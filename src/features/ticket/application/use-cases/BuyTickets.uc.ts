@@ -1,11 +1,11 @@
-import type { IRaffleService } from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
-import type { Ticket } from "../../domain/entities/Ticket.entity.js";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
 	RaffleSoldOutError,
-} from "../../domain/errors/Ticket.error.js";
-import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
+} from "@/features/ticket/domain/errors/Ticket.error";
+import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
+import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract";
 
 export interface BuyTicketsCommand {
 	raffleId: string;

@@ -1,5 +1,5 @@
-import type { Ticket } from "../../domain/entities/Ticket.entity.js";
-import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
+import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
 
 export interface ListTicketsCommand {
 	raffleId: string;

@@ -1,7 +1,7 @@
-import { TicketMapper } from "../../../../application/mappers/Ticket.mapper.js";
-import type { Ticket } from "../../../../domain/entities/Ticket.entity.js";
-import type { ITicketRepository } from "../../../../domain/repositories/ITicket.repository.js";
-import TicketModel from "../schemas/Ticket.schema.js";
+import TicketModel from "../schemas/Ticket.schema";
+import { TicketMapper } from "@/features/ticket/application/mappers/Ticket.mapper";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
+import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
 
 export class TicketRepository implements ITicketRepository {
 	async findById(id: string): Promise<Ticket | null> {

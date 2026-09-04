@@ -1,69 +1,69 @@
 import type { OptionsPag } from "@/shared/types/types.js";
 
 export const QueryFactory = {
-  createStatusQuery(status?: string | string[]): any {
-    if (!status) return {};
-    if (status === "all") return {};
+	createStatusQuery(status?: string | string[]): any {
+		if (!status) return {};
+		if (status === "all") return {};
 
-    let statuses: string[];
-    if (Array.isArray(status)) {
-      statuses = status;
-    } else if (typeof status === "string" && status.includes(",")) {
-      statuses = status.split(",").map((s) => s.trim());
-    } else {
-      statuses = [status];
-    }
+		let statuses: string[];
+		if (Array.isArray(status)) {
+			statuses = status;
+		} else if (typeof status === "string" && status.includes(",")) {
+			statuses = status.split(",").map((s) => s.trim());
+		} else {
+			statuses = [status];
+		}
 
-    return { status: { $in: statuses } };
-  },
+		return { status: { $in: statuses } };
+	},
 
-  createDateQuery(date?: string): any {
-    if (!date) return {};
+	createDateQuery(date?: string): any {
+		if (!date) return {};
 
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+		const start = new Date(date);
+		start.setHours(0, 0, 0, 0);
+		const end = new Date(date);
+		end.setHours(23, 59, 59, 999);
 
-    return { createdAt: { $gte: start, $lte: end } };
-  },
+		return { createdAt: { $gte: start, $lte: end } };
+	},
 
-  createAccountStatusQuery(accountStatus?: string | string[]): any {
-    if (!accountStatus) return {};
-    if (accountStatus === "all") return {};
+	createAccountStatusQuery(accountStatus?: string | string[]): any {
+		if (!accountStatus) return {};
+		if (accountStatus === "all") return {};
 
-    let statuses: string[];
-    if (Array.isArray(accountStatus)) {
-      statuses = accountStatus;
-    } else if (accountStatus.includes(",")) {
-      statuses = accountStatus.split(",").map((s) => s.trim());
-    } else {
-      statuses = [accountStatus];
-    }
+		let statuses: string[];
+		if (Array.isArray(accountStatus)) {
+			statuses = accountStatus;
+		} else if (accountStatus.includes(",")) {
+			statuses = accountStatus.split(",").map((s) => s.trim());
+		} else {
+			statuses = [accountStatus];
+		}
 
-    return { accountStatus: { $in: statuses } };
-  },
+		return { accountStatus: { $in: statuses } };
+	},
 
-  createFilterQuery(filter: any): any {
-    if (!filter || typeof filter !== "object") return {};
-    return filter;
-  },
+	createFilterQuery(filter: any): any {
+		if (!filter || typeof filter !== "object") return {};
+		return filter;
+	},
 
-  assembleQueryOptions(options: OptionsPag): any {
-    const query: any = {};
+	assembleQueryOptions(options: OptionsPag): any {
+		const query: any = {};
 
-    Object.assign(
-      query,
-      QueryFactory.createStatusQuery(options.status),
-      QueryFactory.createAccountStatusQuery(options.accountStatus),
-      QueryFactory.createDateQuery(options.date),
-      QueryFactory.createFilterQuery(options.filter)
-    );
+		Object.assign(
+			query,
+			QueryFactory.createStatusQuery(options.status),
+			QueryFactory.createAccountStatusQuery(options.accountStatus),
+			QueryFactory.createDateQuery(options.date),
+			QueryFactory.createFilterQuery(options.filter),
+		);
 
-    return query;
-  },
+		return query;
+	},
 
-  createSortOptions(): any {
-    return { createdAt: -1 };
-  }
+	createSortOptions(): any {
+		return { createdAt: -1 };
+	},
 };

@@ -1,4 +1,4 @@
-import type { Ticket } from "../../domain/entities/Ticket.entity.js";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 
 type TicketDoc = {
 	_id: string;

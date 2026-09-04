@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import type { Ticket } from "../../../../domain/entities/Ticket.entity.js";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 
 const TicketSchema = new Schema<Ticket>(
 	{

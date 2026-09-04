@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import type { BuyTickets } from "../../../../application/use-cases/BuyTickets.uc.js";
-import type { ListTickets } from "../../../../application/use-cases/ListTickets.uc.js";
-import type { ManageAvailability } from "../../../../application/use-cases/ManageAvailability.uc.js";
+import type { BuyTickets } from "@/features/ticket/application/use-cases/BuyTickets.uc.js";
+import type { ListTickets } from "@/features/ticket/application/use-cases/ListTickets.uc.js";
+import type { ManageAvailability } from "@/features/ticket/application/use-cases/ManageAvailability.uc.js";
 
 export class TicketController {
 	constructor(
