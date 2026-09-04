@@ -1,0 +1,1 @@
+// errors — Shared Component

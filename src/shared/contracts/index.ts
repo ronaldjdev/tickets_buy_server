@@ -1,0 +1,1 @@
+// contracts — Shared Component
