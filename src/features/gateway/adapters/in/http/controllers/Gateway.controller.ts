@@ -1,8 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 
-import type { CreateGatewayLinkDTO } from "@/features/gateway/adapters/in/http/dto/gateway.dto.js";
-import type { CreateGatewayLink } from "@/features/gateway/application/use-cases/CreateGatewayLink.uc.js";
-import type { CreateWidgetSession } from "@/features/gateway/application/use-cases/CreateWidgetSession.uc.js";
 import type { GetGatewayStatus } from "@/features/gateway/application/use-cases/GetGatewayStatus.uc.js";
 import type { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
 import type { HandleWompiEvent } from "@/features/gateway/application/use-cases/HandleWompiEvent.uc.js";
@@ -16,36 +13,11 @@ import type { WompiEventPayload } from "@/shared/port/IWompi.port";
 
 export class GatewayController {
 	constructor(
-		private readonly createLink: CreateGatewayLink,
-		private readonly createWidgetSession: CreateWidgetSession,
 		private readonly getPublicIntent: GetPublicIntent,
 		private readonly getStatus: GetGatewayStatus,
 		private readonly handleWompiEvent: HandleWompiEvent,
 		private readonly verifyTransaction: VerifyGatewayTransaction,
 	) {}
-
-	createPaymentLink = async (
-		req: Request,
-		res: Response,
-		next: NextFunction,
-	) => {
-		try {
-			const input = req.body as CreateGatewayLinkDTO;
-			const intent = await this.createLink.execute(input);
-			response(res, 201, "Enlace de pago generado", { intent });
-		} catch (error) {
-			next(error);
-		}
-	};
-
-	createWidget = async (req: Request, res: Response, next: NextFunction) => {
-		try {
-			const session = await this.createWidgetSession.execute(req.body);
-			response(res, 201, "Sesión de widget creada", session);
-		} catch (error) {
-			next(error);
-		}
-	};
 
 	getIntent = async (req: Request, res: Response, next: NextFunction) => {
 		try {

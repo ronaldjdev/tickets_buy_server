@@ -1,5 +1,8 @@
 import { model, Schema } from "mongoose";
-import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
+import type {
+	Ticket,
+	TicketStatus,
+} from "@/features/ticket/domain/entities/Ticket.entity";
 
 const TicketSchema = new Schema<Ticket>(
 	{
@@ -7,9 +10,12 @@ const TicketSchema = new Schema<Ticket>(
 		number: { type: Number, required: true },
 		buyerName: { type: String },
 		buyerEmail: { type: String },
+		buyerPhone: { type: String },
+		purchaseId: { type: String, index: true },
+		reservedUntil: { type: Date },
 		status: {
 			type: String,
-			enum: ["available", "purchased", "winner"],
+			enum: ["available", "reserved", "purchased", "winner"],
 			default: "available",
 			required: true,
 		},
@@ -18,5 +24,6 @@ const TicketSchema = new Schema<Ticket>(
 );
 
 TicketSchema.index({ raffleId: 1, number: 1 }, { unique: true });
+TicketSchema.index({ purchaseId: 1, status: 1 });
 
 export default model<Ticket>("Ticket", TicketSchema);

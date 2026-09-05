@@ -1,3 +1,4 @@
+import { buildIntegritySignature } from "@/features/gateway/adapters/out/wompi/WompiSignature.utils.js";
 import type {
 	GatewayIntent,
 	PublicGatewayIntent,
@@ -6,7 +7,6 @@ import type { IGatewayIntentRepository } from "@/features/gateway/domain/reposit
 import type { IPublicIntentConfig } from "@/shared/contracts/IPublicIntentConfig.contract.js";
 import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import { buildIntegritySignature } from "./CreateWidgetSession.uc.js";
 
 export class GetPublicIntent {
 	constructor(

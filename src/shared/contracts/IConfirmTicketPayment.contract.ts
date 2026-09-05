@@ -1,9 +1,8 @@
 import type { PaymentMethod, PaymentStatus } from "@/shared/types/types.js";
 
-export interface RegisterGatewayPaymentInput {
-	creditId: string;
+export interface ConfirmTicketPaymentInput {
+	purchaseId: string;
 	amount: number;
-	installmentsCovered: number;
 	method: PaymentMethod;
 	status?: PaymentStatus;
 	paymentDate: string;
@@ -17,12 +16,12 @@ export interface RegisterGatewayPaymentInput {
 	payerPhone?: string;
 }
 
-export interface RegisteredPaymentData {
-	paymentId: string;
-	creditId: string;
+export interface ConfirmedTicketPayment {
+	purchaseId: string;
 	amount: number;
+	ticketCount: number;
 }
 
-export interface IRegisterGatewayPayment {
-	execute(input: RegisterGatewayPaymentInput): Promise<RegisteredPaymentData>;
+export interface IConfirmTicketPayment {
+	execute(input: ConfirmTicketPaymentInput): Promise<ConfirmedTicketPayment>;
 }

@@ -1,10 +1,13 @@
 import { Router } from "express";
 
-// TODO(gateway): Pendiente de cablear. Requiere Gateway.di (features config, credit, message, payment).
-// import { gatewayController } from "@/platform/di/Gateway.di.js";
+import type { GatewayController } from "@/features/gateway/adapters/in/http/controllers/Gateway.controller.js";
 
-const router = Router();
+export function createWompiWebhookRoutes(
+	controller: GatewayController,
+): Router {
+	const router = Router();
 
-// router.post("/events", gatewayController.wompiEvents);
+	router.post("/events", controller.wompiEvents);
 
-export default router;
+	return router;
+}

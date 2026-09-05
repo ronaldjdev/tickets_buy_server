@@ -1,7 +1,13 @@
+import { ContactRepository } from "@/features/contact/adapters/out/persistence/repositories/Contact.repository.js";
+import type { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
+import { PurchaseController } from "@/features/ticket/adapters/in/http/controllers/Purchase.controller.js";
 import { TicketController } from "@/features/ticket/adapters/in/http/controllers/Ticket.controller";
 import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository";
 import { TicketSharedService } from "@/features/ticket/adapters/out/shared/TicketSharedService";
 import { BuyTickets } from "@/features/ticket/application/use-cases/BuyTickets.uc";
+import { ConfirmTicketPayment } from "@/features/ticket/application/use-cases/ConfirmTicketPayment.uc.js";
+import { CreatePurchase } from "@/features/ticket/application/use-cases/CreatePurchase.uc.js";
+import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract";
 import type { ITicketService } from "@/shared/contracts/ticket/ITicketService.contract";
 import { ListTickets } from "./application/use-cases/ListTickets.uc.js";
@@ -26,4 +32,28 @@ export function createTicketModule(raffleService: IRaffleService): {
 	const sharedService = new TicketSharedService(ticketRepository);
 
 	return { controller, sharedService };
+}
+
+export function createTicketPurchaseModule(deps: {
+	raffleService: IRaffleService;
+	linkCreator: IGatewayLinkCreator;
+	getIntent: GetPublicIntent;
+}): {
+	controller: PurchaseController;
+	confirmTicketPayment: ConfirmTicketPayment;
+} {
+	const ticketRepository = new TicketRepository();
+	const contactRepository = new ContactRepository();
+
+	const createPurchase = new CreatePurchase(
+		deps.raffleService,
+		ticketRepository,
+		deps.linkCreator,
+		contactRepository,
+	);
+	const confirmTicketPayment = new ConfirmTicketPayment(ticketRepository);
+
+	const controller = new PurchaseController(createPurchase, deps.getIntent);
+
+	return { controller, confirmTicketPayment };
 }

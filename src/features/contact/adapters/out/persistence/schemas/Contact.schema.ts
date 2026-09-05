@@ -9,8 +9,8 @@ interface IContact extends Document, Contact {
 const ContactSchema = new Schema<IContact>(
 	{
 		name: { type: String, required: true },
-		documentType: { type: String, required: true },
-		documentNumber: { type: String, required: true },
+		documentType: { type: String },
+		documentNumber: { type: String, sparse: true },
 		email: { type: String },
 		phone: { type: String, required: true },
 		status: { type: String, default: "activo" },
@@ -23,7 +23,7 @@ const ContactSchema = new Schema<IContact>(
 );
 
 // Índices para optimizar consultas de contactos
-ContactSchema.index({ documentNumber: 1 }, { unique: true }); // Búsqueda por documento único
+ContactSchema.index({ documentNumber: 1 }, { unique: true, sparse: true }); // Búsqueda por documento único
 ContactSchema.index({ email: 1 }); // Búsqueda por email
 ContactSchema.index({ phone: 1 }); // Búsqueda por teléfono
 ContactSchema.index({ status: 1, accountStatus: 1 }); // Filtrar por estado y estado de cuenta

@@ -6,8 +6,8 @@ import type {
 
 export interface Contact {
 	name: string;
-	documentType: DocumentType;
-	documentNumber: string;
+	documentType?: DocumentType;
+	documentNumber?: string;
 	email?: string;
 	phone: string;
 	status: UserStatus;

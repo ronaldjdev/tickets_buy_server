@@ -60,6 +60,71 @@ class MockTicketRepository implements ITicketRepository {
 		this.store.push(...tickets);
 		return tickets;
 	}
+
+	async findByPurchaseId(purchaseId: string): Promise<Ticket[]> {
+		return this.store.filter((t) => t.purchaseId === purchaseId);
+	}
+
+	async reserveTickets(
+		ticketIds: string[],
+		data: {
+			buyerName?: string;
+			buyerEmail?: string;
+			buyerPhone?: string;
+			purchaseId: string;
+			reservedUntil: Date;
+		},
+	): Promise<void> {
+		this.store = this.store.map((t) =>
+			ticketIds.includes(t.id) && t.status === "available"
+				? {
+						...t,
+						status: "reserved" as const,
+						buyerName: data.buyerName,
+						buyerEmail: data.buyerEmail,
+						buyerPhone: data.buyerPhone,
+						purchaseId: data.purchaseId,
+						reservedUntil: data.reservedUntil,
+					}
+				: t,
+		);
+	}
+
+	async markPurchasedByPurchaseId(purchaseId: string): Promise<number> {
+		let count = 0;
+		this.store = this.store.map((t) => {
+			if (t.purchaseId === purchaseId && t.status === "reserved") {
+				count++;
+				return { ...t, status: "purchased" as const, reservedUntil: null };
+			}
+			return t;
+		});
+		return count;
+	}
+
+	async releaseExpiredReserved(until: Date): Promise<number> {
+		let count = 0;
+		this.store = this.store.map((t) => {
+			if (
+				t.status === "reserved" &&
+				t.reservedUntil &&
+				t.reservedUntil <= until
+			) {
+				count++;
+				return {
+					...t,
+					status: "available" as const,
+					buyerName: undefined,
+					buyerEmail: undefined,
+					buyerPhone: undefined,
+					purchaseId: undefined,
+					reservedUntil: null,
+				};
+			}
+			return t;
+		});
+		return count;
+	}
 }
 
 function makeRaffle(): RafflePayload {

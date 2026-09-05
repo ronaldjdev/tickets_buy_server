@@ -7,6 +7,16 @@ export const WOMPI_BASE_URLS = {
 	prod: "https://production.wompi.co/v1",
 } as const;
 
+export function buildIntegritySignature(
+	reference: string,
+	amountInCents: number,
+	currency: string,
+	integrityKey: string,
+): string {
+	const concat = `${reference}${amountInCents}${currency}${integrityKey}`;
+	return createHash("sha256").update(concat).digest("hex");
+}
+
 export function resolvePropertyValues(
 	payload: WompiEventPayload,
 	properties: string[],

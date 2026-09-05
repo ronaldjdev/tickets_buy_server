@@ -6,6 +6,9 @@ type TicketDoc = {
 	number: number;
 	buyerName?: string;
 	buyerEmail?: string;
+	buyerPhone?: string;
+	purchaseId?: string;
+	reservedUntil?: Date | null;
 	status: Ticket["status"];
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -20,6 +23,9 @@ export class TicketMapper {
 			number: d.number,
 			buyerName: d.buyerName,
 			buyerEmail: d.buyerEmail,
+			buyerPhone: d.buyerPhone,
+			purchaseId: d.purchaseId,
+			reservedUntil: d.reservedUntil,
 			status: d.status,
 			createdAt: d.createdAt,
 			updatedAt: d.updatedAt,
@@ -33,6 +39,9 @@ export class TicketMapper {
 			number: ticket.number,
 			buyerName: ticket.buyerName,
 			buyerEmail: ticket.buyerEmail,
+			buyerPhone: ticket.buyerPhone,
+			purchaseId: ticket.purchaseId,
+			reservedUntil: ticket.reservedUntil,
 			status: ticket.status,
 		};
 	}

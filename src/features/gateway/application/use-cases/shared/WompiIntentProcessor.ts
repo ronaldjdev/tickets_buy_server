@@ -1,11 +1,14 @@
 import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
 import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
-import type { IGatewayCreditReader } from "@/shared/contracts/IGatewayCreditReader.contract.js";
-import type { RegisterGatewayPaymentInput } from "@/shared/contracts/IRegisterGatewayPayment.contract.js";
+import type {
+	ConfirmTicketPaymentInput,
+	IConfirmTicketPayment,
+} from "@/shared/contracts/IConfirmTicketPayment.contract.js";
 import type {
 	WompiEventTransaction,
 	WompiTransactionStatus,
 } from "@/shared/port/IWompi.port.js";
+import type { PaymentMethod } from "@/shared/types/types.js";
 
 export const INTENT_STATUS_MAP: Record<
 	WompiTransactionStatus,
@@ -21,10 +24,7 @@ export const INTENT_STATUS_MAP: Record<
 export class WompiIntentProcessor {
 	constructor(
 		private readonly intentRepo: IGatewayIntentRepository,
-		private readonly registerPayment: {
-			execute(input: RegisterGatewayPaymentInput): Promise<unknown>;
-		},
-		private readonly creditReader: IGatewayCreditReader,
+		private readonly confirmTicketPayment: IConfirmTicketPayment,
 	) {}
 
 	async apply(
@@ -39,26 +39,19 @@ export class WompiIntentProcessor {
 		});
 
 		if (transaction.status === "APPROVED") {
-			await this.registerApprovedPayment(intent, transaction);
+			await this.confirmApprovedPayment(intent, transaction);
 		}
 
 		return INTENT_STATUS_MAP[transaction.status];
 	}
 
-	private async registerApprovedPayment(
+	private async confirmApprovedPayment(
 		intent: GatewayIntent,
 		transaction: WompiEventTransaction,
 	): Promise<void> {
-		const amount = transaction.amount_in_cents / 100;
-		const credit = await this.creditReader.findById(intent.creditId);
-		const installmentsCovered = credit?.installmentValue
-			? Math.max(1, Math.floor(amount / credit.installmentValue))
-			: 1;
-
-		await this.registerPayment.execute({
-			creditId: intent.creditId,
-			amount,
-			installmentsCovered,
+		await this.confirmTicketPayment.execute({
+			purchaseId: intent.purchaseId,
+			amount: transaction.amount_in_cents / 100,
 			method: this.mapMethod(transaction.payment_method_type),
 			status: "confirmado",
 			paymentDate: new Date().toISOString(),
@@ -76,7 +69,11 @@ export class WompiIntentProcessor {
 
 	private mapMethod(
 		paymentMethodType?: string,
-	): RegisterGatewayPaymentInput["method"] {
+	): ConfirmTicketPaymentInput["method"] {
+		return this.toPaymentMethod(paymentMethodType);
+	}
+
+	private toPaymentMethod(paymentMethodType?: string): PaymentMethod {
 		switch (paymentMethodType) {
 			case "PSE":
 				return "pse";

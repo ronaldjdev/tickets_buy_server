@@ -12,7 +12,8 @@ export interface GatewayIntent {
 	reference: string;
 	gateway: GatewayName;
 	mode: GatewayMode;
-	creditId: string;
+	purchaseId: string;
+	ticketIds: string[];
 	contactId?: string;
 	contactName?: string;
 	contactPhone?: string;

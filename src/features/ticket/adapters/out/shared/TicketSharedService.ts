@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 import { TicketNotFoundError } from "@/features/ticket/domain/errors/Ticket.error";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
 import type {
@@ -43,20 +44,16 @@ export class TicketSharedService implements ITicketService {
 		return docs.map((t) => this.toPayload(t));
 	}
 
-	private toPayload(ticket: {
-		id: string;
-		raffleId: string;
-		number: number;
-		buyerName?: string;
-		buyerEmail?: string;
-		status: "available" | "purchased" | "winner";
-	}): TicketPayload {
+	private toPayload(ticket: Ticket): TicketPayload {
 		return {
 			id: ticket.id,
 			raffleId: ticket.raffleId,
 			number: ticket.number,
 			buyerName: ticket.buyerName,
 			buyerEmail: ticket.buyerEmail,
+			buyerPhone: ticket.buyerPhone,
+			purchaseId: ticket.purchaseId,
+			reservedUntil: ticket.reservedUntil,
 			status: ticket.status,
 		};
 	}

@@ -10,8 +10,13 @@ import type { OptionsPag } from "@/shared/types/types.js";
 
 export class ContactRepository implements IContactRepository {
 	async create(data: Contact): Promise<Contact> {
+		const filter = data.documentNumber
+			? { documentNumber: data.documentNumber }
+			: data.phone
+				? { phone: data.phone }
+				: { email: data.email };
 		const newContact = await ContactModel.findOneAndUpdate(
-			{ documentNumber: data.documentNumber },
+			filter,
 			{ $set: ContactMapper.toPersistence({ ...data }) },
 			{ new: true, upsert: true, runValidators: true },
 		).lean();
