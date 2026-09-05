@@ -31,11 +31,8 @@ export class GatewayController {
 	) => {
 		try {
 			const input = req.body as CreateGatewayLinkDTO;
-			const result = await this.createLink.execute(input);
-			response(res, 201, "Enlace de pago generado", {
-				intent: result.intent,
-				sentViaWhatsApp: result.sentViaWhatsApp,
-			});
+			const intent = await this.createLink.execute(input);
+			response(res, 201, "Enlace de pago generado", { intent });
 		} catch (error) {
 			next(error);
 		}

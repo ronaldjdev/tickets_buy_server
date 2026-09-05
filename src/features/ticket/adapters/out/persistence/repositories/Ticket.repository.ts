@@ -1,7 +1,7 @@
-import TicketModel from "../schemas/Ticket.schema";
 import { TicketMapper } from "@/features/ticket/application/mappers/Ticket.mapper";
 import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
+import TicketModel from "../schemas/Ticket.schema";
 
 export class TicketRepository implements ITicketRepository {
 	async findById(id: string): Promise<Ticket | null> {

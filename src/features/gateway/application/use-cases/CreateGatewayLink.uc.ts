@@ -5,20 +5,13 @@ import type { IContactReader } from "@/shared/contracts/IContactReader.contract.
 import type { IGatewayCreditReader } from "@/shared/contracts/IGatewayCreditReader.contract.js";
 import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
 import type { IWompiPort } from "@/shared/port/IWompi.port.js";
-import type { IWhatsAppTextSender } from "./IWhatsAppTextSender.port.js";
 
 export interface CreateGatewayLinkInput {
 	creditId: string;
 	amount: number;
-	sendWhatsApp?: boolean;
-	message?: string;
 	expiresInDays?: number;
 }
-
-const DEFAULT_TEMPLATE =
-	"Hola {nombre}, aquí tienes tu enlace de pago por {monto} del crédito {credito}: {url}";
 
 export class CreateGatewayLink {
 	constructor(
@@ -27,8 +20,6 @@ export class CreateGatewayLink {
 		private readonly intentRepo: IGatewayIntentRepository,
 		private readonly creditReader: IGatewayCreditReader,
 		private readonly contactReader: IContactReader,
-		private readonly whatsAppSender: IWhatsAppTextSender,
-		private readonly logger: ILogger,
 		private readonly redirectBaseUrl?: string,
 	) {}
 
@@ -39,28 +30,7 @@ export class CreateGatewayLink {
 		}
 	}
 
-	private buildMessage(
-		template: string | undefined,
-		contactName: string,
-		amount: number,
-		creditId: string,
-		url: string,
-	): string {
-		const formatted = new Intl.NumberFormat("es-CO", {
-			style: "currency",
-			currency: "COP",
-			maximumFractionDigits: 0,
-		}).format(amount);
-		return (template?.trim() || DEFAULT_TEMPLATE)
-			.replaceAll("{nombre}", contactName || "cliente")
-			.replaceAll("{monto}", formatted)
-			.replaceAll("{credito}", creditId)
-			.replaceAll("{url}", url);
-	}
-
-	async execute(
-		input: CreateGatewayLinkInput,
-	): Promise<{ intent: GatewayIntent; sentViaWhatsApp: boolean }> {
+	async execute(input: CreateGatewayLinkInput): Promise<GatewayIntent> {
 		this.validate(input);
 
 		const settings = await this.wompiConfigReader.getWompiSettings();
@@ -120,26 +90,6 @@ export class CreateGatewayLink {
 				checkoutUrl: link.url,
 			})) ?? intent;
 
-		let sentViaWhatsApp = false;
-		if (input.sendWhatsApp !== false && contact?.phone) {
-			try {
-				const body = this.buildMessage(
-					input.message,
-					contact.name,
-					input.amount,
-					input.creditId,
-					link.url,
-				);
-				await this.whatsAppSender.send(contact.phone, body);
-				sentViaWhatsApp = true;
-			} catch (error) {
-				this.logger.warn(
-					"[Gateway] No se pudo enviar el WhatsApp con el enlace",
-					error,
-				);
-			}
-		}
-
-		return { intent, sentViaWhatsApp };
+		return intent;
 	}
 }

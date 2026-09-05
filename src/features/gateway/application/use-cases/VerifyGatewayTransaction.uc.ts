@@ -1,8 +1,8 @@
-import type { WompiIntentProcessor } from "@/features/gateway/application/use-cases/shared/WompiIntentProcessor.js";
-import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
-import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { WompiIntentProcessor } from "@/features/gateway/application/use-cases/shared/WompiIntentProcessor";
+import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity";
+import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository";
+import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract";
+import { UseCaseError } from "@/shared/errors/UseCaseError";
 import type {
 	IWompiPort,
 	WompiEventTransaction,

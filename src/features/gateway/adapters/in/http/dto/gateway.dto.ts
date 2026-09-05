@@ -1,8 +1,6 @@
 export interface CreateGatewayLinkDTO {
 	creditId: string;
 	amount: number;
-	sendWhatsApp?: boolean;
-	message?: string;
 	expiresInDays?: number;
 }
 

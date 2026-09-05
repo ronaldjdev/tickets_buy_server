@@ -1,4 +1,7 @@
-import type { Ticket, TicketStatus } from "@/features/ticket/domain/entities/Ticket.entity";
+import type {
+	Ticket,
+	TicketStatus,
+} from "@/features/ticket/domain/entities/Ticket.entity";
 import { TicketNotFoundError } from "@/features/ticket/domain/errors/Ticket.error";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
 
