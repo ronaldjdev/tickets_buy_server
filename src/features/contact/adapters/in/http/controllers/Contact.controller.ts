@@ -52,10 +52,7 @@ export class ContactController {
 
 	list = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const { status, date, accountStatus } =
-				req.query as unknown as ListQueryDTO & {
-					accountStatus?: string;
-				};
+			const { status, date } = req.query as unknown as ListQueryDTO;
 			const pageNum = parseInt(String(req.query.page ?? "1"), 10);
 			const limitNum = parseInt(String(req.query.limit ?? "10"), 10);
 			if (Number.isNaN(pageNum) || pageNum < 1)
@@ -67,7 +64,6 @@ export class ContactController {
 				page: pageNum,
 				date: date as string | undefined,
 				status: status as string | undefined,
-				accountStatus: accountStatus as string | undefined,
 			};
 
 			const { contacts, paginate } = await this.listContacts.execute(options);

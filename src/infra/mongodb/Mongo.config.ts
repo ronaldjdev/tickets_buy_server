@@ -51,10 +51,10 @@ export async function connectDB(uri: string) {
 
 function getDbInstance(): Db {
 	if (!dbInstance) {
-		const uri = process.env.MONGO_URI;
+		const uri = process.env.MONGO_URI ?? process.env.MONGODB_URI;
 		if (!uri) {
 			throw new Error(
-				"La variable de entorno MONGO_URI no está definida al intentar conectar el cliente de MongoDB.",
+				"Las variables de entorno MONGO_URI o MONGODB_URI no están definidas al intentar conectar el cliente de MongoDB.",
 			);
 		}
 		logger.info("Initializing lazy MongoClient...");

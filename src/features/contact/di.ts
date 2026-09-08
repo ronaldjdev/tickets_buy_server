@@ -7,19 +7,35 @@ import {
 	ListContacts,
 	UpdateContact,
 } from "@/features/contact/application/use-cases/index.js";
+import { GatewayIntentRepository } from "@/features/gateway/adapters/out/persistence/repositories/GatewayIntent.repository.js";
+import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository.js";
+import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 
-const contactRepo = new ContactRepository();
+export function createContactModule(deps: { raffleService: IRaffleService }): {
+	controller: ContactController;
+} {
+	const contactRepo = new ContactRepository();
+	const intentRepo = new GatewayIntentRepository();
+	const ticketRepo = new TicketRepository();
 
-const createContact = new CreateContact(contactRepo);
-const getContact = new GetContact(contactRepo);
-const listContacts = new ListContacts(contactRepo);
-const updateContact = new UpdateContact(contactRepo);
-const deleteContact = new DeleteContact(contactRepo);
+	const createContact = new CreateContact(contactRepo);
+	const getContact = new GetContact(
+		contactRepo,
+		intentRepo,
+		ticketRepo,
+		deps.raffleService,
+	);
+	const listContacts = new ListContacts(contactRepo);
+	const updateContact = new UpdateContact(contactRepo);
+	const deleteContact = new DeleteContact(contactRepo);
 
-export const contactController = new ContactController(
-	createContact,
-	getContact,
-	listContacts,
-	updateContact,
-	deleteContact,
-);
+	const controller = new ContactController(
+		createContact,
+		getContact,
+		listContacts,
+		updateContact,
+		deleteContact,
+	);
+
+	return { controller };
+}

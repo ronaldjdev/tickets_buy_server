@@ -1,7 +1,10 @@
+import { ComboRepository } from "@/features/combo/adapters/out/persistence/repositories/Combo.repository.js";
 import { ContactRepository } from "@/features/contact/adapters/out/persistence/repositories/Contact.repository.js";
 import type { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
+import type { NotificationService } from "@/features/notification/application/services/NotificationService.js";
 import { PurchaseController } from "@/features/ticket/adapters/in/http/controllers/Purchase.controller.js";
 import { TicketController } from "@/features/ticket/adapters/in/http/controllers/Ticket.controller";
+import { EmailTicketConfirmationNotifier } from "@/features/ticket/adapters/out/notifiers/EmailTicketConfirmation.notifier.js";
 import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository";
 import { TicketSharedService } from "@/features/ticket/adapters/out/shared/TicketSharedService";
 import { BuyTickets } from "@/features/ticket/application/use-cases/BuyTickets.uc";
@@ -38,20 +41,28 @@ export function createTicketPurchaseModule(deps: {
 	raffleService: IRaffleService;
 	linkCreator: IGatewayLinkCreator;
 	getIntent: GetPublicIntent;
+	notificationService?: NotificationService;
 }): {
 	controller: PurchaseController;
 	confirmTicketPayment: ConfirmTicketPayment;
 } {
 	const ticketRepository = new TicketRepository();
 	const contactRepository = new ContactRepository();
+	const comboRepository = new ComboRepository();
 
 	const createPurchase = new CreatePurchase(
 		deps.raffleService,
 		ticketRepository,
 		deps.linkCreator,
 		contactRepository,
+		comboRepository,
 	);
-	const confirmTicketPayment = new ConfirmTicketPayment(ticketRepository);
+	const confirmTicketPayment = new ConfirmTicketPayment(
+		deps.raffleService,
+		ticketRepository,
+		new EmailTicketConfirmationNotifier(),
+		deps.notificationService,
+	);
 
 	const controller = new PurchaseController(createPurchase, deps.getIntent);
 

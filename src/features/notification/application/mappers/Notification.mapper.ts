@@ -3,6 +3,7 @@ import type { AppNotification } from "@/features/notification/domain/entities/No
 export const NotificationMapper = {
 	toDomain(doc: any): AppNotification {
 		return {
+			id: doc._id?.toString() ?? doc.id,
 			userId: doc.userId,
 			type: doc.type,
 			title: doc.title,

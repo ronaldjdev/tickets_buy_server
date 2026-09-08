@@ -1,4 +1,6 @@
+import logger from "../../../../platform/logger/index.js";
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import type { NotificationService } from "../../../notification/application/services/NotificationService.js";
 import type { Raffle } from "../../domain/entities/Raffle.entity.js";
 import {
 	NoTicketsPurchasedError,
@@ -15,6 +17,7 @@ export class DrawWinner {
 	constructor(
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly ticketService: ITicketService,
+		private readonly notificationService?: NotificationService,
 	) {}
 
 	async execute(command: DrawWinnerCommand): Promise<Raffle> {
@@ -36,6 +39,24 @@ export class DrawWinner {
 			status: "drawn",
 			winnerTicketId: winnerTicket.id,
 		});
+
+		if (this.notificationService) {
+			try {
+				await this.notificationService.notifyUsers({
+					type: "sale_drawn",
+					title: "Ganador asignado",
+					message: `El sorteo "${drawn.title}" ya tiene ganador (boleta #${winnerTicket.number}).`,
+					metadata: {
+						raffleId: drawn.id,
+						winnerTicketId: winnerTicket.id,
+					},
+				});
+			} catch (error) {
+				logger.warn("No se pudo emitir notificación de ganador asignado", {
+					error,
+				});
+			}
+		}
 
 		return drawn;
 	}

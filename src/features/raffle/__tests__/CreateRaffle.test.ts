@@ -28,6 +28,10 @@ class MockRaffleRepository implements IRaffleRepository {
 		this.store = this.store.map((e) => (e.id === entity.id ? entity : e));
 		return entity;
 	}
+
+	async delete(id: string): Promise<void> {
+		this.store = this.store.filter((e) => e.id !== id);
+	}
 }
 
 class MockTicketService implements ITicketService {
@@ -56,15 +60,33 @@ class MockTicketService implements ITicketService {
 	async createAvailableTickets(
 		raffleId: string,
 		count: number,
+		startNumber = 1,
 	): Promise<TicketPayload[]> {
 		const created: TicketPayload[] = Array.from({ length: count }, (_, i) => ({
-			id: `ticket-${raffleId}-${i}`,
+			id: `ticket-${raffleId}-${startNumber + i}`,
 			raffleId,
-			number: i + 1,
+			number: startNumber + i,
 			status: "available",
 		}));
 		this.store.push(...created);
 		return created;
+	}
+
+	async releaseAvailableBeyond(
+		raffleId: string,
+		count: number,
+	): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter(
+			(e) => !(e.raffleId === raffleId && e.number > count),
+		);
+		return before - this.store.length;
+	}
+
+	async deleteByRaffle(raffleId: string): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter((e) => e.raffleId !== raffleId);
+		return before - this.store.length;
 	}
 
 	countByRaffle(raffleId: string): number {

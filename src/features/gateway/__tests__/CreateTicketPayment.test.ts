@@ -60,6 +60,10 @@ class MockIntentRepo implements IGatewayIntentRepository {
 		return null;
 	}
 
+	async findPaidByContactId(): Promise<GatewayIntent[]> {
+		return [];
+	}
+
 	async updateByReference(
 		reference: string,
 		data: Partial<GatewayIntent>,
@@ -77,6 +81,10 @@ class MockIntentRepo implements IGatewayIntentRepository {
 			checkoutUrl: data.checkoutUrl,
 			linkId: data.linkId,
 		};
+	}
+
+	async list(): Promise<{ intents: GatewayIntent[]; total: number }> {
+		return { intents: [], total: 0 };
 	}
 }
 

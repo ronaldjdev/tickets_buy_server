@@ -4,9 +4,23 @@ import type {
 	WompiSettings,
 } from "@/shared/contracts/IWompiConfigReader.contract.js";
 
+type PaymentEnvironment = "sandbox" | "production";
+
+interface PaymentProviderSettings {
+	enabled?: boolean;
+	environment?: PaymentEnvironment | "test" | "prod";
+	publicKey?: string;
+	privateKey?: string;
+	integrityKey?: string;
+	eventsKey?: string;
+}
+
 interface GatewayConfigStore {
 	findSingleton(): Promise<{
 		wompi?: WompiSettings;
+		integrations?: {
+			payments?: Record<string, PaymentProviderSettings>;
+		};
 		general?: { nameBusiness?: string };
 	} | null>;
 }
@@ -16,7 +30,25 @@ export class WompiConfigReader implements IWompiConfigReader {
 
 	async getWompiSettings(): Promise<WompiSettings | null> {
 		const config = await this.configRepo.findSingleton();
-		return config?.wompi ?? null;
+		const settings =
+			config?.integrations?.payments?.wompi ?? config?.wompi ?? null;
+		if (!settings) return null;
+		return {
+			enabled: settings.enabled,
+			environment: this.mapEnvironment(settings.environment),
+			publicKey: settings.publicKey,
+			privateKey: settings.privateKey,
+			integrityKey: settings.integrityKey,
+			eventsKey: settings.eventsKey,
+		};
+	}
+
+	private mapEnvironment(
+		environment: PaymentProviderSettings["environment"],
+	): WompiSettings["environment"] {
+		if (environment === "production" || environment === "prod") return "prod";
+		if (environment === "sandbox" || environment === "test") return "test";
+		return undefined;
 	}
 }
 

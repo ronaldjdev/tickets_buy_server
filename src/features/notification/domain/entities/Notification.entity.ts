@@ -1,13 +1,13 @@
 export type NotificationType =
-	| "payment_reminder"
-	| "credit_approved"
-	| "credit_rejected"
 	| "payment_received"
-	| "system"
-	| "task"
-	| "message";
+	| "sale_active"
+	| "sale_drawn"
+	| "stock_low"
+	| "sold_out"
+	| "system";
 
 export interface AppNotification {
+	id?: string;
 	userId: string;
 	type: NotificationType;
 	title: string;

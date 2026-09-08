@@ -33,6 +33,7 @@ export class WompiAdapter implements IWompiPort {
 	) {}
 
 	private async baseUrl(): Promise<string> {
+		if (process.env.WOMPI_API_BASE_URL) return process.env.WOMPI_API_BASE_URL;
 		if (!this.getEnvironment) return WOMPI_BASE_URLS.test;
 		const env = await this.getEnvironment();
 		return WOMPI_BASE_URLS[env] ?? WOMPI_BASE_URLS.test;

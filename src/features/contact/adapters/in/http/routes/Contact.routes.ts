@@ -1,13 +1,15 @@
 import { Router } from "express";
 
-import { contactController } from "@/features/contact/di.js";
+import type { ContactController } from "@/features/contact/adapters/in/http/controllers/Contact.controller.js";
 
-const router = Router();
+export function createContactRoutes(controller: ContactController): Router {
+	const router = Router();
 
-router.post("/", contactController.create);
-router.get("/:id", contactController.get);
-router.get("/", contactController.list);
-router.patch("/:id", contactController.update);
-router.delete("/:id", contactController.delete);
+	router.post("/", controller.create);
+	router.get("/:id", controller.get);
+	router.get("/", controller.list);
+	router.patch("/:id", controller.update);
+	router.delete("/:id", controller.delete);
 
-export default router;
+	return router;
+}

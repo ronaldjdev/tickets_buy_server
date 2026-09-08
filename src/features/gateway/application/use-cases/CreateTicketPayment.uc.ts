@@ -16,7 +16,7 @@ export class CreateTicketPayment implements IGatewayLinkCreator {
 		private readonly wompiPort: IWompiPort,
 		private readonly intentRepo: IGatewayIntentRepository,
 		private readonly redirectBaseUrl?: string,
-	) {}
+	) { }
 
 	private validate(input: GatewayLinkRequest): void {
 		if (!input.purchaseId) throw new UseCaseError("La compra es obligatoria.");
@@ -59,7 +59,7 @@ export class CreateTicketPayment implements IGatewayLinkCreator {
 
 		const link = await this.wompiPort.createPaymentLink(
 			{
-				name: `Boletos rifa ${input.purchaseId}`,
+				name: `Boletos sorteo ${input.purchaseId}`,
 				description: `Compra de boletos referencia ${reference}`,
 				amountInCents: input.amountInCents,
 				singleUse: true,

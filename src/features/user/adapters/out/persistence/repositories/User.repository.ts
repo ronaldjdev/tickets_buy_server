@@ -73,8 +73,8 @@ export class UserRepository implements IUserRepository {
 	}
 
 	async findActive(): Promise<User[]> {
-		const docs = await UserModel.find({ status: "active" })
-			.select("userId")
+		const docs = await UserModel.find({ status: "activo" })
+			.select("userId notificationPreferences")
 			.lean();
 		return docs.map((d) => UserMapper.toDomain(d as any));
 	}

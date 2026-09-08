@@ -5,14 +5,15 @@
 	"main": "src/main.ts",
 	"type": "module",
 	"scripts": {
-		"dev": "tsx watch src/main.ts",
+		"dev": "NODE_OPTIONS=\"--max-old-space-size=3072\" tsx watch --ignore ./logs --ignore ./dist src/main.ts",
 		"build": "tsc",
 		"start": "node dist/main.js",
 		"test": "tsx --test src/features/**/__tests__/*.test.ts",
 		"typecheck": "tsc --noEmit",
 		"lint": "biome check src/",
 		"lint:fix": "biome check --write src/",
-		"format": "biome format --write src/"
+		"format": "biome format --write src/",
+		"seed:admin": "tsx src/seed/seed-admin.ts"
 	},
 	"keywords": [],
 	"author": "",

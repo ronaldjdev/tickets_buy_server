@@ -39,6 +39,10 @@ class MockTicketRepository implements ITicketRepository {
 		return this.store.find((t) => t.id === id) || null;
 	}
 
+	async findByIds(ids: string[]): Promise<Ticket[]> {
+		return this.store.filter((t) => ids.includes(t.id));
+	}
+
 	async findByRaffle(raffleId: string): Promise<Ticket[]> {
 		return this.store.filter((t) => t.raffleId === raffleId);
 	}
@@ -74,20 +78,25 @@ class MockTicketRepository implements ITicketRepository {
 			purchaseId: string;
 			reservedUntil: Date;
 		},
-	): Promise<void> {
+	): Promise<number> {
+		let count = 0;
 		this.store = this.store.map((t) =>
 			ticketIds.includes(t.id) && t.status === "available"
-				? {
-						...t,
-						status: "reserved" as const,
-						buyerName: data.buyerName,
-						buyerEmail: data.buyerEmail,
-						buyerPhone: data.buyerPhone,
-						purchaseId: data.purchaseId,
-						reservedUntil: data.reservedUntil,
-					}
+				? (() => {
+						count++;
+						return {
+							...t,
+							status: "reserved" as const,
+							buyerName: data.buyerName,
+							buyerEmail: data.buyerEmail,
+							buyerPhone: data.buyerPhone,
+							purchaseId: data.purchaseId,
+							reservedUntil: data.reservedUntil,
+						};
+					})()
 				: t,
 		);
+		return count;
 	}
 
 	async markPurchasedByPurchaseId(purchaseId: string): Promise<number> {
@@ -124,6 +133,28 @@ class MockTicketRepository implements ITicketRepository {
 			return t;
 		});
 		return count;
+	}
+
+	async deleteAvailableBeyond(
+		raffleId: string,
+		afterNumber: number,
+	): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter(
+			(t) =>
+				!(
+					t.raffleId === raffleId &&
+					t.number > afterNumber &&
+					t.status === "available"
+				),
+		);
+		return before - this.store.length;
+	}
+
+	async deleteByRaffle(raffleId: string): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter((t) => t.raffleId !== raffleId);
+		return before - this.store.length;
 	}
 }
 

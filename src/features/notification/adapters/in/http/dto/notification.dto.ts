@@ -7,13 +7,12 @@ export interface ListNotificationsQueryDTO {
 export interface CreateNotificationDTO {
 	userId: string;
 	type:
-		| "payment_reminder"
-		| "credit_approved"
-		| "credit_rejected"
 		| "payment_received"
-		| "system"
-		| "task"
-		| "message";
+		| "sale_active"
+		| "sale_drawn"
+		| "stock_low"
+		| "sold_out"
+		| "system";
 	title: string;
 	message: string;
 	link?: string;

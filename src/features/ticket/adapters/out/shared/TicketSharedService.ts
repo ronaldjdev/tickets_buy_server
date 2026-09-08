@@ -32,16 +32,28 @@ export class TicketSharedService implements ITicketService {
 	async createAvailableTickets(
 		raffleId: string,
 		count: number,
+		startNumber = 1,
 	): Promise<TicketPayload[]> {
 		const docs = await this.ticketRepository.saveMany(
 			Array.from({ length: count }, (_, i) => ({
 				id: randomUUID(),
 				raffleId,
-				number: i + 1,
+				number: startNumber + i,
 				status: "available" as const,
 			})),
 		);
 		return docs.map((t) => this.toPayload(t));
+	}
+
+	async releaseAvailableBeyond(
+		raffleId: string,
+		count: number,
+	): Promise<number> {
+		return this.ticketRepository.deleteAvailableBeyond(raffleId, count);
+	}
+
+	async deleteByRaffle(raffleId: string): Promise<number> {
+		return this.ticketRepository.deleteByRaffle(raffleId);
 	}
 
 	private toPayload(ticket: Ticket): TicketPayload {

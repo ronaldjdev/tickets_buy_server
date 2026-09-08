@@ -1,23 +1,31 @@
 import type { NextFunction, Request, Response } from "express";
 import type { ListNotificationsQueryDTO } from "@/features/notification/adapters/in/http/dto/notification.dto.js";
 import type {
-	CreateNotification,
 	ListNotifications,
 	MarkAllAsRead,
 	MarkAsRead,
 } from "@/features/notification/application/use-cases/index.js";
+import type { INotificationRepository } from "@/features/notification/domain/repositories/INotification.repository.js";
+import type { IUserRepository } from "@/features/user/domain/repositories/IUser.repository.js";
 import { ValidationError } from "@/shared/errors/ValidationError.js";
 import response from "@/shared/http/Response.utils.js";
 import type { ISseServer } from "@/shared/port/ISseServer.port.js";
 import type { Paginate } from "@/shared/types/types.js";
 
+type NotificationPreferencesInput = {
+	toast?: boolean;
+	push?: boolean;
+	email?: boolean;
+};
+
 export class NotificationController {
 	constructor(
-		readonly _createNotificationUseCase: CreateNotification,
 		private readonly listNotificationsUseCase: ListNotifications,
 		private readonly markAsReadUseCase: MarkAsRead,
 		private readonly markAllAsReadUseCase: MarkAllAsRead,
 		private readonly sseServer: ISseServer,
+		private readonly userRepo: IUserRepository,
+		private readonly notificationRepo: INotificationRepository,
 	) {}
 
 	stream = async (req: Request, res: Response, next: NextFunction) => {
@@ -41,7 +49,9 @@ export class NotificationController {
 			} = req.query as unknown as ListNotificationsQueryDTO;
 			const page = parseInt(String(pageStr ?? "1"), 10);
 			const limit = parseInt(String(limitStr ?? "20"), 10);
-			const unreadOnly = unreadStr === true;
+			const unreadOnly = ["true", "1", "yes"].includes(
+				String(unreadStr ?? "").toLowerCase(),
+			);
 
 			const result = await this.listNotificationsUseCase.execute(req.user.id, {
 				page,
@@ -66,6 +76,64 @@ export class NotificationController {
 				result.total,
 				paginate,
 			);
+		} catch (error: any) {
+			next(error);
+		}
+	};
+
+	unreadCount = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			if (!req.user) return response(res, 401, "No autenticado");
+
+			const count = await this.notificationRepo.getUnreadCount(req.user.id);
+			response(res, 200, "Notificaciones no leídas", { unreadCount: count });
+		} catch (error: any) {
+			next(error);
+		}
+	};
+
+	getPreferences = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			if (!req.user) return response(res, 401, "No autenticado");
+
+			const user = await this.userRepo.findByUserId(req.user.id);
+			response(res, 200, "Preferencias obtenidas", {
+				preferences: user?.notificationPreferences ?? {},
+			});
+		} catch (error: any) {
+			next(error);
+		}
+	};
+
+	updatePreferences = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
+		try {
+			if (!req.user) return response(res, 401, "No autenticado");
+
+			const user = await this.userRepo.findByUserId(req.user.id);
+			if (!user) return response(res, 404, "Usuario no encontrado", null);
+
+			const body =
+				(req.body as { notifications?: NotificationPreferencesInput })
+					.notifications ?? (req.body as NotificationPreferencesInput);
+
+			const preferences: NotificationPreferencesInput = {
+				toast: body.toast !== undefined ? Boolean(body.toast) : undefined,
+				push: body.push !== undefined ? Boolean(body.push) : undefined,
+				email: body.email !== undefined ? Boolean(body.email) : undefined,
+			};
+
+			const updated = await this.userRepo.update(
+				(user as unknown as { _id: string })._id,
+				{ notificationPreferences: preferences },
+			);
+
+			response(res, 200, "Preferencias actualizadas", {
+				preferences: updated?.notificationPreferences ?? preferences,
+			});
 		} catch (error: any) {
 			next(error);
 		}

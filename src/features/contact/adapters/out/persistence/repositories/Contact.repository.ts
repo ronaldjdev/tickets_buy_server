@@ -10,11 +10,7 @@ import type { OptionsPag } from "@/shared/types/types.js";
 
 export class ContactRepository implements IContactRepository {
 	async create(data: Contact): Promise<Contact> {
-		const filter = data.documentNumber
-			? { documentNumber: data.documentNumber }
-			: data.phone
-				? { phone: data.phone }
-				: { email: data.email };
+		const filter = data.phone ? { phone: data.phone } : { email: data.email };
 		const newContact = await ContactModel.findOneAndUpdate(
 			filter,
 			{ $set: ContactMapper.toPersistence({ ...data }) },
@@ -83,19 +79,5 @@ export class ContactRepository implements IContactRepository {
 		startOfMonth.setDate(1);
 		startOfMonth.setHours(0, 0, 0, 0);
 		return ContactModel.countDocuments({ createdAt: { $gte: startOfMonth } });
-	}
-
-	async topDebtors(
-		limit: number,
-	): Promise<Array<{ name: string; phone: string; totalDebt: number }>> {
-		const result = await ContactModel.find({ status: "activo" })
-			.sort({ totalDebt: -1 })
-			.limit(limit)
-			.lean();
-		return result.map((c: any) => ({
-			name: c.name,
-			phone: c.phone,
-			totalDebt: c.totalDebt ?? 0,
-		}));
 	}
 }

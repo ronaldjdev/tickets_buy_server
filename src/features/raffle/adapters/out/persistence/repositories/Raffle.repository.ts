@@ -46,4 +46,8 @@ export class RaffleRepository implements IRaffleRepository {
 			doc.toObject() as unknown as Record<string, unknown>,
 		);
 	}
+
+	async delete(id: string): Promise<void> {
+		await RaffleModel.findByIdAndDelete(id);
+	}
 }

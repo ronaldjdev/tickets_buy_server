@@ -21,5 +21,8 @@ export interface ITicketService {
 	createAvailableTickets(
 		raffleId: string,
 		count: number,
+		startNumber?: number,
 	): Promise<TicketPayload[]>;
+	releaseAvailableBeyond(raffleId: string, count: number): Promise<number>;
+	deleteByRaffle(raffleId: string): Promise<number>;
 }

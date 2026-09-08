@@ -4,6 +4,19 @@ import { SmtpAdapter } from "./Smtp.adapter.js";
 
 export type EmailProvider = "brevo" | "smtp";
 
+export interface EmailIntegrationSettings {
+	enabled?: boolean;
+	provider?: string;
+	host?: string;
+	port?: number;
+	secure?: boolean;
+	user?: string;
+	password?: string;
+	apiKey?: string;
+	fromEmail?: string;
+	fromName?: string;
+}
+
 function resolveSenderConfig(): EmailSenderConfig {
 	return {
 		fromEmail: process.env.EMAIL_FROM_EMAIL ?? "no-reply@celux.com.co",
@@ -31,6 +44,35 @@ function createEmailClient(provider: EmailProvider): IEmailPort {
 	}
 
 	return new BrevoAdapter(process.env.BREVO_API_KEY ?? "", sender);
+}
+
+/** Construye un cliente de email desde la config de Integraciones. Devuelve null si no está habilitada o el proveedor no está soportado. */
+export function createEmailClientFromConfig(
+	settings?: EmailIntegrationSettings,
+): IEmailPort | null {
+	if (!settings?.enabled) return null;
+
+	const sender: EmailSenderConfig = {
+		fromEmail: settings.fromEmail ?? "no-reply@celux.com.co",
+		fromName: settings.fromName ?? "Celux",
+	};
+
+	if (settings.provider === "smtp") {
+		return new SmtpAdapter({
+			...sender,
+			host: settings.host ?? "localhost",
+			port: settings.port ?? 587,
+			secure: settings.secure ?? false,
+			user: settings.user,
+			pass: settings.password,
+		});
+	}
+
+	if (settings.provider === "brevo" && settings.apiKey) {
+		return new BrevoAdapter(settings.apiKey, sender);
+	}
+
+	return null;
 }
 
 let _instance: IEmailPort | null = null;

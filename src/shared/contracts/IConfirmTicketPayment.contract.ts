@@ -20,6 +20,8 @@ export interface ConfirmedTicketPayment {
 	purchaseId: string;
 	amount: number;
 	ticketCount: number;
+	ticketNumbers?: number[];
+	maxTickets?: number;
 }
 
 export interface IConfirmTicketPayment {

@@ -18,6 +18,14 @@ export class TicketRepository implements ITicketRepository {
 			: null;
 	}
 
+	async findByIds(ids: string[]): Promise<Ticket[]> {
+		if (ids.length === 0) return [];
+		const docs = await TicketModel.find({ _id: { $in: ids } }).lean();
+		return docs.map((d) =>
+			TicketMapper.toDomain(d as unknown as Record<string, unknown>),
+		);
+	}
+
 	async findByRaffle(raffleId: string): Promise<Ticket[]> {
 		const docs = await TicketModel.find({ raffleId }).lean();
 		return docs.map((d) =>
@@ -62,9 +70,9 @@ export class TicketRepository implements ITicketRepository {
 	async reserveTickets(
 		ticketIds: string[],
 		data: ReserveTicketsData,
-	): Promise<void> {
+	): Promise<number> {
 		try {
-			await TicketModel.updateMany(
+			const result = await TicketModel.updateMany(
 				{ _id: { $in: ticketIds }, status: "available" },
 				{
 					$set: {
@@ -77,6 +85,7 @@ export class TicketRepository implements ITicketRepository {
 					},
 				},
 			);
+			return result.modifiedCount ?? 0;
 		} catch (error) {
 			throw new RepositoryError(
 				`No se pudieron reservar los tickets: ${(error as Error).message}`,
@@ -124,6 +133,35 @@ export class TicketRepository implements ITicketRepository {
 		} catch (error) {
 			throw new RepositoryError(
 				`No se pudieron liberar las reservas expiradas: ${(error as Error).message}`,
+			);
+		}
+	}
+
+	async deleteAvailableBeyond(
+		raffleId: string,
+		afterNumber: number,
+	): Promise<number> {
+		try {
+			const result = await TicketModel.deleteMany({
+				raffleId,
+				number: { $gt: afterNumber },
+				status: "available",
+			});
+			return result.deletedCount ?? 0;
+		} catch (error) {
+			throw new RepositoryError(
+				`No se pudieron eliminar los tickets disponibles: ${(error as Error).message}`,
+			);
+		}
+	}
+
+	async deleteByRaffle(raffleId: string): Promise<number> {
+		try {
+			const result = await TicketModel.deleteMany({ raffleId });
+			return result.deletedCount ?? 0;
+		} catch (error) {
+			throw new RepositoryError(
+				`No se pudieron eliminar los tickets del sorteo: ${(error as Error).message}`,
 			);
 		}
 	}

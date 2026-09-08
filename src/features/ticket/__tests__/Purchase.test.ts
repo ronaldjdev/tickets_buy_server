@@ -1,5 +1,7 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
+import type { Combo } from "../../../features/combo/domain/entities/Combo.entity.js";
+import type { IComboRepository } from "../../../features/combo/domain/repositories/ICombo.repository.js";
 import type { Contact } from "../../../features/contact/domain/entities/Contact.entity.js";
 import type { IContactRepository } from "../../../features/contact/domain/repositories/IContact.repository.js";
 import type {
@@ -7,11 +9,12 @@ import type {
 	GatewayLinkResult,
 	IGatewayLinkCreator,
 } from "../../../shared/contracts/IGatewayLinkCreator.contract.js";
+import type { ITicketConfirmationNotifier } from "../../../shared/contracts/ITicketConfirmationNotifier.contract.js";
 import type {
 	IRaffleService,
 	RafflePayload,
 } from "../../../shared/contracts/raffle/IRaffleService.contract.js";
-
+import { UseCaseError } from "../../../shared/errors/UseCaseError.js";
 import { ConfirmTicketPayment } from "../application/use-cases/ConfirmTicketPayment.uc.js";
 import {
 	CreatePurchase,
@@ -32,6 +35,39 @@ class MockRaffleService implements IRaffleService {
 	raffle: RafflePayload | null;
 	async findById(): Promise<RafflePayload | null> {
 		return this.raffle;
+	}
+}
+
+class MockComboRepo implements IComboRepository {
+	combos: Combo[];
+
+	constructor(combos: Combo[]) {
+		this.combos = combos.map((c) => ({ ...c }));
+	}
+
+	async save(combo: Combo): Promise<Combo | null> {
+		this.combos.push(combo);
+		return combo;
+	}
+
+	async findById(id: string): Promise<Combo | null> {
+		return this.combos.find((c) => c.id === id) || null;
+	}
+
+	async byRaffle(raffleId: string): Promise<Combo[]> {
+		return this.combos.filter((c) => c.raffleId === raffleId);
+	}
+
+	async list(): Promise<Combo[]> {
+		return [...this.combos];
+	}
+
+	async update(_id: string, _data: Partial<Combo>): Promise<Combo | null> {
+		return null;
+	}
+
+	async delete(_id: string): Promise<boolean> {
+		return false;
 	}
 }
 
@@ -101,6 +137,16 @@ class MockLinkCreator implements IGatewayLinkCreator {
 	}
 }
 
+class MockNotifier implements ITicketConfirmationNotifier {
+	notifications: Parameters<ITicketConfirmationNotifier["notify"]>[0][] = [];
+
+	async notify(
+		notification: Parameters<ITicketConfirmationNotifier["notify"]>[0],
+	): Promise<void> {
+		this.notifications.push(notification);
+	}
+}
+
 class MockTicketRepo implements ITicketRepository {
 	store: Ticket[];
 
@@ -110,6 +156,10 @@ class MockTicketRepo implements ITicketRepository {
 
 	async findById(id: string): Promise<Ticket | null> {
 		return this.store.find((t) => t.id === id) || null;
+	}
+
+	async findByIds(ids: string[]): Promise<Ticket[]> {
+		return this.store.filter((t) => ids.includes(t.id));
 	}
 
 	async findByRaffle(raffleId: string): Promise<Ticket[]> {
@@ -137,10 +187,13 @@ class MockTicketRepo implements ITicketRepository {
 	async reserveTickets(
 		ticketIds: string[],
 		data: Parameters<ITicketRepository["reserveTickets"]>[1],
-	): Promise<void> {
+	): Promise<number> {
+		let count = 0;
 		this.store = this.store.map((t) =>
 			ticketIds.includes(t.id) && t.status === "available"
-				? {
+				? (() => {
+					count++;
+					return {
 						...t,
 						status: "reserved" as const,
 						buyerName: data.buyerName,
@@ -148,9 +201,11 @@ class MockTicketRepo implements ITicketRepository {
 						buyerPhone: data.buyerPhone,
 						purchaseId: data.purchaseId,
 						reservedUntil: data.reservedUntil,
-					}
+					};
+				})()
 				: t,
 		);
+		return count;
 	}
 
 	async markPurchasedByPurchaseId(purchaseId: string): Promise<number> {
@@ -185,6 +240,28 @@ class MockTicketRepo implements ITicketRepository {
 		});
 		return count;
 	}
+
+	async deleteAvailableBeyond(
+		raffleId: string,
+		afterNumber: number,
+	): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter(
+			(t) =>
+				!(
+					t.raffleId === raffleId &&
+					t.number > afterNumber &&
+					t.status === "available"
+				),
+		);
+		return before - this.store.length;
+	}
+
+	async deleteByRaffle(raffleId: string): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter((t) => t.raffleId !== raffleId);
+		return before - this.store.length;
+	}
 }
 
 function makeRaffle(): RafflePayload {
@@ -194,6 +271,16 @@ function makeRaffle(): RafflePayload {
 		status: "active",
 		ticketPrice: 10000,
 		maxTickets: 10,
+	};
+}
+
+function makeCombo(): Combo {
+	return {
+		id: "combo-1",
+		raffleId: "raffle-1",
+		name: "Combo 2 boletos",
+		ticketCount: 2,
+		price: 18000,
 	};
 }
 
@@ -212,8 +299,7 @@ function makeTickets(count: number, reserved: number = 0): Ticket[] {
 
 function makeCommand(overrides: Record<string, unknown> = {}) {
 	return {
-		raffleId: "raffle-1",
-		quantity: 2,
+		comboId: "combo-1",
 		buyerName: "Ana Pérez",
 		buyerEmail: "ana@mail.com",
 		buyerPhone: "3001234567",
@@ -226,30 +312,55 @@ function build() {
 	const ticketRepo = new MockTicketRepo(makeTickets(5));
 	const linkCreator = new MockLinkCreator();
 	const contactRepo = new MockContactRepo();
+	const comboRepo = new MockComboRepo([makeCombo()]);
 	const useCase = new CreatePurchase(
 		raffleService,
 		ticketRepo,
 		linkCreator,
 		contactRepo,
+		comboRepo,
 	);
-	return { useCase, raffleService, ticketRepo, linkCreator, contactRepo };
+	return {
+		useCase,
+		raffleService,
+		ticketRepo,
+		linkCreator,
+		contactRepo,
+		comboRepo,
+	};
 }
 
-describe("CreatePurchase", () => {
-	it("debería reservar tickets y devolver el link de pago", async () => {
+describe("CreatePurchase (combos)", () => {
+	it("debería reservar números aleatorios únicos y devolver el link", async () => {
 		const { useCase, ticketRepo, linkCreator, contactRepo } = build();
 
 		const result = await useCase.execute(makeCommand());
 
 		assert.equal(result.quantity, 2);
-		assert.equal(result.amount, 20000);
+		assert.equal(result.amount, 18000);
+		assert.equal(result.comboId, "combo-1");
 		assert.ok(result.checkoutUrl);
-		assert.equal(
-			ticketRepo.store.filter((t) => t.status === "reserved").length,
-			2,
+
+		const reserved = ticketRepo.store.filter((t) => t.status === "reserved");
+		assert.equal(reserved.length, 2);
+
+		const numbers = reserved.map((t) => t.number);
+		assert.equal(new Set(numbers).size, numbers.length, "números sin repetir");
+		assert.ok(
+			numbers.every((n) => n >= 1 && n <= 10),
+			`números dentro del rango: ${numbers}`,
 		);
+		// aleatoriedad: en un pool de 5, debe existir al menos una corrida donde no sea [1,2]
+		const firstAndSecond = [1, 2];
+		assert.ok(
+			!numbers.every((n, i) => n === firstAndSecond[i]),
+			`no siempre los primeros: ${numbers}`,
+		);
+
+		assert.equal(result.ticketNumbers.length, 2);
 		assert.equal(linkCreator.inputs.length, 1);
-		assert.equal(linkCreator.inputs[0].amountInCents, 2000000);
+		assert.equal(linkCreator.inputs[0].amountInCents, 1800000);
+		assert.equal(linkCreator.inputs[0].ticketIds.length, 2);
 		assert.equal(
 			linkCreator.inputs[0].expiresInMinutes,
 			RESERVATION_TTL_MINUTES,
@@ -257,7 +368,33 @@ describe("CreatePurchase", () => {
 		assert.equal(contactRepo.created[0].email, "ana@mail.com");
 	});
 
-	it("debería fallar si la rifa no está activa", async () => {
+	it("debería asignar pedazos de rango distintos en varias compras", async () => {
+		const { useCase } = build();
+
+		const first = await useCase.execute(makeCommand());
+		const second = await useCase.execute(
+			makeCommand({ buyerEmail: "l@mail.com" }),
+		);
+
+		assert.equal(first.ticketNumbers.length, 2);
+		assert.equal(second.ticketNumbers.length, 2);
+		const overlap = first.ticketNumbers.filter((n) =>
+			second.ticketNumbers.includes(n),
+		);
+		assert.equal(overlap.length, 0, "números nunca se repiten entre compras");
+	});
+
+	it("debería fallar si el combo no existe", async () => {
+		const { useCase, comboRepo } = build();
+		comboRepo.combos = [];
+
+		await assert.rejects(
+			() => useCase.execute(makeCommand()),
+			(e: Error) => e instanceof UseCaseError,
+		);
+	});
+
+	it("debería fallar si la sorteo no está activa", async () => {
 		const { useCase, raffleService } = build();
 		raffleService.raffle = { ...makeRaffle(), status: "draft" };
 
@@ -267,7 +404,7 @@ describe("CreatePurchase", () => {
 		);
 	});
 
-	it("debería fallar si la rifa no existe", async () => {
+	it("debería fallar si la sorteo no existe", async () => {
 		const { useCase, raffleService } = build();
 		raffleService.raffle = null;
 
@@ -308,21 +445,22 @@ describe("CreatePurchase", () => {
 });
 
 describe("ConfirmTicketPayment", () => {
-	it("debería marcar los tickets reservados como comprados", async () => {
+	it("debería marcar como comprados y notificar con los números", async () => {
 		const repo = new MockTicketRepo(makeTickets(3));
-		const confirm = new ConfirmTicketPayment(repo);
+		const raffleService = new MockRaffleService(makeRaffle());
+		const notifier = new MockNotifier();
+		const confirm = new ConfirmTicketPayment(raffleService, repo, notifier);
 
-		const reserved = await repo.reserveTickets(["t1", "t2"], {
+		await repo.reserveTickets(["t1", "t2"], {
 			purchaseId: "purchase-1",
 			reservedUntil: new Date(Date.now() + 60_000),
 			buyerName: "Ana",
 			buyerEmail: "ana@mail.com",
 		});
-		assert.equal(reserved, undefined);
 
 		const result = await confirm.execute({
 			purchaseId: "purchase-1",
-			amount: 20000,
+			amount: 18000,
 			method: "nequi",
 			status: "confirmado",
 			paymentDate: new Date().toISOString(),
@@ -332,5 +470,11 @@ describe("ConfirmTicketPayment", () => {
 
 		assert.equal(result.ticketCount, 2);
 		assert.equal(repo.store.filter((t) => t.status === "purchased").length, 2);
+		assert.deepEqual(result.ticketNumbers, [1, 2]);
+
+		assert.equal(notifier.notifications.length, 1);
+		assert.deepEqual(notifier.notifications[0].numbers, [1, 2]);
+		assert.equal(notifier.notifications[0].raffleTitle, "Sorteo");
+		assert.equal(notifier.notifications[0].buyerEmail, "ana@mail.com");
 	});
 });

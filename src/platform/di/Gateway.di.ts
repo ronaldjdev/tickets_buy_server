@@ -10,10 +10,13 @@ import { CreateTicketPayment } from "@/features/gateway/application/use-cases/Cr
 import { GetGatewayStatus } from "@/features/gateway/application/use-cases/GetGatewayStatus.uc.js";
 import { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
 import { HandleWompiEvent } from "@/features/gateway/application/use-cases/HandleWompiEvent.uc.js";
+import { ListGatewayIntents } from "@/features/gateway/application/use-cases/ListGatewayIntents.uc.js";
 import { WompiIntentProcessor } from "@/features/gateway/application/use-cases/shared/WompiIntentProcessor.js";
 import { VerifyGatewayTransaction } from "@/features/gateway/application/use-cases/VerifyGatewayTransaction.uc.js";
+import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository.js";
 import type { IConfirmTicketPayment } from "@/shared/contracts/IConfirmTicketPayment.contract.js";
 import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
+import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { configPromise } from "../config/index.js";
 import { httpClient } from "./HttpClient.di.js";
 import { appLogger } from "./Logger.di.js";
@@ -21,6 +24,7 @@ import { appLogger } from "./Logger.di.js";
 export interface GatewayModuleDeps {
 	configRepo: ConfigRepository;
 	confirmTicketPayment: IConfirmTicketPayment;
+	raffleService: IRaffleService;
 }
 
 export interface GatewayModule {
@@ -30,6 +34,7 @@ export interface GatewayModule {
 	handleWompiEvent: HandleWompiEvent;
 	verifyTransaction: VerifyGatewayTransaction;
 	getStatus: GetGatewayStatus;
+	listGatewayIntents: ListGatewayIntents;
 }
 
 export async function createGatewayModule(
@@ -57,6 +62,8 @@ export async function createGatewayModule(
 		intentRepo,
 		new PublicIntentConfig(deps.configRepo),
 		wompiConfigReader,
+		new TicketRepository(),
+		deps.raffleService,
 	);
 
 	const getStatus = new GetGatewayStatus(wompiConfigReader, config.server.url);
@@ -81,11 +88,14 @@ export async function createGatewayModule(
 		wompiIntentProcessor,
 	);
 
+	const listGatewayIntents = new ListGatewayIntents(intentRepo);
+
 	const controller = new GatewayController(
 		getPublicIntent,
 		getStatus,
 		handleWompiEvent,
 		verifyTransaction,
+		listGatewayIntents,
 	);
 
 	return {
@@ -95,5 +105,6 @@ export async function createGatewayModule(
 		handleWompiEvent,
 		verifyTransaction,
 		getStatus,
+		listGatewayIntents,
 	};
 }

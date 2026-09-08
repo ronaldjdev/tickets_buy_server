@@ -38,5 +38,8 @@ export interface PublicGatewayIntent {
 	currency: string;
 	contactName?: string;
 	businessName?: string;
+	purchaseId?: string;
+	ticketNumbers?: number[];
+	maxTickets?: number;
 	widget?: { publicKey: string; signatureIntegrity: string } | null;
 }

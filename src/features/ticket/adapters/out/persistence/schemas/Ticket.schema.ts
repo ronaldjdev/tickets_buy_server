@@ -1,11 +1,9 @@
 import { model, Schema } from "mongoose";
-import type {
-	Ticket,
-	TicketStatus,
-} from "@/features/ticket/domain/entities/Ticket.entity";
+import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 
-const TicketSchema = new Schema<Ticket>(
+const TicketSchema = new Schema(
 	{
+		_id: { type: String },
 		raffleId: { type: String, required: true, ref: "Raffle" },
 		number: { type: Number, required: true },
 		buyerName: { type: String },

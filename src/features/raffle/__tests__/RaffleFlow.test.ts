@@ -50,6 +50,10 @@ class MockRaffleRepository implements IRaffleRepository {
 		this.raffle = entity;
 		return entity;
 	}
+
+	async delete(id: string): Promise<void> {
+		if (this.raffle?.id === id) this.raffle = null;
+	}
 }
 
 class MockTicketService implements ITicketService {
@@ -81,6 +85,16 @@ class MockTicketService implements ITicketService {
 
 	async createAvailableTickets(): Promise<TicketPayload[]> {
 		return [];
+	}
+
+	async releaseAvailableBeyond(): Promise<number> {
+		return 0;
+	}
+
+	async deleteByRaffle(raffleId: string): Promise<number> {
+		const before = this.store.length;
+		this.store = this.store.filter((t) => t.raffleId !== raffleId);
+		return before - this.store.length;
 	}
 }
 

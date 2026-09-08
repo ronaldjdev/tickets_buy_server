@@ -3,3 +3,5 @@ dist/
 .env
 .forge
 .opencode
+.playwright-mcp
+logs/*

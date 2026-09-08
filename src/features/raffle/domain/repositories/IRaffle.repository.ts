@@ -11,4 +11,5 @@ export interface IRaffleRepository {
 	list(query: RaffleQuery): Promise<Raffle[]>;
 	save(raffle: Raffle): Promise<Raffle>;
 	update(raffle: Raffle): Promise<Raffle>;
+	delete(id: string): Promise<void>;
 }

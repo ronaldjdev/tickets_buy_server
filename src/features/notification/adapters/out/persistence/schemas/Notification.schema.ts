@@ -2,7 +2,7 @@ import { type Document, model, Schema } from "mongoose";
 
 import type { AppNotification } from "@/features/notification/domain/entities/Notification.entity.js";
 
-interface INotification extends Document, AppNotification {}
+interface INotification extends Document, Omit<AppNotification, "id"> {}
 
 const NotificationSchema = new Schema<INotification>(
 	{
@@ -16,13 +16,12 @@ const NotificationSchema = new Schema<INotification>(
 			type: String,
 			required: true,
 			enum: [
-				"payment_reminder",
-				"credit_approved",
-				"credit_rejected",
 				"payment_received",
+				"sale_active",
+				"sale_drawn",
+				"stock_low",
+				"sold_out",
 				"system",
-				"task",
-				"message",
 			],
 		},
 		title: { type: String, required: true },

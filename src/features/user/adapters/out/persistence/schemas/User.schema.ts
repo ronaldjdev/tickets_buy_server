@@ -18,6 +18,11 @@ const UserSchema = new Schema<IUser>(
 		documentNumber: { type: String, required: true },
 		phone: { type: String, required: true },
 		status: { type: String, required: true },
+		notificationPreferences: {
+			toast: { type: Boolean, default: true },
+			push: { type: Boolean, default: false },
+			email: { type: Boolean, default: false },
+		},
 	},
 	{ timestamps: true },
 );

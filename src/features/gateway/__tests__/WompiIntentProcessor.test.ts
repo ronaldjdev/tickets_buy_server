@@ -21,12 +21,20 @@ class MockIntentRepo implements IGatewayIntentRepository {
 		return null;
 	}
 
+	async findPaidByContactId(): Promise<GatewayIntent[]> {
+		return [];
+	}
+
 	async updateByReference(
 		reference: string,
 		data: Partial<GatewayIntent>,
 	): Promise<GatewayIntent | null> {
 		this.updated.push({ reference, data });
 		return data as GatewayIntent;
+	}
+
+	async list(): Promise<{ intents: GatewayIntent[]; total: number }> {
+		return { intents: [], total: 0 };
 	}
 }
 

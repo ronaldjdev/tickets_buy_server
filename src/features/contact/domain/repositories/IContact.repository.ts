@@ -12,10 +12,6 @@ export interface IContactRepository {
 	countAll(): Promise<number>;
 
 	countNewThisMonth(): Promise<number>;
-
-	topDebtors(
-		limit: number,
-	): Promise<Array<{ name: string; phone: string; totalDebt: number }>>;
 }
 
 export interface IListContactsResponse {

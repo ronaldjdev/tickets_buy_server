@@ -18,34 +18,36 @@ export async function requireAuth(
 			headers: req.headers as Record<string, string>,
 		});
 
-		if (!session?.user) {
-			throw new AppError("Sesión inválida o expirada", 401);
-		}
+		if (session?.user) {
+			let role = (session.user as any).role || "vendedor";
 
-		const user = await userRepo.findByUserId(session.user.id);
+			const user = await userRepo.findByUserId(session.user.id);
 
-		if (!user) {
-			throw new AppError("Usuario no encontrado", 401);
-		}
+			if (user) {
+				if (user.status !== "activo") {
+					const messages: Record<string, string> = {
+						pendiente:
+							"Tu cuenta está pendiente de aprobación por un administrador",
+						suspendido:
+							"Tu cuenta ha sido suspendida. Contacta al administrador",
+						bloqueado: "Tu cuenta ha sido bloqueada. Contacta al administrador",
+					};
+					throw new AppError(messages[user.status] || "Cuenta no activa", 403);
+				}
+				role = user.role || role;
+			}
 
-		if (user.status !== "activo") {
-			const messages: Record<string, string> = {
-				pendiente:
-					"Tu cuenta está pendiente de aprobación por un administrador",
-				suspendido: "Tu cuenta ha sido suspendida. Contacta al administrador",
-				bloqueado: "Tu cuenta ha sido bloqueada. Contacta al administrador",
+			req.user = {
+				id: session.user.id,
+				email: session.user.email,
+				name: session.user.name,
+				role,
 			};
-			throw new AppError(messages[user.status] || "Cuenta no activa", 403);
+
+			return next();
 		}
 
-		req.user = {
-			id: session.user.id,
-			email: session.user.email,
-			name: session.user.name,
-			role: (session.user as any).role || "vendedor",
-		};
-
-		next();
+		throw new AppError("Sesión inválida o expirada", 401);
 	} catch (error: any) {
 		if (error instanceof AppError) {
 			next(error);

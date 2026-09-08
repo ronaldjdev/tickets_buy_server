@@ -32,6 +32,21 @@ export class ConfigController {
 		}
 	};
 
+	public = async (_req: Request, res: Response, next: NextFunction) => {
+		try {
+			const config = await this.getConfig.execute();
+			response(res, 200, "Configuración pública", {
+				general: {
+					nameBusiness: config?.general?.nameBusiness,
+					email: config?.general?.email,
+					phone: config?.general?.phone,
+				},
+			});
+		} catch (error) {
+			next(error);
+		}
+	};
+
 	update = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const config = await this.updateConfig.execute(
