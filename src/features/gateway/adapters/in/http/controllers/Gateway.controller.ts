@@ -40,6 +40,7 @@ export class GatewayController {
 
 			const result = await this.listGatewayIntents.execute({
 				status: req.query.status as never,
+				q: (req.query.q as string | undefined) || undefined,
 				page,
 				limit,
 			});

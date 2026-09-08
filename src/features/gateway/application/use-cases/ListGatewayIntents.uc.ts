@@ -6,6 +6,7 @@ import type {
 
 export interface ListGatewayIntentsCommand {
 	status?: GatewayIntentStatus;
+	q?: string;
 	page?: number;
 	limit?: number;
 }
@@ -18,6 +19,7 @@ export class ListGatewayIntents {
 	): Promise<GatewayIntentListResult> {
 		return this.intentRepository.list({
 			status: command.status,
+			q: command.q,
 			page: command.page,
 			limit: command.limit,
 		});

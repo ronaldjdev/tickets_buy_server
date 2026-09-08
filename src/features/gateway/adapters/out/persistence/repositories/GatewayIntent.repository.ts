@@ -63,6 +63,18 @@ export class GatewayIntentRepository implements IGatewayIntentRepository {
 	): Promise<{ intents: GatewayIntent[]; total: number }> {
 		const filter: Record<string, unknown> = {};
 		if (query.status) filter.status = query.status;
+		if (query.q) {
+			const pattern = query.q
+				.trim()
+				.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			const regex = new RegExp(pattern, "i");
+			filter.$or = [
+				{ reference: regex },
+				{ contactName: regex },
+				{ contactPhone: regex },
+				{ customerEmail: regex },
+			];
+		}
 
 		const page = Math.max(1, query.page ?? 1);
 		const limit = Math.min(100, Math.max(1, query.limit ?? 20));

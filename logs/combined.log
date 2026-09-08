@@ -95,3 +95,47 @@
 {"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-07 17:04:56"}
 {"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-07 17:05:03"}
 {"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-07 17:06:51"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:40:25"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:40:25"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:40:25"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:40:26"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:40:26"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:40:26"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:45:44"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:45:44"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:45:44"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:45:44"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:45:44"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:45:44"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:45:47"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:45:47"}
+{"level":"info","message":"Contacto obtenido con éxito","service":"call-automation","timestamp":"2026-09-07 23:45:54"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:46:05"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:46:05"}
+{"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-07 23:53:33"}
+{"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-07 23:53:39"}
+{"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-07 23:53:45"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:58:54"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:58:54"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-07 23:58:54"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:58:56"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:58:56"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-07 23:58:56"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:07:15"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:07:15"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:07:15"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:07:30"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:07:30"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:07:30"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:20:44"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:20:44"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:20:44"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:20:49"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:20:49"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:20:49"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:24:20"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:24:20"}
+{"level":"info","message":"Usuarios listados con éxito: 1","operation":"listar_usuarios","service":"call-automation","timestamp":"2026-09-08 00:24:20"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:24:23"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:24:23"}
+{"level":"info","message":"Contactos listados con éxito: 3","operation":"listar_contactos","service":"call-automation","timestamp":"2026-09-08 00:24:23"}

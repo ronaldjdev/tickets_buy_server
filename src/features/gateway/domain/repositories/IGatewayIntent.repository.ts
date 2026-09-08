@@ -2,6 +2,7 @@ import type { GatewayIntent } from "../entities/GatewayIntent.entity.js";
 
 export interface GatewayIntentListQuery {
 	status?: GatewayIntent["status"];
+	q?: string;
 	page?: number;
 	limit?: number;
 }
