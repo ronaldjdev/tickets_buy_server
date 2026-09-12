@@ -131,6 +131,15 @@ const CtaCmsSchema = new Schema(
 	{ _id: false },
 );
 
+const SalesProgressCmsSchema = new Schema(
+	{
+		targetPercent: { type: Number, default: 50 },
+		title: { type: String },
+		description: { type: String },
+	},
+	{ _id: false },
+);
+
 const HomepageCmsSchema = new Schema(
 	{
 		sections: { type: [HomepageSectionVisibilitySchema], default: undefined },
@@ -139,6 +148,7 @@ const HomepageCmsSchema = new Schema(
 		testimonials: { type: TestimonialsCmsSchema },
 		faq: { type: FaqCmsSchema },
 		cta: { type: CtaCmsSchema },
+		salesProgress: { type: SalesProgressCmsSchema },
 	},
 	{ _id: false },
 );

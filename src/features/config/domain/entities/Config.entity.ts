@@ -127,6 +127,12 @@ export interface CtaCmsContent {
 	buttonText?: string;
 }
 
+export interface SalesProgressCmsContent {
+	targetPercent?: number;
+	title?: string;
+	description?: string;
+}
+
 export interface HomepageCmsConfig {
 	sections?: HomepageSectionVisibility[];
 	hero?: HeroCmsContent;
@@ -134,6 +140,7 @@ export interface HomepageCmsConfig {
 	testimonials?: TestimonialsCmsContent;
 	faq?: FaqCmsContent;
 	cta?: CtaCmsContent;
+	salesProgress?: SalesProgressCmsContent;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
