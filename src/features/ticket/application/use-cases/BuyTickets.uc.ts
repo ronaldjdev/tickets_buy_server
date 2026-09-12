@@ -6,6 +6,7 @@ import {
 } from "@/features/ticket/domain/errors/Ticket.error";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 export interface BuyTicketsCommand {
 	raffleId: string;
@@ -18,6 +19,7 @@ export class BuyTickets {
 	constructor(
 		private readonly raffleService: IRaffleService,
 		private readonly ticketRepository: ITicketRepository,
+		private readonly logger: ILogger,
 	) {}
 
 	async execute(command: BuyTicketsCommand): Promise<Ticket[]> {
@@ -42,6 +44,16 @@ export class BuyTickets {
 		for (const ticket of toPurchase) {
 			purchased.push(await this.ticketRepository.save(ticket));
 		}
+
+		this.logger.info("Boletos comprados", {
+			operation: "ticket.buy",
+			raffleId: command.raffleId,
+			quantity: purchased.length,
+			numbers: purchased.map((t) => t.number).sort((a, b) => a - b),
+			buyerName: command.buyerName,
+			buyerEmail: command.buyerEmail,
+		});
+
 		return purchased;
 	}
 }

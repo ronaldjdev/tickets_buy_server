@@ -10,21 +10,26 @@ import { TicketSharedService } from "@/features/ticket/adapters/out/shared/Ticke
 import { BuyTickets } from "@/features/ticket/application/use-cases/BuyTickets.uc";
 import { ConfirmTicketPayment } from "@/features/ticket/application/use-cases/ConfirmTicketPayment.uc.js";
 import { CreatePurchase } from "@/features/ticket/application/use-cases/CreatePurchase.uc.js";
+import { appLogger } from "@/platform/di/Logger.di.js";
 import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract";
 import type { ITicketService } from "@/shared/contracts/ticket/ITicketService.contract";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 import { ListTickets } from "./application/use-cases/ListTickets.uc.js";
 import { ManageAvailability } from "./application/use-cases/ManageAvailability.uc.js";
 
-export function createTicketModule(raffleService: IRaffleService): {
+export function createTicketModule(
+	raffleService: IRaffleService,
+	logger: ILogger = appLogger,
+): {
 	controller: TicketController;
 	sharedService: ITicketService;
 } {
 	const ticketRepository = new TicketRepository();
 
-	const buyTickets = new BuyTickets(raffleService, ticketRepository);
+	const buyTickets = new BuyTickets(raffleService, ticketRepository, logger);
 	const listTickets = new ListTickets(ticketRepository);
-	const manageAvailability = new ManageAvailability(ticketRepository);
+	const manageAvailability = new ManageAvailability(ticketRepository, logger);
 
 	const controller = new TicketController(
 		buyTickets,
@@ -56,12 +61,14 @@ export function createTicketPurchaseModule(deps: {
 		deps.linkCreator,
 		contactRepository,
 		comboRepository,
+		appLogger,
 	);
 	const confirmTicketPayment = new ConfirmTicketPayment(
 		deps.raffleService,
 		ticketRepository,
 		new EmailTicketConfirmationNotifier(),
 		deps.notificationService,
+		appLogger,
 	);
 
 	const controller = new PurchaseController(createPurchase, deps.getIntent);

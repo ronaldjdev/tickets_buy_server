@@ -20,8 +20,7 @@ export interface ITicketService {
 	markAsWinner(ticketId: string): Promise<TicketPayload>;
 	createAvailableTickets(
 		raffleId: string,
-		count: number,
-		startNumber?: number,
+		numbers: number[],
 	): Promise<TicketPayload[]>;
 	releaseAvailableBeyond(raffleId: string, count: number): Promise<number>;
 	deleteByRaffle(raffleId: string): Promise<number>;

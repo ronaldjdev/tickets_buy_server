@@ -4,9 +4,12 @@ import type {
 	ITicketService,
 	TicketPayload,
 } from "../../../shared/contracts/ticket/ITicketService.contract.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { CreateRaffle } from "../application/use-cases/CreateRaffle.uc.js";
 import type { Raffle } from "../domain/entities/Raffle.entity.js";
 import type { IRaffleRepository } from "../domain/repositories/IRaffle.repository.js";
+
+const noopLogger = createNoopLogger();
 
 class MockRaffleRepository implements IRaffleRepository {
 	private store: Raffle[] = [];
@@ -71,13 +74,12 @@ class MockTicketService implements ITicketService {
 
 	async createAvailableTickets(
 		raffleId: string,
-		count: number,
-		startNumber = 1,
+		numbers: number[],
 	): Promise<TicketPayload[]> {
-		const created: TicketPayload[] = Array.from({ length: count }, (_, i) => ({
-			id: `ticket-${raffleId}-${startNumber + i}`,
+		const created: TicketPayload[] = numbers.map((number) => ({
+			id: `ticket-${raffleId}-${number}`,
 			raffleId,
-			number: startNumber + i,
+			number,
 			status: "available",
 		}));
 		this.store.push(...created);
@@ -114,7 +116,7 @@ describe("CreateRaffle", () => {
 	before(() => {
 		raffleRepo = new MockRaffleRepository();
 		ticketService = new MockTicketService();
-		useCase = new CreateRaffle(raffleRepo, ticketService);
+		useCase = new CreateRaffle(raffleRepo, ticketService, noopLogger);
 	});
 
 	it("debería crear una raffle y sus tickets", async () => {

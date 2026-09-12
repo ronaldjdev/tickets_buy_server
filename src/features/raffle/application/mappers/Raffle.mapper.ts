@@ -23,12 +23,19 @@ type RaffleDoc = {
 export class RaffleMapper {
 	static toDomain(doc: Record<string, unknown>): Raffle {
 		const d = doc as unknown as RaffleDoc;
-		const legacyPrize = (d as unknown as { prize?: { name: string; description?: string } })
-			.prize;
+		const legacyPrize = (
+			d as unknown as { prize?: { name: string; description?: string } }
+		).prize;
 		const prizes: RafflePrize[] =
 			d.prizes ??
 			(legacyPrize?.name
-				? [{ type: "mayor", name: legacyPrize.name, description: legacyPrize.description }]
+				? [
+						{
+							type: "mayor",
+							name: legacyPrize.name,
+							description: legacyPrize.description,
+						},
+					]
 				: []);
 		return {
 			id: d._id.toString(),

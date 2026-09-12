@@ -4,6 +4,7 @@ import type {
 	ITicketService,
 	TicketPayload,
 } from "../../../shared/contracts/ticket/ITicketService.contract.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { DrawWinner } from "../application/use-cases/DrawWinner.uc.js";
 import type { Raffle } from "../domain/entities/Raffle.entity.js";
 import {
@@ -11,6 +12,8 @@ import {
 	RaffleAlreadyDrawnError,
 } from "../domain/errors/Raffle.error.js";
 import type { IRaffleRepository } from "../domain/repositories/IRaffle.repository.js";
+
+const noopLogger = createNoopLogger();
 
 function makeRaffle(partial: Partial<Raffle> = {}): Raffle {
 	return {
@@ -94,8 +97,18 @@ class MockTicketService implements ITicketService {
 		return winner;
 	}
 
-	async createAvailableTickets(): Promise<TicketPayload[]> {
-		return [];
+	async createAvailableTickets(
+		raffleId: string,
+		numbers: number[],
+	): Promise<TicketPayload[]> {
+		const created = numbers.map((number) => ({
+			id: `ticket-${number}`,
+			raffleId,
+			number,
+			status: "available" as const,
+		}));
+		this.store.push(...created);
+		return created;
 	}
 
 	async releaseAvailableBeyond(): Promise<number> {
@@ -126,7 +139,12 @@ describe("DrawWinner", () => {
 	it("debería seleccionar un ganador entre los tickets comprados", async () => {
 		const raffleRepo = new MockRaffleRepository(makeRaffle());
 		const ticketService = new MockTicketService(makeTickets(5, 3));
-		const useCase = new DrawWinner(raffleRepo, ticketService);
+		const useCase = new DrawWinner(
+			raffleRepo,
+			ticketService,
+			undefined,
+			noopLogger,
+		);
 
 		const drawn = await useCase.execute({ raffleId: "raffle-1" });
 		assert.equal(drawn.status, "drawn");
@@ -141,7 +159,12 @@ describe("DrawWinner", () => {
 	it("debería fallar si no hay tickets comprados", async () => {
 		const raffleRepo = new MockRaffleRepository(makeRaffle());
 		const ticketService = new MockTicketService(makeTickets(5, 0));
-		const useCase = new DrawWinner(raffleRepo, ticketService);
+		const useCase = new DrawWinner(
+			raffleRepo,
+			ticketService,
+			undefined,
+			noopLogger,
+		);
 
 		await assert.rejects(
 			() => useCase.execute({ raffleId: "raffle-1" }),
@@ -154,7 +177,12 @@ describe("DrawWinner", () => {
 			makeRaffle({ status: "drawn" }),
 		);
 		const ticketService = new MockTicketService(makeTickets(5, 3));
-		const useCase = new DrawWinner(raffleRepo, ticketService);
+		const useCase = new DrawWinner(
+			raffleRepo,
+			ticketService,
+			undefined,
+			noopLogger,
+		);
 
 		await assert.rejects(
 			() =>

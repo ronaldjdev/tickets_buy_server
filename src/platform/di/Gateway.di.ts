@@ -55,6 +55,7 @@ export async function createGatewayModule(
 		wompiConfigReader,
 		wompiPort,
 		intentRepo,
+		appLogger,
 		config.frontend.url,
 	);
 
@@ -71,6 +72,7 @@ export async function createGatewayModule(
 	const wompiIntentProcessor = new WompiIntentProcessor(
 		intentRepo,
 		deps.confirmTicketPayment,
+		appLogger,
 	);
 
 	const handleWompiEvent = new HandleWompiEvent(
@@ -86,6 +88,7 @@ export async function createGatewayModule(
 		wompiPort,
 		intentRepo,
 		wompiIntentProcessor,
+		appLogger,
 	);
 
 	const listGatewayIntents = new ListGatewayIntents(intentRepo);

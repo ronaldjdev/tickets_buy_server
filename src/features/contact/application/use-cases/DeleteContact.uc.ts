@@ -1,8 +1,12 @@
 import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 export class DeleteContact {
-	constructor(private contactRepo: IContactRepository) {}
+	constructor(
+		private contactRepo: IContactRepository,
+		private readonly logger: ILogger,
+	) {}
 	async execute(uid: string): Promise<boolean> {
 		if (!uid) {
 			throw new UseCaseError(
@@ -13,6 +17,10 @@ export class DeleteContact {
 		if (!result) {
 			throw new UseCaseError("No se pudo eliminar el contacto.");
 		}
+		this.logger.info("Contacto eliminado", {
+			operation: "contact.delete",
+			contactId: uid,
+		});
 		return result;
 	}
 }

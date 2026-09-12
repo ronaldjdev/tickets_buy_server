@@ -31,14 +31,13 @@ export class TicketSharedService implements ITicketService {
 
 	async createAvailableTickets(
 		raffleId: string,
-		count: number,
-		startNumber = 1,
+		numbers: number[],
 	): Promise<TicketPayload[]> {
 		const docs = await this.ticketRepository.saveMany(
-			Array.from({ length: count }, (_, i) => ({
+			numbers.map((number) => ({
 				id: randomUUID(),
 				raffleId,
-				number: startNumber + i,
+				number,
 				status: "available" as const,
 			})),
 		);

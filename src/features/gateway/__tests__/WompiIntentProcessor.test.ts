@@ -2,9 +2,12 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import type { IConfirmTicketPayment } from "../../../shared/contracts/IConfirmTicketPayment.contract.js";
 import type { WompiEventTransaction } from "../../../shared/port/IWompi.port.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { WompiIntentProcessor } from "../application/use-cases/shared/WompiIntentProcessor.js";
 import type { GatewayIntent } from "../domain/entities/GatewayIntent.entity.js";
 import type { IGatewayIntentRepository } from "../domain/repositories/IGatewayIntent.repository.js";
+
+const noopLogger = createNoopLogger();
 
 class MockIntentRepo implements IGatewayIntentRepository {
 	updated: Array<{ reference: string; data: Partial<GatewayIntent> }> = [];
@@ -86,7 +89,7 @@ describe("WompiIntentProcessor", () => {
 	it("debería actualizar el intent y confirmar la compra al aprobarse", async () => {
 		const intentRepo = new MockIntentRepo();
 		const confirm = new MockConfirm();
-		const processor = new WompiIntentProcessor(intentRepo, confirm);
+		const processor = new WompiIntentProcessor(intentRepo, confirm, noopLogger);
 
 		const status = await processor.apply(makeIntent(), makeTransaction());
 
@@ -102,7 +105,7 @@ describe("WompiIntentProcessor", () => {
 	it("no debería confirmar la compra cuando el pago es rechazado", async () => {
 		const intentRepo = new MockIntentRepo();
 		const confirm = new MockConfirm();
-		const processor = new WompiIntentProcessor(intentRepo, confirm);
+		const processor = new WompiIntentProcessor(intentRepo, confirm, noopLogger);
 
 		const status = await processor.apply(
 			makeIntent(),

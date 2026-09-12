@@ -1,4 +1,5 @@
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import { RaffleNotFoundError } from "../../domain/errors/Raffle.error.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
 
@@ -10,6 +11,7 @@ export class DeleteRaffle {
 	constructor(
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly ticketService: ITicketService,
+		private readonly logger: ILogger,
 	) {}
 
 	async execute(command: DeleteRaffleCommand): Promise<void> {
@@ -25,5 +27,11 @@ export class DeleteRaffle {
 
 		await this.ticketService.deleteByRaffle(raffle.id);
 		await this.raffleRepository.delete(raffle.id);
+
+		this.logger.info("Sorteo eliminado", {
+			operation: "raffle.delete",
+			raffleId: raffle.id,
+			title: raffle.title,
+		});
 	}
 }

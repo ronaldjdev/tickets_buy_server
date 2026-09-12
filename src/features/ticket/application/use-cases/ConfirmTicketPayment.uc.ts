@@ -1,6 +1,5 @@
 import type { NotificationService } from "@/features/notification/application/services/NotificationService.js";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository.js";
-import logger from "@/platform/logger/index.js";
 import type {
 	ConfirmedTicketPayment,
 	ConfirmTicketPaymentInput,
@@ -12,6 +11,7 @@ import type {
 	RafflePayload,
 } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 export class ConfirmTicketPayment implements IConfirmTicketPayment {
 	constructor(
@@ -19,6 +19,7 @@ export class ConfirmTicketPayment implements IConfirmTicketPayment {
 		private readonly ticketRepository: ITicketRepository,
 		private readonly notifier: ITicketConfirmationNotifier,
 		private readonly notificationService?: NotificationService,
+		private readonly logger?: ILogger,
 	) {}
 
 	async execute(
@@ -61,6 +62,15 @@ export class ConfirmTicketPayment implements IConfirmTicketPayment {
 
 			await this.emitPurchaseNotifications(raffle, input, numbers);
 		}
+
+		this.logger?.info("Pago confirmado", {
+			operation: "ticket.confirm_payment",
+			purchaseId: input.purchaseId,
+			amount: input.amount,
+			ticketCount,
+			ticketNumbers: numbers,
+			maxTickets,
+		});
 
 		return {
 			purchaseId: input.purchaseId,
@@ -111,7 +121,7 @@ export class ConfirmTicketPayment implements IConfirmTicketPayment {
 				}
 			}
 		} catch (error) {
-			logger.warn("No se pudo emitir notificación del pago confirmado", {
+			this.logger?.warn("No se pudo emitir notificación del pago confirmado", {
 				error,
 			});
 		}

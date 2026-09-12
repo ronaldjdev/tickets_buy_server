@@ -9,16 +9,22 @@ import {
 } from "@/features/contact/application/use-cases/index.js";
 import { GatewayIntentRepository } from "@/features/gateway/adapters/out/persistence/repositories/GatewayIntent.repository.js";
 import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository.js";
+import { appLogger } from "@/platform/di/Logger.di.js";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
-export function createContactModule(deps: { raffleService: IRaffleService }): {
+export function createContactModule(deps: {
+	raffleService: IRaffleService;
+	appLogger?: ILogger;
+}): {
 	controller: ContactController;
 } {
 	const contactRepo = new ContactRepository();
 	const intentRepo = new GatewayIntentRepository();
 	const ticketRepo = new TicketRepository();
+	const logger = deps.appLogger ?? appLogger;
 
-	const createContact = new CreateContact(contactRepo);
+	const createContact = new CreateContact(contactRepo, logger);
 	const getContact = new GetContact(
 		contactRepo,
 		intentRepo,
@@ -26,8 +32,8 @@ export function createContactModule(deps: { raffleService: IRaffleService }): {
 		deps.raffleService,
 	);
 	const listContacts = new ListContacts(contactRepo);
-	const updateContact = new UpdateContact(contactRepo);
-	const deleteContact = new DeleteContact(contactRepo);
+	const updateContact = new UpdateContact(contactRepo, logger);
+	const deleteContact = new DeleteContact(contactRepo, logger);
 
 	const controller = new ContactController(
 		createContact,

@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import type { Raffle, RafflePrizeType } from "../../../../domain/entities/Raffle.entity.js";
+import type { Raffle } from "../../../../domain/entities/Raffle.entity.js";
 
 const PrizeSchema = new Schema(
 	{

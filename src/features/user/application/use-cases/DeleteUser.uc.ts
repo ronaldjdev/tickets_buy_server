@@ -1,8 +1,12 @@
 import type { IUserRepository } from "@/features/user/domain/repositories/IUser.repository.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 export class DeleteUser {
-	constructor(private userRepo: IUserRepository) {}
+	constructor(
+		private userRepo: IUserRepository,
+		private readonly logger: ILogger,
+	) {}
 	async execute(uid: string): Promise<boolean> {
 		if (!uid) {
 			throw new UseCaseError(
@@ -13,6 +17,10 @@ export class DeleteUser {
 		if (!result) {
 			throw new UseCaseError("No se pudo eliminar el usuario.");
 		}
+		this.logger.info("Usuario eliminado", {
+			operation: "user.delete",
+			userId: uid,
+		});
 		return result;
 	}
 }

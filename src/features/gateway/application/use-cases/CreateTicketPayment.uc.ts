@@ -8,6 +8,7 @@ import type {
 } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
 import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 import type { IWompiPort } from "@/shared/port/IWompi.port.js";
 
 export class CreateTicketPayment implements IGatewayLinkCreator {
@@ -15,8 +16,9 @@ export class CreateTicketPayment implements IGatewayLinkCreator {
 		private readonly wompiConfigReader: IWompiConfigReader,
 		private readonly wompiPort: IWompiPort,
 		private readonly intentRepo: IGatewayIntentRepository,
+		private readonly logger: ILogger,
 		private readonly redirectBaseUrl?: string,
-	) { }
+	) {}
 
 	private validate(input: GatewayLinkRequest): void {
 		if (!input.purchaseId) throw new UseCaseError("La compra es obligatoria.");
@@ -77,6 +79,14 @@ export class CreateTicketPayment implements IGatewayLinkCreator {
 				linkId: link.id,
 				checkoutUrl: link.url,
 			})) ?? intent;
+
+		this.logger.info("Link de pago creado", {
+			operation: "gateway.create_ticket_payment",
+			reference: stored.reference,
+			amountInCents: stored.amountInCents,
+			purchaseId: stored.purchaseId,
+			checkoutUrl: stored.checkoutUrl,
+		});
 
 		return {
 			reference: stored.reference,

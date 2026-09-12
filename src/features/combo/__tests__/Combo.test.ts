@@ -5,6 +5,7 @@ import type {
 	RafflePayload,
 } from "../../../shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "../../../shared/errors/UseCaseError.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { RaffleNotFoundError } from "../../ticket/domain/errors/Ticket.error.js";
 import { CreateCombo } from "../application/use-cases/CreateCombo.uc.js";
 import { DeleteCombo } from "../application/use-cases/DeleteCombo.uc.js";
@@ -13,6 +14,8 @@ import { UpdateCombo } from "../application/use-cases/UpdateCombo.uc.js";
 import type { Combo } from "../domain/entities/Combo.entity.js";
 import { ComboNotFoundError } from "../domain/errors/Combo.error.js";
 import type { IComboRepository } from "../domain/repositories/ICombo.repository.js";
+
+const noopLogger = createNoopLogger();
 
 class MockComboRepo implements IComboRepository {
 	combos: Combo[] = [];
@@ -77,7 +80,7 @@ function build() {
 describe("CreateCombo", () => {
 	it("debería crear un combo con números dentro del rango de la sorteo", async () => {
 		const { repo, raffleService } = build();
-		const uc = new CreateCombo(repo, raffleService);
+		const uc = new CreateCombo(repo, raffleService, noopLogger);
 
 		const combo = await uc.execute({
 			raffleId: "raffle-1",
@@ -96,7 +99,7 @@ describe("CreateCombo", () => {
 
 	it("debería rechazar nombre vacío, ticketCount 0 y precio negativo", async () => {
 		const { repo, raffleService } = build();
-		const uc = new CreateCombo(repo, raffleService);
+		const uc = new CreateCombo(repo, raffleService, noopLogger);
 
 		await assert.rejects(
 			() => uc.execute({ raffleId: "r", name: " ", ticketCount: 1, price: 10 }),
@@ -114,7 +117,7 @@ describe("CreateCombo", () => {
 
 	it("debería rechazar si la sorteo no existe o el combo excede el rango", async () => {
 		const { repo, raffleService } = build();
-		const uc = new CreateCombo(repo, raffleService);
+		const uc = new CreateCombo(repo, raffleService, noopLogger);
 
 		raffleService.raffle = null;
 		await assert.rejects(
@@ -137,7 +140,7 @@ describe("CreateCombo", () => {
 
 	it("debería rechazar si ya existe un combo con el mismo nombre en la sorteo", async () => {
 		const { repo, raffleService } = build();
-		const uc = new CreateCombo(repo, raffleService);
+		const uc = new CreateCombo(repo, raffleService, noopLogger);
 
 		await uc.execute({
 			raffleId: "raffle-1",
@@ -174,13 +177,17 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 
 	it("debería actualizar con validación de rango", async () => {
 		const { repo, raffleService } = build();
-		const created = await new CreateCombo(repo, raffleService).execute({
+		const created = await new CreateCombo(
+			repo,
+			raffleService,
+			noopLogger,
+		).execute({
 			raffleId: "raffle-1",
 			name: "Combo",
 			ticketCount: 1,
 			price: 5000,
 		});
-		const uc = new UpdateCombo(repo, raffleService);
+		const uc = new UpdateCombo(repo, raffleService, noopLogger);
 
 		const updated = await uc.execute({
 			id: created.id,
@@ -198,8 +205,8 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 
 	it("debería fallar al actualizar/eliminar un combo inexistente", async () => {
 		const { repo, raffleService } = build();
-		const update = new UpdateCombo(repo, raffleService);
-		const del = new DeleteCombo(repo);
+		const update = new UpdateCombo(repo, raffleService, noopLogger);
+		const del = new DeleteCombo(repo, noopLogger);
 
 		await assert.rejects(
 			() => update.execute({ id: "nope" }),
@@ -210,14 +217,18 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 
 	it("debería eliminar un combo existente", async () => {
 		const { repo, raffleService } = build();
-		const created = await new CreateCombo(repo, raffleService).execute({
+		const created = await new CreateCombo(
+			repo,
+			raffleService,
+			noopLogger,
+		).execute({
 			raffleId: "raffle-1",
 			name: "Combo",
 			ticketCount: 1,
 			price: 5000,
 		});
 
-		const ok = await new DeleteCombo(repo).execute(created.id);
+		const ok = await new DeleteCombo(repo, noopLogger).execute(created.id);
 		assert.equal(ok, true);
 		assert.equal(repo.combos.length, 0);
 	});

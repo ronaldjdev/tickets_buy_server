@@ -1,7 +1,20 @@
 import type { NextFunction, Request, Response } from "express";
 import type { BuyTickets } from "@/features/ticket/application/use-cases/BuyTickets.uc.js";
-import type { ListTickets } from "@/features/ticket/application/use-cases/ListTickets.uc.js";
+import type {
+	ListTickets,
+	TicketListFilter,
+} from "@/features/ticket/application/use-cases/ListTickets.uc.js";
 import type { ManageAvailability } from "@/features/ticket/application/use-cases/ManageAvailability.uc.js";
+import { ValidationError } from "@/shared/errors/ValidationError.js";
+
+const TICKET_LIST_FILTERS = new Set<string>([
+	"all",
+	"sold",
+	"available",
+	"reserved",
+	"purchased",
+	"winner",
+]);
 
 export class TicketController {
 	constructor(
@@ -29,8 +42,18 @@ export class TicketController {
 		next: NextFunction,
 	) => {
 		try {
+			const raw = req.query.status;
+			const status = Array.isArray(raw)
+				? undefined
+				: (raw as string | undefined);
+			if (status !== undefined && !TICKET_LIST_FILTERS.has(status)) {
+				throw new ValidationError(
+					`status inválido: debe ser all, sold, available, reserved, purchased o winner`,
+				);
+			}
 			const tickets = await this.listTickets.execute({
 				raffleId: String(req.params.raffleId),
+				status: status as TicketListFilter | undefined,
 			});
 			res.status(200).json({ data: tickets });
 		} catch (error) {

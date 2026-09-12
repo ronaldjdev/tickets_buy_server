@@ -26,8 +26,14 @@ export class TicketRepository implements ITicketRepository {
 		);
 	}
 
-	async findByRaffle(raffleId: string): Promise<Ticket[]> {
-		const docs = await TicketModel.find({ raffleId }).lean();
+	async findByRaffle(
+		raffleId: string,
+		statuses?: TicketStatus[],
+	): Promise<Ticket[]> {
+		const docs = await TicketModel.find({
+			raffleId,
+			...(statuses && statuses.length > 0 ? { status: { $in: statuses } } : {}),
+		}).lean();
 		return docs.map((d) =>
 			TicketMapper.toDomain(d as unknown as Record<string, unknown>),
 		);

@@ -15,6 +15,7 @@ import type {
 	RafflePayload,
 } from "../../../shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "../../../shared/errors/UseCaseError.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { ConfirmTicketPayment } from "../application/use-cases/ConfirmTicketPayment.uc.js";
 import {
 	CreatePurchase,
@@ -27,6 +28,8 @@ import {
 	RaffleSoldOutError,
 } from "../domain/errors/Ticket.error.js";
 import type { ITicketRepository } from "../domain/repositories/ITicket.repository.js";
+
+const noopLogger = createNoopLogger();
 
 class MockRaffleService implements IRaffleService {
 	constructor(raffle: RafflePayload | null) {
@@ -192,17 +195,17 @@ class MockTicketRepo implements ITicketRepository {
 		this.store = this.store.map((t) =>
 			ticketIds.includes(t.id) && t.status === "available"
 				? (() => {
-					count++;
-					return {
-						...t,
-						status: "reserved" as const,
-						buyerName: data.buyerName,
-						buyerEmail: data.buyerEmail,
-						buyerPhone: data.buyerPhone,
-						purchaseId: data.purchaseId,
-						reservedUntil: data.reservedUntil,
-					};
-				})()
+						count++;
+						return {
+							...t,
+							status: "reserved" as const,
+							buyerName: data.buyerName,
+							buyerEmail: data.buyerEmail,
+							buyerPhone: data.buyerPhone,
+							purchaseId: data.purchaseId,
+							reservedUntil: data.reservedUntil,
+						};
+					})()
 				: t,
 		);
 		return count;
@@ -319,6 +322,7 @@ function build() {
 		linkCreator,
 		contactRepo,
 		comboRepo,
+		noopLogger,
 	);
 	return {
 		useCase,
@@ -449,7 +453,13 @@ describe("ConfirmTicketPayment", () => {
 		const repo = new MockTicketRepo(makeTickets(3));
 		const raffleService = new MockRaffleService(makeRaffle());
 		const notifier = new MockNotifier();
-		const confirm = new ConfirmTicketPayment(raffleService, repo, notifier);
+		const confirm = new ConfirmTicketPayment(
+			raffleService,
+			repo,
+			notifier,
+			undefined,
+			noopLogger,
+		);
 
 		await repo.reserveTickets(["t1", "t2"], {
 			purchaseId: "purchase-1",

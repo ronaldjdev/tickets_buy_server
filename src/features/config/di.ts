@@ -6,12 +6,13 @@ import {
 	UpdateConfig,
 } from "@/features/config/application/use-cases/index.js";
 import { SeedConfigFromEnv } from "@/features/config/application/use-cases/SeedConfigFromEnv.uc.js";
+import { appLogger } from "@/platform/di/Logger.di.js";
 
 export const configRepo = new ConfigRepository();
 
-const addConfig = new AddConfig(configRepo);
+const addConfig = new AddConfig(configRepo, appLogger);
 const getConfig = new GetConfig(configRepo);
-const updateConfig = new UpdateConfig(configRepo);
+const updateConfig = new UpdateConfig(configRepo, appLogger);
 
 export const configController = new ConfigController(
 	addConfig,
@@ -19,4 +20,4 @@ export const configController = new ConfigController(
 	updateConfig,
 );
 
-export const seedConfigFromEnv = new SeedConfigFromEnv(configRepo);
+export const seedConfigFromEnv = new SeedConfigFromEnv(configRepo, appLogger);

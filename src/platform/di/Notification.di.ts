@@ -12,6 +12,7 @@ import {
 	createEmailClientFromConfig,
 	getEmailClient,
 } from "@/infra/email/index.js";
+import { appLogger } from "./Logger.di";
 import { sseServer } from "./SseServer.di";
 
 const notificationRepo = new NotificationRepository();
@@ -31,8 +32,8 @@ export const notificationService = new NotificationService(
 );
 
 const listNotifications = new ListNotifications(notificationRepo);
-const markAsRead = new MarkAsRead(notificationRepo);
-const markAllAsRead = new MarkAllAsRead(notificationRepo);
+const markAsRead = new MarkAsRead(notificationRepo, appLogger);
+const markAllAsRead = new MarkAllAsRead(notificationRepo, appLogger);
 
 export const notificationController = new NotificationController(
 	listNotifications,

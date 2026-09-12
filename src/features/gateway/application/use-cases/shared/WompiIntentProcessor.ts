@@ -4,6 +4,7 @@ import type {
 	ConfirmTicketPaymentInput,
 	IConfirmTicketPayment,
 } from "@/shared/contracts/IConfirmTicketPayment.contract.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 import type {
 	WompiEventTransaction,
 	WompiTransactionStatus,
@@ -25,24 +26,35 @@ export class WompiIntentProcessor {
 	constructor(
 		private readonly intentRepo: IGatewayIntentRepository,
 		private readonly confirmTicketPayment: IConfirmTicketPayment,
+		private readonly logger: ILogger,
 	) {}
 
 	async apply(
 		intent: GatewayIntent,
 		transaction: WompiEventTransaction,
 	): Promise<GatewayIntent["status"]> {
+		const status = INTENT_STATUS_MAP[transaction.status];
+
 		await this.intentRepo.updateByReference(intent.reference, {
-			status: INTENT_STATUS_MAP[transaction.status],
+			status,
 			transactionId: transaction.id,
 			paymentMethodType: transaction.payment_method_type,
 			customerEmail: transaction.customer_email,
+		});
+
+		this.logger.info("Intent de pago actualizado", {
+			operation: "gateway.intent_updated",
+			reference: intent.reference,
+			status,
+			transactionId: transaction.id,
+			gateway: "wompi",
 		});
 
 		if (transaction.status === "APPROVED") {
 			await this.confirmApprovedPayment(intent, transaction);
 		}
 
-		return INTENT_STATUS_MAP[transaction.status];
+		return status;
 	}
 
 	private async confirmApprovedPayment(

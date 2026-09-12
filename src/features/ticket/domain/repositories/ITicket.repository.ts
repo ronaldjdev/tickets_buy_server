@@ -1,4 +1,4 @@
-import type { Ticket } from "../entities/Ticket.entity.js";
+import type { Ticket, TicketStatus } from "../entities/Ticket.entity.js";
 
 export interface ReserveTicketsData {
 	buyerName?: string;
@@ -11,7 +11,7 @@ export interface ReserveTicketsData {
 export interface ITicketRepository {
 	findById(id: string): Promise<Ticket | null>;
 	findByIds(ids: string[]): Promise<Ticket[]>;
-	findByRaffle(raffleId: string): Promise<Ticket[]>;
+	findByRaffle(raffleId: string, statuses?: TicketStatus[]): Promise<Ticket[]>;
 	findByPurchaseId(purchaseId: string): Promise<Ticket[]>;
 	findWinningTicket(raffleId: string): Promise<Ticket | null>;
 	save(ticket: Ticket): Promise<Ticket>;

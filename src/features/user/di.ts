@@ -8,14 +8,15 @@ import {
 	ListUsers,
 	UpdateUser,
 } from "@/features/user/application/use-cases/index.js";
+import { appLogger } from "@/platform/di/Logger.di.js";
 
 const userRepo = new UserRepository();
 
-const createUser = new CreateUser(userRepo);
+const createUser = new CreateUser(userRepo, appLogger);
 const getUser = new GetUser(userRepo);
 const listUsers = new ListUsers(userRepo);
-const updateUser = new UpdateUser(userRepo);
-const deleteUser = new DeleteUser(userRepo);
+const updateUser = new UpdateUser(userRepo, appLogger);
+const deleteUser = new DeleteUser(userRepo, appLogger);
 
 export const userController = new UserController(
 	createUser,

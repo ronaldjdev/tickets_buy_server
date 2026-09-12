@@ -64,9 +64,7 @@ export class GatewayIntentRepository implements IGatewayIntentRepository {
 		const filter: Record<string, unknown> = {};
 		if (query.status) filter.status = query.status;
 		if (query.q) {
-			const pattern = query.q
-				.trim()
-				.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			const pattern = query.q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 			const regex = new RegExp(pattern, "i");
 			filter.$or = [
 				{ reference: regex },

@@ -4,10 +4,11 @@ import type {
 	IRaffleService,
 	RafflePayload,
 } from "../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { BuyTickets } from "../application/use-cases/BuyTickets.uc.js";
 import { ListTickets } from "../application/use-cases/ListTickets.uc.js";
 import { ManageAvailability } from "../application/use-cases/ManageAvailability.uc.js";
-import type { Ticket } from "../domain/entities/Ticket.entity.js";
+import type { Ticket, TicketStatus } from "../domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
@@ -15,6 +16,8 @@ import {
 	TicketNotFoundError,
 } from "../domain/errors/Ticket.error.js";
 import type { ITicketRepository } from "../domain/repositories/ITicket.repository.js";
+
+const noopLogger = createNoopLogger();
 
 class MockRaffleService implements IRaffleService {
 	raffle: RafflePayload | null;
@@ -43,8 +46,15 @@ class MockTicketRepository implements ITicketRepository {
 		return this.store.filter((t) => ids.includes(t.id));
 	}
 
-	async findByRaffle(raffleId: string): Promise<Ticket[]> {
-		return this.store.filter((t) => t.raffleId === raffleId);
+	async findByRaffle(
+		raffleId: string,
+		statuses?: TicketStatus[],
+	): Promise<Ticket[]> {
+		return this.store.filter(
+			(t) =>
+				t.raffleId === raffleId &&
+				(!statuses || statuses.length === 0 || statuses.includes(t.status)),
+		);
 	}
 
 	async findWinningTicket(raffleId: string): Promise<Ticket | null> {
@@ -185,7 +195,7 @@ describe("BuyTickets", () => {
 	it("debería comprar tickets disponibles", async () => {
 		const raffleService = new MockRaffleService(makeRaffle());
 		const repo = new MockTicketRepository(makeTickets(5, 0));
-		const useCase = new BuyTickets(raffleService, repo);
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
 
 		const purchased = await useCase.execute({
 			raffleId: "raffle-1",
@@ -202,7 +212,7 @@ describe("BuyTickets", () => {
 	it("debería fallar si la raffle no existe", async () => {
 		const raffleService = new MockRaffleService(null);
 		const repo = new MockTicketRepository(makeTickets(5, 0));
-		const useCase = new BuyTickets(raffleService, repo);
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
 
 		await assert.rejects(
 			() => useCase.execute({ raffleId: "raffle-1", quantity: 1 }),
@@ -216,7 +226,7 @@ describe("BuyTickets", () => {
 			status: "draft",
 		});
 		const repo = new MockTicketRepository(makeTickets(5, 0));
-		const useCase = new BuyTickets(raffleService, repo);
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
 
 		await assert.rejects(
 			() => useCase.execute({ raffleId: "raffle-1", quantity: 1 }),
@@ -227,7 +237,7 @@ describe("BuyTickets", () => {
 	it("debería fallar si no hay suficientes tickets", async () => {
 		const raffleService = new MockRaffleService(makeRaffle());
 		const repo = new MockTicketRepository(makeTickets(1, 1));
-		const useCase = new BuyTickets(raffleService, repo);
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
 
 		await assert.rejects(
 			() => useCase.execute({ raffleId: "raffle-1", quantity: 2 }),
@@ -237,19 +247,79 @@ describe("BuyTickets", () => {
 });
 
 describe("ListTickets", () => {
-	it("debería listar tickets de una raffle", async () => {
-		const repo = new MockTicketRepository(makeTickets(3, 0));
+	it("debería listar solo los vendidos por defecto", async () => {
+		const repo = new MockTicketRepository([
+			...makeTickets(3, 1),
+			{ id: "t0", raffleId: "raffle-1", number: 4, status: "winner" },
+			{
+				id: "t9",
+				raffleId: "raffle-1",
+				number: 5,
+				status: "reserved",
+				buyerName: "Ana",
+			},
+		]);
 		const useCase = new ListTickets(repo);
 
 		const tickets = await useCase.execute({ raffleId: "raffle-1" });
-		assert.equal(tickets.length, 3);
+
+		assert.equal(tickets.length, 2);
+		assert.deepEqual(
+			tickets.map((t) => t.status),
+			["purchased", "winner"],
+		);
+	});
+
+	it("debería listar todos los tickets con status all", async () => {
+		const repo = new MockTicketRepository([
+			...makeTickets(3, 0),
+			{
+				id: "t9",
+				raffleId: "raffle-1",
+				number: 4,
+				status: "reserved",
+				buyerName: "Ana",
+			},
+		]);
+		const useCase = new ListTickets(repo);
+
+		const tickets = await useCase.execute({
+			raffleId: "raffle-1",
+			status: "all",
+		});
+
+		assert.equal(tickets.length, 4);
+	});
+
+	it("debería listar por un status específico", async () => {
+		const repo = new MockTicketRepository([
+			...makeTickets(3, 0),
+			{
+				id: "t9",
+				raffleId: "raffle-1",
+				number: 4,
+				status: "reserved",
+				buyerName: "Ana",
+			},
+		]);
+		const useCase = new ListTickets(repo);
+
+		const tickets = await useCase.execute({
+			raffleId: "raffle-1",
+			status: "available",
+		});
+
+		assert.deepEqual(
+			tickets.map((t) => t.status),
+			["available", "available", "available"],
+		);
 	});
 });
 
 describe("ManageAvailability", () => {
 	it("debería liberar un ticket comprado", async () => {
 		const repo = new MockTicketRepository(makeTickets(2, 1));
-		const useCase = new ManageAvailability(repo);
+		const useCase = new ManageAvailability(repo, noopLogger);
 
 		const ticket = await useCase.execute({ ticketId: "t1", action: "release" });
 		assert.equal(ticket.status, "available");
@@ -257,7 +327,7 @@ describe("ManageAvailability", () => {
 
 	it("debería fallar si el ticket no existe", async () => {
 		const repo = new MockTicketRepository(makeTickets(2, 0));
-		const useCase = new ManageAvailability(repo);
+		const useCase = new ManageAvailability(repo, noopLogger);
 
 		await assert.rejects(
 			() => useCase.execute({ ticketId: "no-existe", action: "release" }),

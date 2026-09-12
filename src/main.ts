@@ -26,6 +26,7 @@ import { initAuth } from "./platform/auth/auth.config";
 import { env } from "./platform/config/Env.config";
 import { connectDB } from "./platform/database/Db.config";
 import { createGatewayModule } from "./platform/di/Gateway.di";
+import { appLogger } from "./platform/di/Logger.di";
 import { notificationService } from "./platform/di/Notification.di";
 import { createApp } from "./platform/http/App";
 import { errorHandler } from "./platform/http/Error.middleware";
@@ -64,14 +65,15 @@ async function main() {
 		raffleService: raffleServiceProxy,
 	});
 
-	const ticketModule = createTicketModule(raffleServiceProxy);
+	const ticketModule = createTicketModule(raffleServiceProxy, appLogger);
 	const raffleModule = createRaffleModule(
 		ticketModule.sharedService,
+		appLogger,
 		notificationService,
 	);
 	raffleShared = raffleModule.sharedService;
 
-	const comboModule = createComboModule(raffleServiceProxy);
+	const comboModule = createComboModule(raffleServiceProxy, appLogger);
 
 	const purchaseModule = createTicketPurchaseModule({
 		raffleService: raffleServiceProxy,
@@ -81,6 +83,7 @@ async function main() {
 	});
 	const contactModule = createContactModule({
 		raffleService: raffleServiceProxy,
+		appLogger,
 	});
 	linkCreatorRef = gatewayModule.linkCreator;
 	confirmRef = purchaseModule.confirmTicketPayment;

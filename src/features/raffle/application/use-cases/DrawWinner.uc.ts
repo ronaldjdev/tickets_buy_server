@@ -1,5 +1,5 @@
-import logger from "../../../../platform/logger/index.js";
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import type { NotificationService } from "../../../notification/application/services/NotificationService.js";
 import type { Raffle } from "../../domain/entities/Raffle.entity.js";
 import {
@@ -18,6 +18,7 @@ export class DrawWinner {
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly ticketService: ITicketService,
 		private readonly notificationService?: NotificationService,
+		private readonly logger?: ILogger,
 	) {}
 
 	async execute(command: DrawWinnerCommand): Promise<Raffle> {
@@ -52,11 +53,22 @@ export class DrawWinner {
 					},
 				});
 			} catch (error) {
-				logger.warn("No se pudo emitir notificación de ganador asignado", {
-					error,
-				});
+				this.logger?.warn(
+					"No se pudo emitir notificación de ganador asignado",
+					{
+						error,
+					},
+				);
 			}
 		}
+
+		this.logger?.info("Ganador asignado", {
+			operation: "raffle.draw_winner",
+			raffleId: drawn.id,
+			winnerTicketId: winnerTicket.id,
+			winnerNumber: winnerTicket.number,
+			title: drawn.title,
+		});
 
 		return drawn;
 	}

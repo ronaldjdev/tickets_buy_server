@@ -15,6 +15,7 @@ import type {
 import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 export const RESERVATION_TTL_MINUTES = 15;
 const MAX_RESERVATION_ATTEMPTS = 10;
@@ -54,6 +55,7 @@ export class CreatePurchase {
 		private readonly linkCreator: IGatewayLinkCreator,
 		private readonly contactRepository: IContactRepository,
 		private readonly comboRepository: IComboRepository,
+		private readonly logger: ILogger,
 	) {}
 
 	async execute(command: CreatePurchaseCommand): Promise<CreatePurchaseResult> {
@@ -103,6 +105,18 @@ export class CreatePurchase {
 			contactPhone: command.buyerPhone,
 			amountInCents: Math.round(combo.price * 100),
 			expiresInMinutes: RESERVATION_TTL_MINUTES,
+		});
+
+		this.logger.info("Compra iniciada", {
+			operation: "ticket.create_purchase",
+			reference: link.reference,
+			comboId: combo.id,
+			comboName: combo.name,
+			quantity: combo.ticketCount,
+			amount: combo.price,
+			ticketNumbers: claimed.map((t) => t.number).sort((a, b) => a - b),
+			buyerName: command.buyerName,
+			buyerEmail: command.buyerEmail,
 		});
 
 		return {

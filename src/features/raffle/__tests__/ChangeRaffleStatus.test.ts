@@ -1,9 +1,12 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import type { NotificationService } from "../../../features/notification/application/services/NotificationService.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { ChangeRaffleStatus } from "../application/use-cases/ChangeRaffleStatus.uc.js";
 import type { Raffle } from "../domain/entities/Raffle.entity.js";
 import type { IRaffleRepository } from "../domain/repositories/IRaffle.repository.js";
+
+const noopLogger = createNoopLogger();
 
 function makeRaffle(
 	id: string,
@@ -81,6 +84,7 @@ describe("ChangeRaffleStatus", () => {
 		const useCase = new ChangeRaffleStatus(
 			raffleRepo,
 			makeNotificationService(),
+			noopLogger,
 		);
 
 		const activated = await useCase.execute({
@@ -100,7 +104,7 @@ describe("ChangeRaffleStatus", () => {
 		const raffleRepo = new MockRaffleRepository([
 			makeRaffle("one", "Sorteo uno", "active"),
 		]);
-		const useCase = new ChangeRaffleStatus(raffleRepo);
+		const useCase = new ChangeRaffleStatus(raffleRepo, undefined, noopLogger);
 
 		const paused = await useCase.execute({
 			raffleId: "one",

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { RaffleNotFoundError } from "@/features/ticket/domain/errors/Ticket.error.js";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 import type { Combo } from "../../domain/entities/Combo.entity.js";
 import type { IComboRepository } from "../../domain/repositories/ICombo.repository.js";
@@ -18,7 +19,8 @@ export class CreateCombo {
 	constructor(
 		private readonly comboRepository: IComboRepository,
 		private readonly raffleService: IRaffleService,
-	) { }
+		private readonly logger: ILogger,
+	) {}
 
 	async execute(command: CreateComboCommand): Promise<Combo> {
 		const name = command?.name?.trim();
@@ -57,6 +59,14 @@ export class CreateCombo {
 			price: command.price,
 		});
 		if (!saved) throw new UseCaseError("No se pudo crear el combo.");
+
+		this.logger.info("Combo creado", {
+			operation: "combo.create",
+			comboId: saved.id,
+			raffleId: saved.raffleId,
+			name: saved.name,
+			ticketCount: saved.ticketCount,
+		});
 		return saved;
 	}
 }

@@ -1,6 +1,7 @@
 import { RaffleNotFoundError } from "@/features/ticket/domain/errors/Ticket.error.js";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 import type { Combo } from "../../domain/entities/Combo.entity.js";
 import { ComboNotFoundError } from "../../domain/errors/Combo.error.js";
@@ -17,7 +18,8 @@ export class UpdateCombo {
 	constructor(
 		private readonly comboRepository: IComboRepository,
 		private readonly raffleService: IRaffleService,
-	) { }
+		private readonly logger: ILogger,
+	) {}
 
 	async execute(command: UpdateComboCommand): Promise<Combo> {
 		if (!command.id) throw new UseCaseError("El id del combo es obligatorio.");
@@ -58,6 +60,14 @@ export class UpdateCombo {
 
 		const updated = await this.comboRepository.update(combo.id, next);
 		if (!updated) throw new UseCaseError("No se pudo actualizar el combo.");
+
+		this.logger.info("Combo actualizado", {
+			operation: "combo.update",
+			comboId: updated.id,
+			raffleId: updated.raffleId,
+			name: updated.name,
+			ticketCount: updated.ticketCount,
+		});
 		return updated;
 	}
 }

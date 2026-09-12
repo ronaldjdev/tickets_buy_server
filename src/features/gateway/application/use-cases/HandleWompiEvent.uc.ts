@@ -58,6 +58,12 @@ export class HandleWompiEvent {
 		}
 
 		const intentStatus = await this.processor.apply(intent, transaction);
+		this.logger.info("[Wompi] Evento procesado", {
+			operation: "gateway.handle_wompi_event",
+			reference: intent.reference,
+			intentStatus,
+			transactionId: transaction.id,
+		});
 		return { handled: true, intentStatus };
 	}
 }

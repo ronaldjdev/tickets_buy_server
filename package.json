@@ -1,5 +1,5 @@
 {
-	"name": "tickets_buy_server",
+	"name": "chevere_max_server",
 	"version": "1.0.0",
 	"description": "Servidor para venta de tickets",
 	"main": "src/main.ts",

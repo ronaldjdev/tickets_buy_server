@@ -1,4 +1,5 @@
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
 import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
@@ -24,6 +25,7 @@ export class UpdateRaffle {
 	constructor(
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly ticketService: ITicketService,
+		private readonly logger: ILogger,
 	) {}
 
 	async execute(command: UpdateRaffleCommand): Promise<Raffle> {
@@ -49,32 +51,41 @@ export class UpdateRaffle {
 
 		let maxTickets = raffle.maxTickets;
 		if (command.maxTickets !== undefined) {
-			if (command.maxTickets <= 0) {
+			const newMax = command.maxTickets;
+			if (newMax <= 0) {
 				throw new Error("maxTickets debe ser mayor a 0");
 			}
 
 			const tickets = await this.ticketService.listTickets(raffle.id);
-			const sold = tickets.filter((t) => t.status !== "available").length;
-			if (command.maxTickets < sold) {
+			const sold = tickets.filter((t) => t.status !== "available");
+			if (newMax < sold.length) {
 				throw new Error("maxTickets no puede ser menor a los tickets vendidos");
 			}
 
-			if (command.maxTickets > maxTickets) {
+			if (newMax < maxTickets) {
+				if (sold.some((t) => t.number > newMax)) {
+					throw new Error(
+						"maxTickets no puede ser menor al número de un boleto vendido",
+					);
+				}
+				await this.ticketService.releaseAvailableBeyond(raffle.id, newMax);
+			}
+
+			const existingNumbers = new Set(tickets.map((t) => t.number));
+			const missingNumbers = Array.from(
+				{ length: newMax },
+				(_, i) => i + 1,
+			).filter((n) => !existingNumbers.has(n));
+			if (missingNumbers.length > 0) {
 				await this.ticketService.createAvailableTickets(
 					raffle.id,
-					command.maxTickets - maxTickets,
-					maxTickets + 1,
-				);
-			} else if (command.maxTickets < maxTickets) {
-				await this.ticketService.releaseAvailableBeyond(
-					raffle.id,
-					command.maxTickets,
+					missingNumbers,
 				);
 			}
-			maxTickets = command.maxTickets;
+			maxTickets = newMax;
 		}
 
-		return this.raffleRepository.update({
+		const updated = await this.raffleRepository.update({
 			...raffle,
 			slug,
 			title,
@@ -86,5 +97,15 @@ export class UpdateRaffle {
 			maxTickets,
 			winnerTicketId: command.winnerTicketId ?? raffle.winnerTicketId,
 		});
+
+		this.logger.info("Sorteo actualizado", {
+			operation: "raffle.update",
+			raffleId: updated.id,
+			slug: updated.slug,
+			title: updated.title,
+			maxTickets: updated.maxTickets,
+		});
+
+		return updated;
 	}
 }

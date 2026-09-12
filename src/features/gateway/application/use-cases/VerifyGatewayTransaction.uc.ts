@@ -3,6 +3,7 @@ import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIn
 import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository";
 import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract";
 import { UseCaseError } from "@/shared/errors/UseCaseError";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 import type {
 	IWompiPort,
 	WompiEventTransaction,
@@ -25,6 +26,7 @@ export class VerifyGatewayTransaction {
 		private readonly wompiPort: IWompiPort,
 		private readonly intentRepo: IGatewayIntentRepository,
 		private readonly processor: WompiIntentProcessor,
+		private readonly logger: ILogger,
 	) {}
 
 	async execute(
@@ -59,7 +61,18 @@ export class VerifyGatewayTransaction {
 		if (transaction.status === "PENDING") return unchanged;
 
 		const status = await this.processor.apply(intent, transaction);
-		return { reference: intent.reference, status, updated: true };
+		const result = {
+			reference: intent.reference,
+			status,
+			updated: true,
+		};
+		this.logger.info("Transacción verificada", {
+			operation: "gateway.verify_transaction",
+			reference: result.reference,
+			status: result.status,
+			transactionId: transaction.id,
+		});
+		return result;
 	}
 
 	private async findTransaction(

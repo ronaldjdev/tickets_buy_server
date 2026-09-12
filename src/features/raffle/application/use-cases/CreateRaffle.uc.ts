@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
 import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
@@ -24,6 +25,7 @@ export class CreateRaffle {
 	constructor(
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly ticketService: ITicketService,
+		private readonly logger: ILogger,
 	) {}
 
 	async execute(command: CreateRaffleCommand): Promise<Raffle> {
@@ -58,8 +60,17 @@ export class CreateRaffle {
 		const saved = await this.raffleRepository.save(raffle);
 		await this.ticketService.createAvailableTickets(
 			raffle.id,
-			raffle.maxTickets,
+			Array.from({ length: raffle.maxTickets }, (_, i) => i + 1),
 		);
+
+		this.logger.info("Sorteo creado", {
+			operation: "raffle.create",
+			raffleId: saved.id,
+			slug: saved.slug,
+			title: saved.title,
+			status: saved.status,
+			maxTickets: saved.maxTickets,
+		});
 
 		return saved;
 	}

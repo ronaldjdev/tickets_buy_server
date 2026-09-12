@@ -1,10 +1,14 @@
 import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
 import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 import { normalizePhone } from "@/shared/utils/phone.js";
 
 export class UpdateContact {
-	constructor(private contactRepo: IContactRepository) {}
+	constructor(
+		private contactRepo: IContactRepository,
+		private readonly logger: ILogger,
+	) {}
 	async execute(id: string, data: Partial<Contact>): Promise<Contact | null> {
 		if (!id) {
 			throw new UseCaseError(
@@ -23,6 +27,11 @@ export class UpdateContact {
 		if (!contact) {
 			throw new UseCaseError("No se pudo actualizar el contacto.");
 		}
+		this.logger.info("Contacto actualizado", {
+			operation: "contact.update",
+			contactId: id,
+			email: contact.email,
+		});
 		return contact;
 	}
 }

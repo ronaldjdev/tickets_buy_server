@@ -1,5 +1,6 @@
 import type { Config } from "@/features/config/domain/entities/Config.entity.js";
 import type { IConfigRepository } from "@/features/config/domain/repositories/IConfig.repository.js";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 function envBool(value: string | undefined): boolean {
 	if (value === undefined) return true;
@@ -7,7 +8,10 @@ function envBool(value: string | undefined): boolean {
 }
 
 export class SeedConfigFromEnv {
-	constructor(private readonly configRepo: IConfigRepository) {}
+	constructor(
+		private readonly configRepo: IConfigRepository,
+		private readonly logger: ILogger,
+	) {}
 
 	async execute(): Promise<void> {
 		const existing = await this.configRepo.findSingleton();
@@ -30,6 +34,9 @@ export class SeedConfigFromEnv {
 				phone: process.env.BUSINESS_PHONE,
 			},
 			wompi,
+		});
+		this.logger.info("Configuración sembrada desde entorno", {
+			operation: "config.seed_from_env",
 		});
 	}
 }

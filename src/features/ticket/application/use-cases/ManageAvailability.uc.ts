@@ -4,6 +4,7 @@ import type {
 } from "@/features/ticket/domain/entities/Ticket.entity";
 import { TicketNotFoundError } from "@/features/ticket/domain/errors/Ticket.error";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
+import type { ILogger } from "@/shared/port/ILogger.port.js";
 
 export type AvailabilityAction = "release" | "purchase";
 
@@ -15,7 +16,10 @@ export interface ManageAvailabilityCommand {
 }
 
 export class ManageAvailability {
-	constructor(private readonly ticketRepository: ITicketRepository) {}
+	constructor(
+		private readonly ticketRepository: ITicketRepository,
+		private readonly logger: ILogger,
+	) {}
 
 	async execute(command: ManageAvailabilityCommand): Promise<Ticket> {
 		const ticket = await this.ticketRepository.findById(command.ticketId);
@@ -37,6 +41,15 @@ export class ManageAvailability {
 			...ticket,
 			buyerName: command.buyerName ?? ticket.buyerName,
 			buyerEmail: command.buyerEmail ?? ticket.buyerEmail,
+			status,
+		});
+
+		this.logger.info("Disponibilidad de boleto actualizada", {
+			operation: "ticket.manage_availability",
+			ticketId: updated.id,
+			raffleId: updated.raffleId,
+			number: updated.number,
+			action: command.action,
 			status,
 		});
 

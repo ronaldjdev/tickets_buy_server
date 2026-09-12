@@ -9,9 +9,12 @@ import type {
 	IWompiPort,
 	WompiLinkData,
 } from "../../../shared/port/IWompi.port.js";
+import { createNoopLogger } from "../../../test/testLogger.js";
 import { CreateTicketPayment } from "../application/use-cases/CreateTicketPayment.uc.js";
 import type { GatewayIntent } from "../domain/entities/GatewayIntent.entity.js";
 import type { IGatewayIntentRepository } from "../domain/repositories/IGatewayIntent.repository.js";
+
+const noopLogger = createNoopLogger();
 
 class MockConfigReader implements IWompiConfigReader {
 	constructor(private readonly settings: WompiSettings | null) {}
@@ -115,6 +118,7 @@ describe("CreateTicketPayment", () => {
 			new MockConfigReader(settings),
 			wompiPort,
 			intentRepo,
+			noopLogger,
 			"https://frontend.com",
 		);
 
@@ -137,6 +141,7 @@ describe("CreateTicketPayment", () => {
 			new MockConfigReader({ enabled: false }),
 			new MockWompiPort(),
 			new MockIntentRepo(),
+			noopLogger,
 		);
 
 		await assert.rejects(
@@ -150,6 +155,7 @@ describe("CreateTicketPayment", () => {
 			new MockConfigReader(settings),
 			new MockWompiPort(),
 			new MockIntentRepo(),
+			noopLogger,
 		);
 
 		await assert.rejects(() =>

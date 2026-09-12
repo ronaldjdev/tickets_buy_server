@@ -1,4 +1,4 @@
-import logger from "../../../../platform/logger/index.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import type { NotificationService } from "../../../notification/application/services/NotificationService.js";
 import type {
 	Raffle,
@@ -16,6 +16,7 @@ export class ChangeRaffleStatus {
 	constructor(
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly notificationService?: NotificationService,
+		private readonly logger?: ILogger,
 	) {}
 
 	async execute(command: ChangeRaffleStatusCommand): Promise<Raffle> {
@@ -49,11 +50,18 @@ export class ChangeRaffleStatus {
 					metadata: { raffleId: updated.id },
 				});
 			} catch (error) {
-				logger.warn("No se pudo emitir notificación de sorteo activo", {
+				this.logger?.warn("No se pudo emitir notificación de sorteo activo", {
 					error,
 				});
 			}
 		}
+
+		this.logger?.info("Estado de sorteo cambiado", {
+			operation: "raffle.change_status",
+			raffleId: updated.id,
+			status: updated.status,
+			title: updated.title,
+		});
 
 		return updated;
 	}
