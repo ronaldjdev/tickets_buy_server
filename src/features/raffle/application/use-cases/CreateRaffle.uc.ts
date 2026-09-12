@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
+import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
 	Raffle,
+	RafflePrize,
 	RaffleStatus,
 } from "../../domain/entities/Raffle.entity.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
@@ -9,7 +12,7 @@ import type { IRaffleRepository } from "../../domain/repositories/IRaffle.reposi
 export interface CreateRaffleCommand {
 	title: string;
 	description?: string;
-	prize: { name: string; description?: string };
+	prizes?: RafflePrize[];
 	startDate: Date;
 	endDate: Date;
 	ticketPrice: number;
@@ -30,11 +33,21 @@ export class CreateRaffle {
 		if (command.ticketPrice < 0)
 			throw new Error("ticketPrice no puede ser negativo");
 
+		const id = randomUUID();
+		const slug = await ensureUniqueSlug(slugify(command.title), (s) =>
+			this.raffleRepository.findBySlug(s),
+		);
+
+		if (command.status === "active") {
+			await this.raffleRepository.deactivateActiveRaffles(id);
+		}
+
 		const raffle: Raffle = {
-			id: randomUUID(),
+			id,
+			slug,
 			title: command.title,
 			description: command.description,
-			prize: command.prize,
+			prizes: command.prizes ?? [],
 			startDate: command.startDate,
 			endDate: command.endDate,
 			ticketPrice: command.ticketPrice,

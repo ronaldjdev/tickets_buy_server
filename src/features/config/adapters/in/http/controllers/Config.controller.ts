@@ -40,7 +40,9 @@ export class ConfigController {
 					nameBusiness: config?.general?.nameBusiness,
 					email: config?.general?.email,
 					phone: config?.general?.phone,
+					logoUrl: config?.general?.logoUrl,
 				},
+				homepage: config?.homepage ?? null,
 			});
 		} catch (error) {
 			next(error);

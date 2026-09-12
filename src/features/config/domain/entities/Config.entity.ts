@@ -4,6 +4,7 @@ interface General {
 	nameBusiness?: string;
 	email?: string;
 	phone?: string;
+	logoUrl?: string;
 }
 
 interface WompiConfig {
@@ -54,11 +55,95 @@ export interface IntegrationsConfig {
 	sms?: SmsIntegration;
 }
 
+// ─── Homepage CMS ─────────────────────────────────────────────────────────────
+
+export type HomepageSectionType =
+	| "hero"
+	| "featured-raffle"
+	| "raffle-grid"
+	| "how-it-works"
+	| "trust"
+	| "stats"
+	| "winners"
+	| "testimonials"
+	| "faq"
+	| "cta";
+
+export interface HomepageSectionVisibility {
+	type: HomepageSectionType;
+	enabled: boolean;
+	order: number;
+}
+
+export interface HeroCmsContent {
+	eyebrow?: string;
+	titleLine1?: string;
+	titleLine2?: string;
+	wordmark?: string;
+	primaryButtonText?: string;
+	secondaryButtonText?: string;
+	videoUrl?: string;
+}
+
+export interface HowItWorksStep {
+	number: string;
+	title: string;
+	description: string;
+}
+
+export interface HowItWorksCmsContent {
+	eyebrow?: string;
+	title?: string;
+	description?: string;
+	steps?: HowItWorksStep[];
+}
+
+export interface TestimonialItem {
+	quote: string;
+	name: string;
+	detail: string;
+}
+
+export interface TestimonialsCmsContent {
+	eyebrow?: string;
+	title?: string;
+	items?: TestimonialItem[];
+}
+
+export interface FaqItem {
+	question: string;
+	answer: string;
+}
+
+export interface FaqCmsContent {
+	eyebrow?: string;
+	title?: string;
+	items?: FaqItem[];
+}
+
+export interface CtaCmsContent {
+	title?: string;
+	description?: string;
+	buttonText?: string;
+}
+
+export interface HomepageCmsConfig {
+	sections?: HomepageSectionVisibility[];
+	hero?: HeroCmsContent;
+	howItWorks?: HowItWorksCmsContent;
+	testimonials?: TestimonialsCmsContent;
+	faq?: FaqCmsContent;
+	cta?: CtaCmsContent;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface Config {
 	isSingleton?: boolean;
 	general?: General;
 	wompi?: WompiConfig;
 	integrations?: IntegrationsConfig;
+	homepage?: HomepageCmsConfig;
 	createdAt?: Date;
 	updatedAt?: Date;
 }

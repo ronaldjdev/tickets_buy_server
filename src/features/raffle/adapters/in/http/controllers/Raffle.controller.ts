@@ -4,6 +4,7 @@ import type { CreateRaffle } from "../../../../application/use-cases/CreateRaffl
 import type { DeleteRaffle } from "../../../../application/use-cases/DeleteRaffle.uc.js";
 import type { DrawWinner } from "../../../../application/use-cases/DrawWinner.uc.js";
 import type { GetRaffle } from "../../../../application/use-cases/GetRaffle.uc.js";
+import type { GetRaffleBySlug } from "../../../../application/use-cases/GetRaffleBySlug.uc.js";
 import type { ListRaffles } from "../../../../application/use-cases/ListRaffles.uc.js";
 import type { UpdateRaffle } from "../../../../application/use-cases/UpdateRaffle.uc.js";
 
@@ -13,6 +14,7 @@ export class RaffleController {
 		private readonly listRaffles: ListRaffles,
 		private readonly drawWinner: DrawWinner,
 		private readonly getRaffle: GetRaffle,
+		private readonly getRaffleBySlug: GetRaffleBySlug,
 		private readonly updateRaffle: UpdateRaffle,
 		private readonly changeRaffleStatus: ChangeRaffleStatus,
 		private readonly deleteRaffle: DeleteRaffle,
@@ -56,6 +58,21 @@ export class RaffleController {
 		try {
 			const raffle = await this.getRaffle.execute({
 				raffleId: String(req.params.id),
+			});
+			res.status(200).json({ data: raffle });
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	getRaffleBySlugHandler = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
+		try {
+			const raffle = await this.getRaffleBySlug.execute({
+				slug: String(req.params.slug),
 			});
 			res.status(200).json({ data: raffle });
 		} catch (error) {

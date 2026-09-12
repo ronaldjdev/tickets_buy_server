@@ -29,7 +29,13 @@ export class ChangeRaffleStatus {
 			throw new Error("El estado 'drawn' solo se asigna al sortear al ganador");
 		}
 
-		const updated = await this.raffleRepository.update({
+		let updated: Raffle;
+
+		if (command.status === "active") {
+			await this.raffleRepository.deactivateActiveRaffles(command.raffleId);
+		}
+
+		updated = await this.raffleRepository.update({
 			...raffle,
 			status: command.status,
 		});

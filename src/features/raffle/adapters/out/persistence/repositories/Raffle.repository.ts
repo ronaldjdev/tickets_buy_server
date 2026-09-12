@@ -14,6 +14,13 @@ export class RaffleRepository implements IRaffleRepository {
 			: null;
 	}
 
+	async findBySlug(slug: string): Promise<Raffle | null> {
+		const doc = await RaffleModel.findOne({ slug }).lean();
+		return doc
+			? RaffleMapper.toDomain(doc as unknown as Record<string, unknown>)
+			: null;
+	}
+
 	async list(query: RaffleQuery): Promise<Raffle[]> {
 		const filter: Record<string, unknown> = {};
 		if (query.status) filter.status = query.status;
@@ -49,5 +56,12 @@ export class RaffleRepository implements IRaffleRepository {
 
 	async delete(id: string): Promise<void> {
 		await RaffleModel.findByIdAndDelete(id);
+	}
+
+	async deactivateActiveRaffles(exceptRaffleId: string): Promise<void> {
+		await RaffleModel.updateMany(
+			{ status: "active", _id: { $ne: exceptRaffleId } },
+			{ $set: { status: "draft" } },
+		);
 	}
 }

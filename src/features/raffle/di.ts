@@ -9,6 +9,7 @@ import { CreateRaffle } from "./application/use-cases/CreateRaffle.uc.js";
 import { DeleteRaffle } from "./application/use-cases/DeleteRaffle.uc.js";
 import { DrawWinner } from "./application/use-cases/DrawWinner.uc.js";
 import { GetRaffle } from "./application/use-cases/GetRaffle.uc.js";
+import { GetRaffleBySlug } from "./application/use-cases/GetRaffleBySlug.uc.js";
 import { ListRaffles } from "./application/use-cases/ListRaffles.uc.js";
 import { UpdateRaffle } from "./application/use-cases/UpdateRaffle.uc.js";
 
@@ -29,6 +30,7 @@ export function createRaffleModule(
 		notificationService,
 	);
 	const getRaffle = new GetRaffle(raffleRepository);
+	const getRaffleBySlug = new GetRaffleBySlug(raffleRepository);
 	const updateRaffle = new UpdateRaffle(raffleRepository, ticketService);
 	const changeRaffleStatus = new ChangeRaffleStatus(
 		raffleRepository,
@@ -41,6 +43,7 @@ export function createRaffleModule(
 		listRaffles,
 		drawWinner,
 		getRaffle,
+		getRaffleBySlug,
 		updateRaffle,
 		changeRaffleStatus,
 		deleteRaffle,

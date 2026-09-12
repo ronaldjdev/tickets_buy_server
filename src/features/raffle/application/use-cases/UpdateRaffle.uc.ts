@@ -1,4 +1,6 @@
 import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
+import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
+import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
 	Raffle,
 	RafflePrize,
@@ -10,7 +12,7 @@ export interface UpdateRaffleCommand {
 	raffleId: string;
 	title?: string;
 	description?: string;
-	prize?: Partial<RafflePrize>;
+	prizes?: RafflePrize[];
 	startDate?: Date;
 	endDate?: Date;
 	ticketPrice?: number;
@@ -33,6 +35,16 @@ export class UpdateRaffle {
 
 		if (command.ticketPrice !== undefined && command.ticketPrice < 0) {
 			throw new Error("ticketPrice no puede ser negativo");
+		}
+
+		const title = command.title ?? raffle.title;
+		let slug = raffle.slug;
+		if (command.title !== undefined && title !== raffle.title) {
+			slug = await ensureUniqueSlug(
+				slugify(title),
+				(s) => this.raffleRepository.findBySlug(s),
+				raffle.id,
+			);
 		}
 
 		let maxTickets = raffle.maxTickets;
@@ -64,12 +76,10 @@ export class UpdateRaffle {
 
 		return this.raffleRepository.update({
 			...raffle,
-			title: command.title ?? raffle.title,
+			slug,
+			title,
 			description: command.description ?? raffle.description,
-			prize: {
-				name: command.prize?.name ?? raffle.prize.name,
-				description: command.prize?.description ?? raffle.prize.description,
-			},
+			prizes: command.prizes ?? raffle.prizes,
 			startDate: command.startDate ?? raffle.startDate,
 			endDate: command.endDate ?? raffle.endDate,
 			ticketPrice: command.ticketPrice ?? raffle.ticketPrice,

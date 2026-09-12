@@ -15,8 +15,9 @@ import type { IRaffleRepository } from "../domain/repositories/IRaffle.repositor
 function makeRaffle(partial: Partial<Raffle> = {}): Raffle {
 	return {
 		id: "raffle-1",
+		slug: "sorteo",
 		title: "Sorteo",
-		prize: { name: "Premio" },
+		prizes: [{ type: "mayor", name: "Premio" }],
 		startDate: new Date(),
 		endDate: new Date(),
 		ticketPrice: 10,
@@ -37,6 +38,10 @@ class MockRaffleRepository implements IRaffleRepository {
 		return this.raffle;
 	}
 
+	async findBySlug(slug: string): Promise<Raffle | null> {
+		return this.raffle && this.raffle.slug === slug ? this.raffle : null;
+	}
+
 	async list(): Promise<Raffle[]> {
 		return this.raffle ? [this.raffle] : [];
 	}
@@ -53,6 +58,12 @@ class MockRaffleRepository implements IRaffleRepository {
 
 	async delete(id: string): Promise<void> {
 		if (this.raffle?.id === id) this.raffle = null;
+	}
+
+	async deactivateActiveRaffles(exceptRaffleId: string): Promise<void> {
+		if (this.raffle?.status === "active" && this.raffle.id !== exceptRaffleId) {
+			this.raffle = { ...this.raffle, status: "draft" };
+		}
 	}
 }
 

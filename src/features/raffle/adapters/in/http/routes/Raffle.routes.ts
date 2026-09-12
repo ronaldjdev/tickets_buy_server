@@ -11,6 +11,7 @@ export function createRaffleRoutes(controller: RaffleController): Router {
 
 	router.post("/", admin, controller.createRaffleHandler);
 	router.get("/", controller.listRafflesHandler);
+	router.get("/slug/:slug", controller.getRaffleBySlugHandler);
 	router.get("/:id", controller.getRaffleHandler);
 	router.patch("/:id", admin, controller.updateRaffleHandler);
 	router.patch("/:id/status", admin, controller.changeRaffleStatusHandler);

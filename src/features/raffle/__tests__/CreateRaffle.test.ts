@@ -15,6 +15,10 @@ class MockRaffleRepository implements IRaffleRepository {
 		return this.store.find((e) => e.id === id) || null;
 	}
 
+	async findBySlug(slug: string): Promise<Raffle | null> {
+		return this.store.find((e) => e.slug === slug) || null;
+	}
+
 	async list(): Promise<Raffle[]> {
 		return this.store;
 	}
@@ -31,6 +35,14 @@ class MockRaffleRepository implements IRaffleRepository {
 
 	async delete(id: string): Promise<void> {
 		this.store = this.store.filter((e) => e.id !== id);
+	}
+
+	async deactivateActiveRaffles(exceptRaffleId: string): Promise<void> {
+		this.store = this.store.map((e) =>
+			e.status === "active" && e.id !== exceptRaffleId
+				? { ...e, status: "draft" }
+				: e,
+		);
 	}
 }
 
@@ -108,7 +120,10 @@ describe("CreateRaffle", () => {
 	it("debería crear una raffle y sus tickets", async () => {
 		const command = {
 			title: "Sorteo PS5",
-			prize: { name: "PlayStation 5" },
+			prizes: [
+				{ type: "mayor" as const, name: "PlayStation 5" },
+				{ type: "seco1" as const, name: "Audífonos" },
+			],
 			startDate: new Date("2026-09-01"),
 			endDate: new Date("2026-09-30"),
 			ticketPrice: 10,
@@ -119,10 +134,74 @@ describe("CreateRaffle", () => {
 		const result = await useCase.execute(command);
 		assert.ok(result);
 		assert.equal(result.title, "Sorteo PS5");
+		assert.equal(result.slug, "sorteo-ps5");
+		assert.deepEqual(result.prizes, command.prizes);
 		const id = (result as unknown as { id: string }).id;
 		assert.ok(id.length > 0);
 
 		assert.equal(ticketService.countByRaffle(id), 5);
+	});
+
+	it("debería permitir sorteo sin premios", async () => {
+		const result = await useCase.execute({
+			title: "Sorteo sin premio",
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+		assert.deepEqual(result.prizes, []);
+	});
+
+	it("debería generar slugs únicos ante colisiones", async () => {
+		await useCase.execute({
+			title: "Sorteo Premium",
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+
+		const second = await useCase.execute({
+			title: "Sorteo Premium",
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+
+		assert.equal(second.slug, "sorteo-premium-2");
+	});
+
+	it("debería mantener un solo sorteo activo a la vez", async () => {
+		const first = await useCase.execute({
+			title: "Sorteo Activo A",
+			status: "active" as const,
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+
+		const second = await useCase.execute({
+			title: "Sorteo Activo B",
+			status: "active" as const,
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+
+		const active = (await raffleRepo.list()).filter(
+			(r) => r.status === "active",
+		);
+		assert.equal(active.length, 1);
+		assert.equal(active[0].id, (second as unknown as { id: string }).id);
+		assert.equal(
+			(await raffleRepo.findById((first as unknown as { id: string }).id))
+				?.status,
+			"draft",
+		);
 	});
 
 	it("debería rechazar maxTickets <= 0", async () => {
@@ -130,7 +209,6 @@ describe("CreateRaffle", () => {
 			() =>
 				useCase.execute({
 					title: "x",
-					prize: { name: "p" },
 					startDate: new Date(),
 					endDate: new Date(),
 					ticketPrice: 1,
