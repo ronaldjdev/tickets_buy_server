@@ -63,7 +63,9 @@ const HeroCmsSchema = new Schema(
 		wordmark: { type: String },
 		primaryButtonText: { type: String },
 		secondaryButtonText: { type: String },
+		mediaType: { type: String, enum: ["video", "carousel"] },
 		videoUrl: { type: String },
+		carouselImages: { type: [String], default: undefined },
 	},
 	{ _id: false },
 );

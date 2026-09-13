@@ -82,7 +82,9 @@ export interface HeroCmsContent {
 	wordmark?: string;
 	primaryButtonText?: string;
 	secondaryButtonText?: string;
+	mediaType?: "video" | "carousel";
 	videoUrl?: string;
+	carouselImages?: string[];
 }
 
 export interface HowItWorksStep {
