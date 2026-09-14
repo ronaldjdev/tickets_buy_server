@@ -24,11 +24,7 @@ export function createRaffleModule(
 } {
 	const raffleRepository = new RaffleRepository();
 
-	const createRaffle = new CreateRaffle(
-		raffleRepository,
-		ticketService,
-		logger,
-	);
+	const createRaffle = new CreateRaffle(raffleRepository, logger);
 	const listRaffles = new ListRaffles(raffleRepository);
 	const drawWinner = new DrawWinner(
 		raffleRepository,

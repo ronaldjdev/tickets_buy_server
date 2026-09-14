@@ -12,13 +12,6 @@ export class RaffleNotActiveError extends Error {
 	}
 }
 
-export class RaffleSoldOutError extends Error {
-	constructor(id: string) {
-		super(`El sorteo ${id} no tiene más tickets disponibles`);
-		this.name = "RaffleSoldOutError";
-	}
-}
-
 export class RaffleAlreadyDrawnError extends Error {
 	constructor(id: string) {
 		super(`El sorteo ${id} ya tiene un ganador sorteado`);

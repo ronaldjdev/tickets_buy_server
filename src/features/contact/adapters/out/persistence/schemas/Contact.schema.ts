@@ -7,8 +7,16 @@ type IContact = Document & Contact;
 const ContactSchema = new Schema<IContact>(
 	{
 		name: { type: String, required: true },
+		lastName: { type: String },
 		email: { type: String },
 		phone: { type: String, required: true },
+		documentType: {
+			type: String,
+			enum: ["cc", "ce", "pasaporte"],
+		},
+		documentNumber: { type: String },
+		country: { type: String },
+		address: { type: String },
 		status: { type: String, default: "activo" },
 		welcomedAt: { type: Date, default: null },
 	},

@@ -37,4 +37,8 @@ export class SmtpAdapter implements IEmailPort {
 			html,
 		});
 	}
+
+	async verify(): Promise<boolean> {
+		return this.transporter.verify();
+	}
 }

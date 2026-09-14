@@ -57,6 +57,23 @@ class MockTicketRepository implements ITicketRepository {
 		);
 	}
 
+	async countByRaffle(
+		raffleId: string,
+		statuses: TicketStatus[],
+	): Promise<number> {
+		return this.store.filter(
+			(t) => t.raffleId === raffleId && statuses.includes(t.status),
+		).length;
+	}
+
+	async findNumbersByRaffle(raffleId: string): Promise<number[]> {
+		return [
+			...new Set(
+				this.store.filter((t) => t.raffleId === raffleId).map((t) => t.number),
+			),
+		];
+	}
+
 	async findWinningTicket(raffleId: string): Promise<Ticket | null> {
 		return (
 			this.store.find(
@@ -79,12 +96,25 @@ class MockTicketRepository implements ITicketRepository {
 		return this.store.filter((t) => t.purchaseId === purchaseId);
 	}
 
+	async findByDocumentNumber(
+		documentNumber: string,
+		statuses?: TicketStatus[],
+	): Promise<Ticket[]> {
+		return this.store.filter(
+			(t) =>
+				t.buyerDocumentNumber === documentNumber &&
+				(!statuses || statuses.length === 0 || statuses.includes(t.status)),
+		);
+	}
+
 	async reserveTickets(
 		ticketIds: string[],
 		data: {
 			buyerName?: string;
 			buyerEmail?: string;
 			buyerPhone?: string;
+			buyerDocumentType?: Ticket["buyerDocumentType"];
+			buyerDocumentNumber?: string;
 			purchaseId: string;
 			reservedUntil: Date;
 		},
@@ -100,6 +130,8 @@ class MockTicketRepository implements ITicketRepository {
 							buyerName: data.buyerName,
 							buyerEmail: data.buyerEmail,
 							buyerPhone: data.buyerPhone,
+							buyerDocumentType: data.buyerDocumentType,
+							buyerDocumentNumber: data.buyerDocumentNumber,
 							purchaseId: data.purchaseId,
 							reservedUntil: data.reservedUntil,
 						};
@@ -122,27 +154,16 @@ class MockTicketRepository implements ITicketRepository {
 	}
 
 	async releaseExpiredReserved(until: Date): Promise<number> {
-		let count = 0;
-		this.store = this.store.map((t) => {
-			if (
-				t.status === "reserved" &&
-				t.reservedUntil &&
-				t.reservedUntil <= until
-			) {
-				count++;
-				return {
-					...t,
-					status: "available" as const,
-					buyerName: undefined,
-					buyerEmail: undefined,
-					buyerPhone: undefined,
-					purchaseId: undefined,
-					reservedUntil: null,
-				};
-			}
-			return t;
-		});
-		return count;
+		const before = this.store.length;
+		this.store = this.store.filter(
+			(t) =>
+				!(
+					t.status === "reserved" &&
+					t.reservedUntil &&
+					t.reservedUntil <= until
+				),
+		);
+		return before - this.store.length;
 	}
 
 	async deleteAvailableBeyond(
@@ -236,7 +257,7 @@ describe("BuyTickets", () => {
 
 	it("debería fallar si no hay suficientes tickets", async () => {
 		const raffleService = new MockRaffleService(makeRaffle());
-		const repo = new MockTicketRepository(makeTickets(1, 1));
+		const repo = new MockTicketRepository(makeTickets(10, 10));
 		const useCase = new BuyTickets(raffleService, repo, noopLogger);
 
 		await assert.rejects(

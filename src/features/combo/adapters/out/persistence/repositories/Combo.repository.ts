@@ -10,6 +10,7 @@ type ComboDoc = {
 	name: string;
 	ticketCount: number;
 	price: number;
+	recommended: boolean;
 	createdAt?: Date;
 	updatedAt?: Date;
 };
@@ -22,6 +23,7 @@ export class ComboRepository implements IComboRepository {
 			name: doc.name,
 			ticketCount: doc.ticketCount,
 			price: doc.price,
+			recommended: doc.recommended,
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,
 		};
@@ -33,6 +35,7 @@ export class ComboRepository implements IComboRepository {
 			name: combo.name,
 			ticketCount: combo.ticketCount,
 			price: combo.price,
+			recommended: combo.recommended ?? false,
 		};
 	}
 
@@ -58,13 +61,15 @@ export class ComboRepository implements IComboRepository {
 
 	async byRaffle(raffleId: string): Promise<Combo[]> {
 		const docs = await ComboModel.find({ raffleId })
-			.sort({ ticketCount: 1 })
+			.sort({ recommended: -1, ticketCount: 1 })
 			.lean();
 		return docs.map((d) => this.toDomain(d as unknown as ComboDoc));
 	}
 
 	async list(): Promise<Combo[]> {
-		const docs = await ComboModel.find().sort({ createdAt: 1 }).lean();
+		const docs = await ComboModel.find()
+			.sort({ recommended: -1, createdAt: 1 })
+			.lean();
 		return docs.map((d) => this.toDomain(d as unknown as ComboDoc));
 	}
 
@@ -79,5 +84,12 @@ export class ComboRepository implements IComboRepository {
 	async delete(id: string): Promise<boolean> {
 		const result = await ComboModel.deleteOne({ _id: id });
 		return (result.deletedCount ?? 0) > 0;
+	}
+
+	async clearRecommended(raffleId: string, exceptId: string): Promise<void> {
+		await ComboModel.updateMany(
+			{ raffleId, _id: { $ne: exceptId } },
+			{ $set: { recommended: false } },
+		);
 	}
 }

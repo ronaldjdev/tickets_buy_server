@@ -1,3 +1,5 @@
+import { AppError } from "@/shared/errors/AppError.js";
+
 export class RaffleNotFoundError extends Error {
 	constructor(id: string) {
 		super(`Raffle no encontrada: ${id}`);
@@ -12,10 +14,13 @@ export class RaffleNotActiveError extends Error {
 	}
 }
 
-export class RaffleSoldOutError extends Error {
+export class RaffleSoldOutError extends AppError {
 	constructor(id: string) {
-		super(`La raffle ${id} no tiene más tickets disponibles`);
-		this.name = "RaffleSoldOutError";
+		super(
+			`La raffle ${id} no tiene más tickets disponibles`,
+			409,
+			"RaffleSoldOutError",
+		);
 	}
 }
 

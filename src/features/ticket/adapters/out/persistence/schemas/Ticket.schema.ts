@@ -7,8 +7,16 @@ const TicketSchema = new Schema(
 		raffleId: { type: String, required: true, ref: "Raffle" },
 		number: { type: Number, required: true },
 		buyerName: { type: String },
+		buyerLastName: { type: String },
 		buyerEmail: { type: String },
 		buyerPhone: { type: String },
+		buyerDocumentType: {
+			type: String,
+			enum: ["cc", "ce", "pasaporte"],
+		},
+		buyerDocumentNumber: { type: String, index: true, sparse: true },
+		buyerCountry: { type: String },
+		buyerAddress: { type: String },
 		purchaseId: { type: String, index: true },
 		reservedUntil: { type: Date },
 		status: {

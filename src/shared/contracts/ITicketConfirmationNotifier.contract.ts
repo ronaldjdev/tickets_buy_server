@@ -1,8 +1,14 @@
+import type { RafflePrizePayload } from "@/shared/contracts/raffle/IRaffleService.contract.js";
+
 export interface TicketConfirmationNotification {
 	purchaseId: string;
 	buyerEmail?: string;
 	buyerName?: string;
 	raffleTitle: string;
+	raffleDescription?: string;
+	raffleEndDate?: string;
+	raffleTicketPrice?: number;
+	prizes?: RafflePrizePayload[];
 	numbers: number[];
 	amount: number;
 	maxTickets?: number;

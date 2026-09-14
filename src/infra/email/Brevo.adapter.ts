@@ -26,4 +26,8 @@ export class BrevoAdapter implements IEmailPort {
 			htmlContent: html,
 		});
 	}
+
+	async verify(): Promise<boolean> {
+		return true;
+	}
 }

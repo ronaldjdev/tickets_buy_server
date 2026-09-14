@@ -12,6 +12,7 @@ export interface UpdateComboCommand {
 	name?: string;
 	ticketCount?: number;
 	price?: number;
+	recommended?: boolean;
 }
 
 export class UpdateCombo {
@@ -31,6 +32,10 @@ export class UpdateCombo {
 			name: command.name?.trim() ?? combo.name,
 			ticketCount: command.ticketCount ?? combo.ticketCount,
 			price: command.price ?? combo.price,
+			recommended:
+				command.recommended === undefined
+					? combo.recommended
+					: command.recommended,
 		};
 		if (!next.name)
 			throw new UseCaseError("El nombre del combo es obligatorio.");
@@ -56,6 +61,10 @@ export class UpdateCombo {
 			throw new UseCaseError(
 				`Ya existe un combo llamado "${next.name}" en esta sorteo.`,
 			);
+		}
+
+		if (next.recommended) {
+			await this.comboRepository.clearRecommended(combo.raffleId, combo.id);
 		}
 
 		const updated = await this.comboRepository.update(combo.id, next);

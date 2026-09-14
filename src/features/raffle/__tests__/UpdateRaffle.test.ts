@@ -82,7 +82,6 @@ class MockRaffleRepository implements IRaffleRepository {
 
 class MockTicketService implements ITicketService {
 	store: TicketPayload[];
-	createdNumbers: number[][] = [];
 
 	constructor(store: TicketPayload[]) {
 		this.store = store.map((t) => ({ ...t }));
@@ -102,21 +101,6 @@ class MockTicketService implements ITicketService {
 		const winner = { ...ticket, status: "winner" as const };
 		this.store = this.store.map((t) => (t.id === ticketId ? winner : t));
 		return winner;
-	}
-
-	async createAvailableTickets(
-		raffleId: string,
-		numbers: number[],
-	): Promise<TicketPayload[]> {
-		this.createdNumbers.push(numbers);
-		const created = numbers.map((number) => ({
-			id: `ticket-${number}`,
-			raffleId,
-			number,
-			status: "available" as const,
-		}));
-		this.store.push(...created);
-		return created;
 	}
 
 	async releaseAvailableBeyond(
@@ -176,7 +160,7 @@ describe("UpdateRaffle", () => {
 		);
 	});
 
-	it("debería crear solo los números faltantes al aumentar", async () => {
+	it("debería permitir aumentar maxTickets sin crear tickets", async () => {
 		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
 		const ticketService = new MockTicketService(
 			makeTickets([
@@ -199,14 +183,13 @@ describe("UpdateRaffle", () => {
 		});
 
 		assert.equal(updated.maxTickets, 7);
-		assert.deepEqual(ticketService.createdNumbers, [[6, 7]]);
 		assert.deepEqual(
 			ticketService.store.map((t) => t.number).sort((a, b) => a - b),
-			[1, 2, 3, 4, 5, 6, 7],
+			[1, 2, 3, 4, 5],
 		);
 	});
 
-	it("debería rellenar los huecos sin duplicar al aumentar tras reducir", async () => {
+	it("debería permitir aumentar maxTickets sin tocar los existentes", async () => {
 		const raffleRepo = new MockRaffleRepository([makeRaffle(6)]);
 		const ticketService = new MockTicketService(
 			makeTickets([
@@ -230,12 +213,10 @@ describe("UpdateRaffle", () => {
 		});
 
 		assert.equal(updated.maxTickets, 10);
-		assert.deepEqual(ticketService.createdNumbers, [[6, 8, 9, 10]]);
 		const numbers = ticketService.store
 			.map((t) => t.number)
 			.sort((a, b) => a - b);
-		assert.deepEqual(numbers, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-		assert.equal(new Set(ticketService.store.map((t) => t.id)).size, 10);
+		assert.deepEqual(numbers, [1, 2, 3, 4, 5, 7]);
 	});
 
 	it("debería rechazar reducir por debajo del número de un boleto vendido", async () => {
@@ -292,7 +273,6 @@ describe("UpdateRaffle", () => {
 		});
 
 		assert.equal(updated.maxTickets, 5);
-		assert.equal(ticketService.createdNumbers.length, 0);
 		assert.deepEqual(
 			ticketService.store.map((t) => t.number).sort((a, b) => a - b),
 			[1, 2, 3, 4, 5],
@@ -324,7 +304,6 @@ describe("UpdateRaffle", () => {
 
 		assert.equal(updated.title, "Nuevo título");
 		assert.equal(updated.slug, "nuevo-titulo");
-		assert.equal(ticketService.createdNumbers.length, 0);
 		assert.equal(ticketService.store.length, before);
 	});
 });

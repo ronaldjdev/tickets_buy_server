@@ -4,6 +4,7 @@ export interface Combo {
 	name: string;
 	ticketCount: number;
 	price: number;
+	recommended?: boolean;
 	createdAt?: Date;
 	updatedAt?: Date;
 }

@@ -19,9 +19,10 @@ import { createNoopLogger } from "../../../test/testLogger.js";
 import { ConfirmTicketPayment } from "../application/use-cases/ConfirmTicketPayment.uc.js";
 import {
 	CreatePurchase,
+	type CreatePurchaseCommand,
 	RESERVATION_TTL_MINUTES,
 } from "../application/use-cases/CreatePurchase.uc.js";
-import type { Ticket } from "../domain/entities/Ticket.entity.js";
+import type { Ticket, TicketStatus } from "../domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
@@ -71,6 +72,10 @@ class MockComboRepo implements IComboRepository {
 
 	async delete(_id: string): Promise<boolean> {
 		return false;
+	}
+
+	async clearRecommended(): Promise<void> {
+		return;
 	}
 }
 
@@ -133,7 +138,7 @@ class MockLinkCreator implements IGatewayLinkCreator {
 		this.inputs.push(input);
 		return {
 			reference: `${input.purchaseId}-abc123`,
-			checkoutUrl: "https://checkout.wompi.co/l/link-1",
+			checkoutUrl: `http://localhost:3000/pagar/${input.purchaseId}-abc123`,
 			amountInCents: input.amountInCents,
 			purchaseId: input.purchaseId,
 		};
@@ -169,8 +174,38 @@ class MockTicketRepo implements ITicketRepository {
 		return this.store.filter((t) => t.raffleId === raffleId);
 	}
 
+	async countByRaffle(
+		raffleId: string,
+		statuses: TicketStatus[],
+	): Promise<number> {
+		return this.store.filter(
+			(t) => t.raffleId === raffleId && statuses.includes(t.status),
+		).length;
+	}
+
+	async findNumbersByRaffle(raffleId: string): Promise<number[]> {
+		return [
+			...new Set(
+				this.store.filter((t) => t.raffleId === raffleId).map((t) => t.number),
+			),
+		];
+	}
+
 	async findByPurchaseId(purchaseId: string): Promise<Ticket[]> {
 		return this.store.filter((t) => t.purchaseId === purchaseId);
+	}
+
+	async findByDocumentNumber(
+		documentNumber: string,
+		statuses?: TicketStatus[],
+	): Promise<Ticket[]> {
+		return this.store.filter(
+			(t) =>
+				t.buyerDocumentNumber === documentNumber &&
+				(!statuses ||
+					statuses.length === 0 ||
+					(t.status && statuses.includes(t.status))),
+		);
 	}
 
 	async findWinningTicket(): Promise<Ticket | null> {
@@ -202,6 +237,8 @@ class MockTicketRepo implements ITicketRepository {
 							buyerName: data.buyerName,
 							buyerEmail: data.buyerEmail,
 							buyerPhone: data.buyerPhone,
+							buyerDocumentType: data.buyerDocumentType,
+							buyerDocumentNumber: data.buyerDocumentNumber,
 							purchaseId: data.purchaseId,
 							reservedUntil: data.reservedUntil,
 						};
@@ -224,24 +261,16 @@ class MockTicketRepo implements ITicketRepository {
 	}
 
 	async releaseExpiredReserved(until: Date): Promise<number> {
-		let count = 0;
-		this.store = this.store.map((t) => {
-			if (
-				t.status === "reserved" &&
-				t.reservedUntil &&
-				t.reservedUntil <= until
-			) {
-				count++;
-				return {
-					...t,
-					status: "available" as const,
-					purchaseId: undefined,
-					reservedUntil: null,
-				};
-			}
-			return t;
-		});
-		return count;
+		const before = this.store.length;
+		this.store = this.store.filter(
+			(t) =>
+				!(
+					t.status === "reserved" &&
+					t.reservedUntil &&
+					t.reservedUntil <= until
+				),
+		);
+		return before - this.store.length;
 	}
 
 	async deleteAvailableBeyond(
@@ -274,6 +303,9 @@ function makeRaffle(): RafflePayload {
 		status: "active",
 		ticketPrice: 10000,
 		maxTickets: 10,
+		description: "Sorteo especial",
+		endDate: "2026-10-15T12:00:00.000Z",
+		prizes: [{ type: "mayor", name: "iPhone 15 Pro" }],
 	};
 }
 
@@ -300,14 +332,21 @@ function makeTickets(count: number, reserved: number = 0): Ticket[] {
 	return tickets;
 }
 
-function makeCommand(overrides: Record<string, unknown> = {}) {
+function makeCommand(
+	overrides: Record<string, unknown> = {},
+): CreatePurchaseCommand {
 	return {
 		comboId: "combo-1",
-		buyerName: "Ana Pérez",
+		buyerName: "Ana",
+		buyerLastName: "Pérez",
 		buyerEmail: "ana@mail.com",
 		buyerPhone: "3001234567",
+		buyerDocumentType: "cc",
+		buyerDocumentNumber: "123456789",
+		buyerCountry: "Colombia",
+		buyerAddress: "Calle 1 # 2-3",
 		...overrides,
-	};
+	} as CreatePurchaseCommand;
 }
 
 function build() {
@@ -420,7 +459,7 @@ describe("CreatePurchase (combos)", () => {
 
 	it("debería fallar si no hay boletos disponibles", async () => {
 		const { useCase, ticketRepo } = build();
-		ticketRepo.store = makeTickets(2, 2);
+		ticketRepo.store = makeTickets(10, 10);
 
 		await assert.rejects(
 			() => useCase.execute(makeCommand()),
@@ -442,9 +481,10 @@ describe("CreatePurchase (combos)", () => {
 		const result = await useCase.execute(makeCommand());
 		assert.ok(result.reference);
 		assert.equal(
-			ticketRepo.store.filter((t) => t.status === "available").length,
+			ticketRepo.store.filter((t) => t.status === "reserved").length,
 			2,
 		);
+		assert.ok(!ticketRepo.store.some((t) => t.purchaseId === "old"));
 	});
 });
 
@@ -481,6 +521,16 @@ describe("ConfirmTicketPayment", () => {
 		assert.equal(result.ticketCount, 2);
 		assert.equal(repo.store.filter((t) => t.status === "purchased").length, 2);
 		assert.deepEqual(result.ticketNumbers, [1, 2]);
+		assert.equal(notifier.notifications.length, 1);
+		assert.equal(notifier.notifications[0].raffleTitle, "Sorteo");
+		assert.equal(
+			notifier.notifications[0].raffleEndDate,
+			"2026-10-15T12:00:00.000Z",
+		);
+		assert.equal(notifier.notifications[0].raffleTicketPrice, 10000);
+		assert.deepEqual(notifier.notifications[0].prizes, [
+			{ type: "mayor", name: "iPhone 15 Pro" },
+		]);
 
 		assert.equal(notifier.notifications.length, 1);
 		assert.deepEqual(notifier.notifications[0].numbers, [1, 2]);

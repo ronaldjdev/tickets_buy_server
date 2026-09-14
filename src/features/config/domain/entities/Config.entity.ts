@@ -75,6 +75,15 @@ export interface HomepageSectionVisibility {
 	order: number;
 }
 
+export interface HeroSlide {
+	id?: string;
+	image: string;
+	top?: string;
+	bottom?: string;
+	model?: string;
+	desc?: string;
+}
+
 export interface HeroCmsContent {
 	eyebrow?: string;
 	titleLine1?: string;
@@ -85,6 +94,7 @@ export interface HeroCmsContent {
 	mediaType?: "video" | "carousel";
 	videoUrl?: string;
 	carouselImages?: string[];
+	slides?: HeroSlide[];
 }
 
 export interface HowItWorksStep {

@@ -53,7 +53,6 @@ export async function createGatewayModule(
 
 	const linkCreator = new CreateTicketPayment(
 		wompiConfigReader,
-		wompiPort,
 		intentRepo,
 		appLogger,
 		config.frontend.url,

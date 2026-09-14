@@ -16,6 +16,13 @@ export class RaffleSharedService implements IRaffleService {
 			status: raffle.status,
 			ticketPrice: raffle.ticketPrice,
 			maxTickets: raffle.maxTickets,
+			description: raffle.description,
+			endDate: raffle.endDate?.toISOString(),
+			prizes: raffle.prizes?.map((p) => ({
+				type: p.type,
+				name: p.name,
+				description: p.description,
+			})),
 		};
 	}
 }

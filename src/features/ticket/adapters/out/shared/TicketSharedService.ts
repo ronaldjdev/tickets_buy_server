@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
 import { TicketNotFoundError } from "@/features/ticket/domain/errors/Ticket.error";
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
@@ -27,21 +26,6 @@ export class TicketSharedService implements ITicketService {
 			status: "winner",
 		});
 		return this.toPayload(winner);
-	}
-
-	async createAvailableTickets(
-		raffleId: string,
-		numbers: number[],
-	): Promise<TicketPayload[]> {
-		const docs = await this.ticketRepository.saveMany(
-			numbers.map((number) => ({
-				id: randomUUID(),
-				raffleId,
-				number,
-				status: "available" as const,
-			})),
-		);
-		return docs.map((t) => this.toPayload(t));
 	}
 
 	async releaseAvailableBeyond(

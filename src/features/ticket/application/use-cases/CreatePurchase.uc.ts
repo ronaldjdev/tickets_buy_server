@@ -2,7 +2,10 @@ import { randomUUID } from "node:crypto";
 import type { IComboRepository } from "@/features/combo/domain/repositories/ICombo.repository.js";
 import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
 import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
-import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity.js";
+import type {
+	Ticket,
+	TicketStatus,
+} from "@/features/ticket/domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
@@ -16,15 +19,22 @@ import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
 import type { ILogger } from "@/shared/port/ILogger.port.js";
+import { pickRandomFreeNumbers } from "@/shared/utils/pickRandomFreeNumbers.js";
 
 export const RESERVATION_TTL_MINUTES = 15;
 const MAX_RESERVATION_ATTEMPTS = 10;
+const ASSIGNED_STATUSES: TicketStatus[] = ["reserved", "purchased", "winner"];
 
 export interface CreatePurchaseCommand {
 	comboId: string;
 	buyerName: string;
+	buyerLastName: string;
 	buyerEmail: string;
-	buyerPhone?: string;
+	buyerPhone: string;
+	buyerDocumentType: Ticket["buyerDocumentType"];
+	buyerDocumentNumber: string;
+	buyerCountry: string;
+	buyerAddress: string;
 }
 
 export interface CreatePurchaseResult {
@@ -36,16 +46,6 @@ export interface CreatePurchaseResult {
 	comboName: string;
 	ticketIds: string[];
 	ticketNumbers: number[];
-}
-
-function randomSample<T>(items: T[], count: number): T[] {
-	const pool = [...items];
-	const sample: T[] = [];
-	while (sample.length < count && pool.length > 0) {
-		const index = Math.floor(Math.random() * pool.length);
-		sample.push(pool.splice(index, 1)[0]);
-	}
-	return sample;
 }
 
 export class CreatePurchase {
@@ -61,9 +61,18 @@ export class CreatePurchase {
 	async execute(command: CreatePurchaseCommand): Promise<CreatePurchaseResult> {
 		if (!command?.comboId?.trim())
 			throw new UseCaseError("El combo es obligatorio.");
-		if (!command.buyerName?.trim() || !command.buyerEmail?.trim()) {
+		if (
+			!command.buyerName?.trim() ||
+			!command.buyerLastName?.trim() ||
+			!command.buyerEmail?.trim() ||
+			!command.buyerPhone?.trim() ||
+			!command.buyerDocumentType ||
+			!command.buyerDocumentNumber?.trim() ||
+			!command.buyerCountry?.trim() ||
+			!command.buyerAddress?.trim()
+		) {
 			throw new UseCaseError(
-				"El nombre y el correo del comprador son obligatorios.",
+				"Todos los datos del comprador son obligatorios: nombre, apellidos, identificación, teléfono, email, país y dirección.",
 			);
 		}
 
@@ -90,8 +99,13 @@ export class CreatePurchase {
 				purchaseId,
 				reservedUntil,
 				buyerName: command.buyerName,
+				buyerLastName: command.buyerLastName,
 				buyerEmail: command.buyerEmail,
 				buyerPhone: command.buyerPhone,
+				buyerDocumentType: command.buyerDocumentType,
+				buyerDocumentNumber: command.buyerDocumentNumber?.trim(),
+				buyerCountry: command.buyerCountry,
+				buyerAddress: command.buyerAddress,
 			},
 		);
 
@@ -142,21 +156,40 @@ export class CreatePurchase {
 
 		while (claimed.length < quantity && attempts < MAX_RESERVATION_ATTEMPTS) {
 			attempts += 1;
-			const tickets = await this.ticketRepository.findByRaffle(raffleId);
-			const available = tickets.filter(
-				(t) => t.status === "available" && t.number <= maxNumber,
-			);
-			if (available.length === 0) break;
+			if (attempts > 1)
+				await this.ticketRepository.releaseExpiredReserved(new Date());
 
-			const sample = randomSample(
-				available,
-				Math.min(quantity - claimed.length, available.length),
+			const assigned = await this.ticketRepository.countByRaffle(
+				raffleId,
+				ASSIGNED_STATUSES,
 			);
-			if (sample.length === 0) break;
+			const freeSlots = maxNumber - assigned;
+			if (freeSlots <= 0) break;
 
-			await this.ticketRepository.reserveTickets(
-				sample.map((t) => t.id),
-				data,
+			const needed = Math.min(quantity - claimed.length, freeSlots);
+			const existingNumbers = new Set(
+				await this.ticketRepository.findNumbersByRaffle(raffleId),
+			);
+			const numbers = pickRandomFreeNumbers(existingNumbers, maxNumber, needed);
+			if (numbers.length === 0) break;
+
+			await this.ticketRepository.saveMany(
+				numbers.map((number) => ({
+					id: randomUUID(),
+					raffleId,
+					number,
+					status: "reserved" as const,
+					purchaseId: data.purchaseId,
+					reservedUntil: data.reservedUntil,
+					buyerName: data.buyerName,
+					buyerLastName: data.buyerLastName,
+					buyerEmail: data.buyerEmail,
+					buyerPhone: data.buyerPhone,
+					buyerDocumentType: data.buyerDocumentType,
+					buyerDocumentNumber: data.buyerDocumentNumber,
+					buyerCountry: data.buyerCountry,
+					buyerAddress: data.buyerAddress,
+				})),
 			);
 			claimed = await this.ticketRepository.findByPurchaseId(data.purchaseId);
 		}
@@ -170,8 +203,13 @@ export class CreatePurchase {
 	): Promise<Contact> {
 		const contact = await this.contactRepository.create({
 			name: command.buyerName.trim(),
+			lastName: command.buyerLastName.trim(),
 			email: command.buyerEmail.trim(),
-			phone: (command.buyerPhone ?? "").trim() || command.buyerEmail.trim(),
+			phone: command.buyerPhone.trim(),
+			documentType: command.buyerDocumentType,
+			documentNumber: command.buyerDocumentNumber.trim(),
+			country: command.buyerCountry.trim(),
+			address: command.buyerAddress.trim(),
 			status: "activo",
 		});
 		if (!contact) throw new UseCaseError("No se pudo registrar al comprador.");

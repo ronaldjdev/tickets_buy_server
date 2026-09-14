@@ -2,9 +2,11 @@ import type { NextFunction, Request, Response } from "express";
 import type {
 	AddConfig,
 	GetConfig,
+	TestEmailIntegration,
 	UpdateConfig,
 } from "@/features/config/application/use-cases/index.js";
 import type { Config } from "@/features/config/domain/entities/Config.entity.js";
+import type { EmailIntegrationSettings } from "@/infra/email/index.js";
 import response from "@/shared/http/Response.utils.js";
 
 export class ConfigController {
@@ -12,6 +14,7 @@ export class ConfigController {
 		private readonly addConfig: AddConfig,
 		private readonly getConfig: GetConfig,
 		private readonly updateConfig: UpdateConfig,
+		private readonly testEmailUc: TestEmailIntegration,
 	) {}
 
 	add = async (req: Request, res: Response, next: NextFunction) => {
@@ -55,6 +58,17 @@ export class ConfigController {
 				req.body as Partial<Config>,
 			);
 			response(res, 200, "Configuración actualizada", config);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	testEmail = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const result = await this.testEmailUc.execute(
+				req.body as EmailIntegrationSettings,
+			);
+			response(res, result.ok ? 200 : 422, result.message, result);
 		} catch (error) {
 			next(error);
 		}

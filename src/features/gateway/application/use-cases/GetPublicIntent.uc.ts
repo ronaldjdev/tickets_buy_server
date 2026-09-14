@@ -32,6 +32,7 @@ export class GetPublicIntent {
 			contactName: intent.contactName,
 			businessName,
 			purchaseId: intent.purchaseId,
+			expiresAt: intent.expiresAt?.toISOString() ?? null,
 			widget: null,
 		};
 

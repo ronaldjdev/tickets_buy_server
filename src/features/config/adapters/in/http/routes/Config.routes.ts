@@ -7,5 +7,6 @@ const router = Router();
 router.post("/", configController.add);
 router.get("/", configController.get);
 router.patch("/", configController.update);
+router.post("/email/test", configController.testEmail);
 
 export default router;

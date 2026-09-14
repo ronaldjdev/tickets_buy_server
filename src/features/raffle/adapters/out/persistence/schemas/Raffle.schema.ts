@@ -1,6 +1,25 @@
 import { model, Schema } from "mongoose";
 import type { Raffle } from "../../../../domain/entities/Raffle.entity.js";
 
+const PrizeScheduleSchema = new Schema(
+	{
+		mode: {
+			type: String,
+			enum: ["weekday", "date"],
+			required: true,
+		},
+		weekday: {
+			type: Number,
+			min: 1,
+			max: 7,
+		},
+		date: {
+			type: String,
+		},
+	},
+	{ _id: false },
+);
+
 const PrizeSchema = new Schema(
 	{
 		type: {
@@ -10,6 +29,7 @@ const PrizeSchema = new Schema(
 		},
 		name: { type: String, required: true },
 		description: { type: String },
+		schedule: { type: PrizeScheduleSchema },
 	},
 	{ _id: false },
 );

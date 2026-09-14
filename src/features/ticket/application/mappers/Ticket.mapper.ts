@@ -5,8 +5,13 @@ type TicketDoc = {
 	raffleId: string;
 	number: number;
 	buyerName?: string;
+	buyerLastName?: string;
 	buyerEmail?: string;
 	buyerPhone?: string;
+	buyerDocumentType?: Ticket["buyerDocumentType"];
+	buyerDocumentNumber?: string;
+	buyerCountry?: string;
+	buyerAddress?: string;
 	purchaseId?: string;
 	reservedUntil?: Date | null;
 	status: Ticket["status"];
@@ -22,8 +27,13 @@ export class TicketMapper {
 			raffleId: d.raffleId,
 			number: d.number,
 			buyerName: d.buyerName,
+			buyerLastName: d.buyerLastName,
 			buyerEmail: d.buyerEmail,
 			buyerPhone: d.buyerPhone,
+			buyerDocumentType: d.buyerDocumentType as Ticket["buyerDocumentType"],
+			buyerDocumentNumber: d.buyerDocumentNumber,
+			buyerCountry: d.buyerCountry,
+			buyerAddress: d.buyerAddress,
 			purchaseId: d.purchaseId,
 			reservedUntil: d.reservedUntil,
 			status: d.status,
@@ -38,8 +48,13 @@ export class TicketMapper {
 			raffleId: ticket.raffleId,
 			number: ticket.number,
 			buyerName: ticket.buyerName,
+			buyerLastName: ticket.buyerLastName,
 			buyerEmail: ticket.buyerEmail,
 			buyerPhone: ticket.buyerPhone,
+			buyerDocumentType: ticket.buyerDocumentType,
+			buyerDocumentNumber: ticket.buyerDocumentNumber,
+			buyerCountry: ticket.buyerCountry,
+			buyerAddress: ticket.buyerAddress,
 			purchaseId: ticket.purchaseId,
 			reservedUntil: ticket.reservedUntil,
 			status: ticket.status,

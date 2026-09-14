@@ -55,6 +55,18 @@ const HomepageSectionVisibilitySchema = new Schema(
 	{ _id: false },
 );
 
+const HeroSlideSchema = new Schema(
+	{
+		id: { type: String },
+		image: { type: String },
+		top: { type: String },
+		bottom: { type: String },
+		model: { type: String },
+		desc: { type: String },
+	},
+	{ _id: false },
+);
+
 const HeroCmsSchema = new Schema(
 	{
 		eyebrow: { type: String },
@@ -66,6 +78,7 @@ const HeroCmsSchema = new Schema(
 		mediaType: { type: String, enum: ["video", "carousel"] },
 		videoUrl: { type: String },
 		carouselImages: { type: [String], default: undefined },
+		slides: { type: [HeroSlideSchema], default: undefined },
 	},
 	{ _id: false },
 );

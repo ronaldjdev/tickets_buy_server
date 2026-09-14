@@ -9,12 +9,10 @@ import type {
 import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
 import type { ILogger } from "@/shared/port/ILogger.port.js";
-import type { IWompiPort } from "@/shared/port/IWompi.port.js";
 
 export class CreateTicketPayment implements IGatewayLinkCreator {
 	constructor(
 		private readonly wompiConfigReader: IWompiConfigReader,
-		private readonly wompiPort: IWompiPort,
 		private readonly intentRepo: IGatewayIntentRepository,
 		private readonly logger: ILogger,
 		private readonly redirectBaseUrl?: string,
@@ -43,11 +41,14 @@ export class CreateTicketPayment implements IGatewayLinkCreator {
 			Date.now() + (input.expiresInMinutes ?? 15) * 60 * 1000,
 		);
 		const reference = `${input.purchaseId}-${randomBytes(6).toString("hex")}`;
+		const checkoutUrl = this.redirectBaseUrl
+			? `${this.redirectBaseUrl}/pagar/${reference}`
+			: `${reference}`;
 
 		const intent = await this.intentRepo.create({
 			reference,
 			gateway: "wompi",
-			mode: "link",
+			mode: "widget",
 			purchaseId: input.purchaseId,
 			ticketIds: input.ticketIds,
 			contactId: input.contactId,
@@ -57,42 +58,22 @@ export class CreateTicketPayment implements IGatewayLinkCreator {
 			currency: "COP",
 			status: "creada",
 			expiresAt,
+			checkoutUrl,
 		});
 
-		const link = await this.wompiPort.createPaymentLink(
-			{
-				name: `Boletos sorteo ${input.purchaseId}`,
-				description: `Compra de boletos referencia ${reference}`,
-				amountInCents: input.amountInCents,
-				singleUse: true,
-				expiresAt,
-				sku: reference.slice(0, 36),
-				redirectUrl: this.redirectBaseUrl
-					? `${this.redirectBaseUrl}/pagar/${reference}`
-					: undefined,
-			},
-			settings.privateKey,
-		);
-
-		const stored =
-			(await this.intentRepo.updateByReference(reference, {
-				linkId: link.id,
-				checkoutUrl: link.url,
-			})) ?? intent;
-
-		this.logger.info("Link de pago creado", {
+		this.logger.info("Cobro con Widget creado", {
 			operation: "gateway.create_ticket_payment",
-			reference: stored.reference,
-			amountInCents: stored.amountInCents,
-			purchaseId: stored.purchaseId,
-			checkoutUrl: stored.checkoutUrl,
+			reference: intent.reference,
+			amountInCents: intent.amountInCents,
+			purchaseId: intent.purchaseId,
+			checkoutUrl,
 		});
 
 		return {
-			reference: stored.reference,
-			checkoutUrl: stored.checkoutUrl!,
-			amountInCents: stored.amountInCents,
-			purchaseId: stored.purchaseId,
+			reference: intent.reference,
+			checkoutUrl,
+			amountInCents: intent.amountInCents,
+			purchaseId: intent.purchaseId,
 		};
 	}
 }

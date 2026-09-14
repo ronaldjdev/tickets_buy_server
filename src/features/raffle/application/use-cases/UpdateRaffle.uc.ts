@@ -6,6 +6,7 @@ import type {
 	Raffle,
 	RafflePrize,
 } from "../../domain/entities/Raffle.entity.js";
+import { validatePrizes } from "../../domain/entities/Raffle.entity.js";
 import { RaffleNotFoundError } from "../../domain/errors/Raffle.error.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
 
@@ -38,6 +39,7 @@ export class UpdateRaffle {
 		if (command.ticketPrice !== undefined && command.ticketPrice < 0) {
 			throw new Error("ticketPrice no puede ser negativo");
 		}
+		validatePrizes(command.prizes);
 
 		const title = command.title ?? raffle.title;
 		let slug = raffle.slug;
@@ -71,17 +73,6 @@ export class UpdateRaffle {
 				await this.ticketService.releaseAvailableBeyond(raffle.id, newMax);
 			}
 
-			const existingNumbers = new Set(tickets.map((t) => t.number));
-			const missingNumbers = Array.from(
-				{ length: newMax },
-				(_, i) => i + 1,
-			).filter((n) => !existingNumbers.has(n));
-			if (missingNumbers.length > 0) {
-				await this.ticketService.createAvailableTickets(
-					raffle.id,
-					missingNumbers,
-				);
-			}
 			maxTickets = newMax;
 		}
 

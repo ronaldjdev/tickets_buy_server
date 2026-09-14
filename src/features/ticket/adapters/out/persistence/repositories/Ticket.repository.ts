@@ -46,6 +46,37 @@ export class TicketRepository implements ITicketRepository {
 		);
 	}
 
+	async findByDocumentNumber(
+		documentNumber: string,
+		statuses?: TicketStatus[],
+	): Promise<Ticket[]> {
+		const docs = await TicketModel.find({
+			buyerDocumentNumber: documentNumber,
+			...(statuses && statuses.length > 0 ? { status: { $in: statuses } } : {}),
+		})
+			.sort({ createdAt: -1 })
+			.limit(500)
+			.lean();
+		return docs.map((d) =>
+			TicketMapper.toDomain(d as unknown as Record<string, unknown>),
+		);
+	}
+
+	async countByRaffle(
+		raffleId: string,
+		statuses: TicketStatus[],
+	): Promise<number> {
+		if (statuses.length === 0) return 0;
+		return TicketModel.countDocuments({
+			raffleId,
+			status: { $in: statuses },
+		});
+	}
+
+	async findNumbersByRaffle(raffleId: string): Promise<number[]> {
+		return TicketModel.distinct("number", { raffleId });
+	}
+
 	async findWinningTicket(raffleId: string): Promise<Ticket | null> {
 		const doc = await TicketModel.findOne({
 			raffleId,
@@ -65,12 +96,21 @@ export class TicketRepository implements ITicketRepository {
 	}
 
 	async saveMany(tickets: Ticket[]): Promise<Ticket[]> {
-		const docs = await TicketModel.insertMany(
-			tickets.map((t) => TicketMapper.toPersistence(t)),
-		);
-		return docs.map((d) =>
-			TicketMapper.toDomain(d as unknown as Record<string, unknown>),
-		);
+		const dtos = tickets.map((t) => TicketMapper.toPersistence(t));
+		const ids = dtos.map((d) => d._id as string);
+		try {
+			const docs = await TicketModel.insertMany(dtos, { ordered: false });
+			return docs.map((d) =>
+				TicketMapper.toDomain(d as unknown as Record<string, unknown>),
+			);
+		} catch {
+			// Colisiones de número (índice único): los insertados persisten;
+			// se reconcilian re-consultando por _id y el resto queda ignorado.
+			const docs = await TicketModel.find({ _id: { $in: ids } }).lean();
+			return docs.map((d) =>
+				TicketMapper.toDomain(d as unknown as Record<string, unknown>),
+			);
+		}
 	}
 
 	async reserveTickets(
@@ -84,8 +124,13 @@ export class TicketRepository implements ITicketRepository {
 					$set: {
 						status: "reserved" satisfies TicketStatus,
 						buyerName: data.buyerName,
+						buyerLastName: data.buyerLastName,
 						buyerEmail: data.buyerEmail,
 						buyerPhone: data.buyerPhone,
+						buyerDocumentType: data.buyerDocumentType,
+						buyerDocumentNumber: data.buyerDocumentNumber,
+						buyerCountry: data.buyerCountry,
+						buyerAddress: data.buyerAddress,
 						purchaseId: data.purchaseId,
 						reservedUntil: data.reservedUntil,
 					},
@@ -120,22 +165,11 @@ export class TicketRepository implements ITicketRepository {
 
 	async releaseExpiredReserved(until: Date): Promise<number> {
 		try {
-			const result = await TicketModel.updateMany(
-				{ status: "reserved", reservedUntil: { $lte: until } },
-				{
-					$set: {
-						status: "available" satisfies TicketStatus,
-						reservedUntil: null,
-					},
-					$unset: {
-						buyerName: "",
-						buyerEmail: "",
-						buyerPhone: "",
-						purchaseId: "",
-					},
-				},
-			);
-			return result.modifiedCount ?? 0;
+			const result = await TicketModel.deleteMany({
+				status: "reserved",
+				reservedUntil: { $lte: until },
+			});
+			return result.deletedCount ?? 0;
 		} catch (error) {
 			throw new RepositoryError(
 				`No se pudieron liberar las reservas expiradas: ${(error as Error).message}`,

@@ -89,7 +89,7 @@ export class NotificationService {
 			} catch (error) {
 				logger.warn("No se pudo enviar el email de notificación", {
 					userId,
-					error,
+					message: (error as Error).message ?? String(error),
 				});
 			}
 		}

@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import type { ITicketService } from "../../../../shared/contracts/ticket/ITicketService.contract.js";
 import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
 import { slugify } from "../../../../shared/utils/slugify.js";
@@ -8,6 +7,7 @@ import type {
 	RafflePrize,
 	RaffleStatus,
 } from "../../domain/entities/Raffle.entity.js";
+import { validatePrizes } from "../../domain/entities/Raffle.entity.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
 
 export interface CreateRaffleCommand {
@@ -24,7 +24,6 @@ export interface CreateRaffleCommand {
 export class CreateRaffle {
 	constructor(
 		private readonly raffleRepository: IRaffleRepository,
-		private readonly ticketService: ITicketService,
 		private readonly logger: ILogger,
 	) {}
 
@@ -34,6 +33,7 @@ export class CreateRaffle {
 			throw new Error("maxTickets debe ser mayor a 0");
 		if (command.ticketPrice < 0)
 			throw new Error("ticketPrice no puede ser negativo");
+		validatePrizes(command.prizes);
 
 		const id = randomUUID();
 		const slug = await ensureUniqueSlug(slugify(command.title), (s) =>
@@ -58,10 +58,6 @@ export class CreateRaffle {
 		};
 
 		const saved = await this.raffleRepository.save(raffle);
-		await this.ticketService.createAvailableTickets(
-			raffle.id,
-			Array.from({ length: raffle.maxTickets }, (_, i) => i + 1),
-		);
 
 		this.logger.info("Sorteo creado", {
 			operation: "raffle.create",

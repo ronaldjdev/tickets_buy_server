@@ -1,3 +1,4 @@
+import { configRepo } from "@/features/config/di";
 import type { IEmailPort } from "@/shared/port/IEmail.port.js";
 import { BrevoAdapter, type EmailSenderConfig } from "./Brevo.adapter.js";
 import { SmtpAdapter } from "./Smtp.adapter.js";
@@ -29,15 +30,26 @@ function resolveProvider(): EmailProvider {
 	return provider === "smtp" ? "smtp" : "brevo";
 }
 
+/** Define el modo TLS según el puerto, estándar de la industria: 465 = SSL/TLS implícito, 587/25 = STARTTLS. */
+function resolveSecure(port: number, secure?: boolean): boolean {
+	if (port === 465) return true;
+	if (port === 587 || port === 25) return false;
+	return secure ?? false;
+}
+
 function createEmailClient(provider: EmailProvider): IEmailPort {
 	const sender = resolveSenderConfig();
 
 	if (provider === "smtp") {
+		const port = parseInt(process.env.SMTP_PORT ?? "587", 10);
 		return new SmtpAdapter({
 			...sender,
 			host: process.env.SMTP_HOST ?? "localhost",
-			port: parseInt(process.env.SMTP_PORT ?? "587", 10),
-			secure: process.env.SMTP_SECURE === "true",
+			port,
+			secure: resolveSecure(
+				port,
+				process.env.SMTP_SECURE === "true" ? true : undefined,
+			),
 			user: process.env.SMTP_USER,
 			pass: process.env.SMTP_PASS,
 		});
@@ -58,11 +70,12 @@ export function createEmailClientFromConfig(
 	};
 
 	if (settings.provider === "smtp") {
+		const port = Number(settings.port ?? 587);
 		return new SmtpAdapter({
 			...sender,
 			host: settings.host ?? "localhost",
-			port: settings.port ?? 587,
-			secure: settings.secure ?? false,
+			port,
+			secure: resolveSecure(port, settings.secure),
 			user: settings.user,
 			pass: settings.password,
 		});
@@ -82,6 +95,18 @@ export function getEmailClient(): IEmailPort {
 		_instance = createEmailClient(resolveProvider());
 	}
 	return _instance;
+}
+
+/** Resuelve el cliente de email desde la config de Integraciones (DB) y, si no está habilitado, cae al config por env. */
+export async function resolveEmailClientFromConfig(): Promise<IEmailPort> {
+	try {
+		const config = await configRepo.findSingleton();
+		const fromConfig = createEmailClientFromConfig(config?.integrations?.email);
+		if (fromConfig) return fromConfig;
+	} catch (error) {
+		console.warn("No se pudo leer la config de email, usando env:", error);
+	}
+	return getEmailClient();
 }
 
 export { createEmailClient, resolveProvider };

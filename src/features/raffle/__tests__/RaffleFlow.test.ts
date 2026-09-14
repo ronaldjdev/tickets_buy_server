@@ -97,20 +97,6 @@ class MockTicketService implements ITicketService {
 		return winner;
 	}
 
-	async createAvailableTickets(
-		raffleId: string,
-		numbers: number[],
-	): Promise<TicketPayload[]> {
-		const created = numbers.map((number) => ({
-			id: `ticket-${number}`,
-			raffleId,
-			number,
-			status: "available" as const,
-		}));
-		this.store.push(...created);
-		return created;
-	}
-
 	async releaseAvailableBeyond(): Promise<number> {
 		return 0;
 	}

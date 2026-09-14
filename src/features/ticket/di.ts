@@ -16,6 +16,7 @@ import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.co
 import type { ITicketService } from "@/shared/contracts/ticket/ITicketService.contract";
 import type { ILogger } from "@/shared/port/ILogger.port.js";
 import { ListTickets } from "./application/use-cases/ListTickets.uc.js";
+import { LookupTicketsByDocument } from "./application/use-cases/LookupTicketsByDocument.uc.js";
 import { ManageAvailability } from "./application/use-cases/ManageAvailability.uc.js";
 
 export function createTicketModule(
@@ -30,11 +31,16 @@ export function createTicketModule(
 	const buyTickets = new BuyTickets(raffleService, ticketRepository, logger);
 	const listTickets = new ListTickets(ticketRepository);
 	const manageAvailability = new ManageAvailability(ticketRepository, logger);
+	const lookupTicketsByDocument = new LookupTicketsByDocument(
+		ticketRepository,
+		raffleService,
+	);
 
 	const controller = new TicketController(
 		buyTickets,
 		listTickets,
 		manageAvailability,
+		lookupTicketsByDocument,
 	);
 
 	const sharedService = new TicketSharedService(ticketRepository);

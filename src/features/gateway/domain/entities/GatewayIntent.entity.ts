@@ -42,4 +42,5 @@ export interface PublicGatewayIntent {
 	ticketNumbers?: number[];
 	maxTickets?: number;
 	widget?: { publicKey: string; signatureIntegrity: string } | null;
+	expiresAt?: string | null;
 }

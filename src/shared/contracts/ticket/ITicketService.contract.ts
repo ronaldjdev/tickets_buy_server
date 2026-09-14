@@ -18,10 +18,6 @@ export interface ITicketService {
 	listTickets(raffleId: string): Promise<TicketPayload[]>;
 	findByRaffle(raffleId: string): Promise<TicketPayload[]>;
 	markAsWinner(ticketId: string): Promise<TicketPayload>;
-	createAvailableTickets(
-		raffleId: string,
-		numbers: number[],
-	): Promise<TicketPayload[]>;
 	releaseAvailableBeyond(raffleId: string, count: number): Promise<number>;
 	deleteByRaffle(raffleId: string): Promise<number>;
 }

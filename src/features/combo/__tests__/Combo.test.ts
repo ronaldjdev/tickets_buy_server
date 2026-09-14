@@ -30,7 +30,14 @@ class MockComboRepo implements IComboRepository {
 	}
 
 	async byRaffle(raffleId: string): Promise<Combo[]> {
-		return this.combos.filter((c) => c.raffleId === raffleId);
+		return this.combos
+			.filter((c) => c.raffleId === raffleId)
+			.sort((a, b) => {
+				const ra = a.recommended ? 1 : 0;
+				const rb = b.recommended ? 1 : 0;
+				if (rb !== ra) return rb - ra;
+				return a.ticketCount - b.ticketCount;
+			});
 	}
 
 	async list(): Promise<Combo[]> {
@@ -48,6 +55,14 @@ class MockComboRepo implements IComboRepository {
 		const before = this.combos.length;
 		this.combos = this.combos.filter((c) => c.id !== id);
 		return this.combos.length < before;
+	}
+
+	async clearRecommended(raffleId: string, exceptId: string): Promise<void> {
+		for (const combo of this.combos) {
+			if (combo.raffleId === raffleId && combo.id !== exceptId) {
+				combo.recommended = false;
+			}
+		}
 	}
 }
 
@@ -201,6 +216,81 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 			() => uc.execute({ id: created.id, ticketCount: 11 }),
 			UseCaseError,
 		);
+	});
+
+	it("debería recomendar y quitar la recomendación de un combo", async () => {
+		const { repo, raffleService } = build();
+		const created = await new CreateCombo(
+			repo,
+			raffleService,
+			noopLogger,
+		).execute({
+			raffleId: "raffle-1",
+			name: "Combo",
+			ticketCount: 1,
+			price: 5000,
+		});
+		const uc = new UpdateCombo(repo, raffleService, noopLogger);
+
+		const recommended = await uc.execute({ id: created.id, recommended: true });
+		assert.equal(recommended.recommended, true);
+
+		const normal = await uc.execute({ id: created.id, recommended: false });
+		assert.equal(normal.recommended, false);
+
+		const untouched = await uc.execute({
+			id: created.id,
+			name: "  Renombrado  ",
+		});
+		assert.equal(untouched.recommended, false);
+		assert.equal(untouched.name, "Renombrado");
+	});
+
+	it("debería des-recomendar los demás combos de la rifa al recomendar uno", async () => {
+		const { repo, raffleService } = build();
+		const create = new CreateCombo(repo, raffleService, noopLogger);
+		const a = await create.execute({
+			raffleId: "raffle-1",
+			name: "Combo A",
+			ticketCount: 1,
+			price: 5000,
+		});
+		const b = await create.execute({
+			raffleId: "raffle-1",
+			name: "Combo B",
+			ticketCount: 2,
+			price: 9000,
+		});
+		const uc = new UpdateCombo(repo, raffleService, noopLogger);
+
+		await uc.execute({ id: a.id, recommended: true });
+		await uc.execute({ id: b.id, recommended: true });
+
+		const after = await repo.byRaffle("raffle-1");
+		assert.equal(after.filter((combo) => combo.recommended).length, 1);
+		assert.equal(after.find((combo) => combo.id === b.id)?.recommended, true);
+		assert.equal(after.find((combo) => combo.id === a.id)?.recommended, false);
+	});
+
+	it("debería listar los combos recomendados primero por sorteo", async () => {
+		const repo = new MockComboRepo();
+		repo.combos = [
+			{ id: "a", raffleId: "r1", name: "A", ticketCount: 5, price: 10 },
+			{
+				id: "b",
+				raffleId: "r1",
+				name: "B",
+				ticketCount: 1,
+				price: 10,
+				recommended: true,
+			},
+			{ id: "c", raffleId: "r1", name: "C", ticketCount: 2, price: 10 },
+		];
+		const uc = new ListCombos(repo);
+
+		const listed = await uc.execute("r1");
+		assert.equal(listed[0].id, "b");
+		assert.equal(listed[0].recommended, true);
 	});
 
 	it("debería fallar al actualizar/eliminar un combo inexistente", async () => {

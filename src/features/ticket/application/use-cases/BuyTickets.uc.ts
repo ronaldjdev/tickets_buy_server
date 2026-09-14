@@ -1,4 +1,8 @@
-import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity";
+import { randomUUID } from "node:crypto";
+import type {
+	Ticket,
+	TicketStatus,
+} from "@/features/ticket/domain/entities/Ticket.entity";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
@@ -7,6 +11,13 @@ import {
 import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
 import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract";
 import type { ILogger } from "@/shared/port/ILogger.port.js";
+import { pickRandomFreeNumbers } from "@/shared/utils/pickRandomFreeNumbers";
+
+const ASSIGNED_STATUSES: TicketStatus[] = [
+	"reserved",
+	"purchased",
+	"winner",
+];
 
 export interface BuyTicketsCommand {
 	raffleId: string;
@@ -28,22 +39,34 @@ export class BuyTickets {
 		if (raffle.status !== "active")
 			throw new RaffleNotActiveError(command.raffleId);
 
-		const tickets = await this.ticketRepository.findByRaffle(command.raffleId);
-		const available = tickets.filter((t) => t.status === "available");
-		if (available.length < command.quantity)
+		const assigned = await this.ticketRepository.countByRaffle(
+			command.raffleId,
+			ASSIGNED_STATUSES,
+		);
+		if (assigned + command.quantity > raffle.maxTickets)
 			throw new RaffleSoldOutError(command.raffleId);
 
-		const toPurchase = available.slice(0, command.quantity).map((t) => ({
-			...t,
-			buyerName: command.buyerName,
-			buyerEmail: command.buyerEmail,
-			status: "purchased" as const,
-		}));
+		const existingNumbers = new Set(
+			await this.ticketRepository.findNumbersByRaffle(command.raffleId),
+		);
+		const numbers = pickRandomFreeNumbers(
+			existingNumbers,
+			raffle.maxTickets,
+			command.quantity,
+		);
+		if (numbers.length < command.quantity)
+			throw new RaffleSoldOutError(command.raffleId);
 
-		const purchased: Ticket[] = [];
-		for (const ticket of toPurchase) {
-			purchased.push(await this.ticketRepository.save(ticket));
-		}
+		const purchased = await this.ticketRepository.saveMany(
+			numbers.map((number) => ({
+				id: randomUUID(),
+				raffleId: command.raffleId,
+				number,
+				status: "purchased" as const,
+				buyerName: command.buyerName,
+				buyerEmail: command.buyerEmail,
+			})),
+		);
 
 		this.logger.info("Boletos comprados", {
 			operation: "ticket.buy",
