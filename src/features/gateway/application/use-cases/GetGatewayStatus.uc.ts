@@ -1,4 +1,4 @@
-import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
+import type { IWompiConfigReader } from "../../../../shared/contracts/IWompiConfigReader.contract.js";
 
 export interface GatewayStatusData {
 	gateway: string;

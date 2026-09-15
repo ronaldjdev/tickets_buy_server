@@ -1,7 +1,7 @@
 import type { AxiosInstance } from "axios";
 import axios from "axios";
 
-import type { IHttpClient } from "@/shared/port/IHttpClient.port.js";
+import type { IHttpClient } from "../../shared/port/IHttpClient.port.js";
 
 export class HttpClient implements IHttpClient {
 	private readonly client: AxiosInstance;

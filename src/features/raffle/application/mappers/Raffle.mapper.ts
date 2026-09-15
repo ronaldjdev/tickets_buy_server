@@ -2,6 +2,7 @@ import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
 	Raffle,
 	RafflePrize,
+	TicketIssuanceMode,
 } from "../../domain/entities/Raffle.entity.js";
 
 type RaffleDoc = {
@@ -15,6 +16,7 @@ type RaffleDoc = {
 	ticketPrice: number;
 	maxTickets: number;
 	minTickets?: number;
+	ticketIssuance?: TicketIssuanceMode;
 	status: Raffle["status"];
 	winnerTicketId?: string;
 	createdAt?: Date;
@@ -49,6 +51,7 @@ export class RaffleMapper {
 			ticketPrice: d.ticketPrice,
 			maxTickets: d.maxTickets,
 			minTickets: d.minTickets,
+			ticketIssuance: d.ticketIssuance ?? "random",
 			status: d.status,
 			winnerTicketId: d.winnerTicketId,
 			createdAt: d.createdAt,
@@ -68,6 +71,7 @@ export class RaffleMapper {
 			ticketPrice: raffle.ticketPrice,
 			maxTickets: raffle.maxTickets,
 			minTickets: raffle.minTickets,
+			ticketIssuance: raffle.ticketIssuance ?? "random",
 			status: raffle.status,
 			winnerTicketId: raffle.winnerTicketId,
 		};

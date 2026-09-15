@@ -1,6 +1,6 @@
 import { type Document, model, Schema } from "mongoose";
 
-import type { User } from "@/features/user/domain/entities/User.entity.js";
+import type { User } from "../../../../domain/entities/User.entity.js";
 
 interface IUser extends Document, User {}
 

@@ -1,4 +1,4 @@
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
 
 export class GatewayDisabledError extends UseCaseError {
 	constructor(gateway = "la pasarela") {

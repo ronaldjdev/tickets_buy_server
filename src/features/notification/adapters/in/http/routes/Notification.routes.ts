@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { notificationController } from "@/platform/di/Notification.di";
-import { requireAuth } from "@/platform/http/middleware/Auth.middleware.js";
+import { notificationController } from "../../../../../../platform/di/Notification.di.js";
+import { requireAuth } from "../../../../../../platform/http/middleware/Auth.middleware.js";
 
 const router = Router();
 

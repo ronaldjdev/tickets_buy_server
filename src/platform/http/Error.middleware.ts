@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import logger from "@/platform/logger/index.js";
-import { AppError } from "@/shared/errors/AppError.js";
-import response from "@/shared/http/Response.utils.js";
+import { AppError } from "../../shared/errors/AppError.js";
+import response from "../../shared/http/Response.utils.js";
+import logger from "../logger/index.js";
 
 export function errorHandler(
 	error: unknown,

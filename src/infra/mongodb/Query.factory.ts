@@ -1,4 +1,4 @@
-import type { OptionsPag } from "@/shared/types/types.js";
+import type { OptionsPag } from "../../shared/types/types.js";
 
 export const QueryFactory = {
 	createStatusQuery(status?: string | string[]): any {
@@ -49,6 +49,19 @@ export const QueryFactory = {
 		return filter;
 	},
 
+	createRoleQuery(role?: string): any {
+		if (!role || role === "all") return {};
+		return { role };
+	},
+
+	createSearchQuery(fields: string[], q?: string): any {
+		const value = (q ?? "").trim();
+		if (!value) return {};
+		const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const name = { $regex: new RegExp(escaped, "i") };
+		return { $or: fields.map((field) => ({ [field]: name })) };
+	},
+
 	assembleQueryOptions(options: OptionsPag): any {
 		const query: any = {};
 
@@ -57,6 +70,7 @@ export const QueryFactory = {
 			QueryFactory.createStatusQuery(options.status),
 			QueryFactory.createAccountStatusQuery(options.accountStatus),
 			QueryFactory.createDateQuery(options.date),
+			QueryFactory.createRoleQuery(options.role),
 			QueryFactory.createFilterQuery(options.filter),
 		);
 

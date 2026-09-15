@@ -1,6 +1,6 @@
-import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import type { IContactRepository } from "../../domain/repositories/IContact.repository.js";
 
 export class DeleteContact {
 	constructor(

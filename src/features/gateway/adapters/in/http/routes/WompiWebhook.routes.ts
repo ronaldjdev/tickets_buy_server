@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import type { GatewayController } from "@/features/gateway/adapters/in/http/controllers/Gateway.controller.js";
+import type { GatewayController } from "../controllers/Gateway.controller.js";
 
 export function createWompiWebhookRoutes(
 	controller: GatewayController,

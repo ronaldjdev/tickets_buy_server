@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { configController } from "@/features/config/di.js";
+import { configController } from "../../../../di.js";
 
 const router = Router();
 

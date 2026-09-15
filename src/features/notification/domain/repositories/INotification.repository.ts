@@ -1,4 +1,4 @@
-import type { AppNotification } from "@/features/notification/domain/entities/Notification.entity.js";
+import type { AppNotification } from "../entities/Notification.entity.js";
 
 export interface IListNotificationsResponse {
 	notifications: AppNotification[];

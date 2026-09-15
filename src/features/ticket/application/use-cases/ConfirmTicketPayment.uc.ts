@@ -1,17 +1,17 @@
-import type { NotificationService } from "@/features/notification/application/services/NotificationService.js";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository.js";
 import type {
 	ConfirmedTicketPayment,
 	ConfirmTicketPaymentInput,
 	IConfirmTicketPayment,
-} from "@/shared/contracts/IConfirmTicketPayment.contract.js";
-import type { ITicketConfirmationNotifier } from "@/shared/contracts/ITicketConfirmationNotifier.contract.js";
+} from "../../../../shared/contracts/IConfirmTicketPayment.contract.js";
+import type { ITicketConfirmationNotifier } from "../../../../shared/contracts/ITicketConfirmationNotifier.contract.js";
 import type {
 	IRaffleService,
 	RafflePayload,
-} from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+} from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import type { NotificationService } from "../../../notification/application/services/NotificationService.js";
+import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
 
 export class ConfirmTicketPayment implements IConfirmTicketPayment {
 	constructor(

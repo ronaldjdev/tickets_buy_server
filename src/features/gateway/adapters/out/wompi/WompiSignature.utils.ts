@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { WompiEventPayload } from "@/shared/port/IWompi.port.js";
+import type { WompiEventPayload } from "../../../../../shared/port/IWompi.port.js";
 
 export const WOMPI_BASE_URLS = {
 	test: "https://sandbox.wompi.co/v1",

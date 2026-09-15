@@ -1,4 +1,4 @@
-import type { PaymentFrequency } from "@/shared/types/types.js";
+import type { PaymentFrequency } from "../types/types.js";
 
 /**
  * Calcula la nueva fecha para un pago recurrente según la frecuencia especificada.

@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { UserRepository } from "@/features/user/adapters/out/persistence/repositories/User.repository.js";
-import { getAuthApi } from "@/platform/auth/auth.config.js";
-import logger from "@/platform/logger/index.js";
-import { AppError } from "@/shared/errors/AppError.js";
+import { UserRepository } from "../../../features/user/adapters/out/persistence/repositories/User.repository.js";
+import { AppError } from "../../../shared/errors/AppError.js";
+import { getAuthApi } from "../../auth/auth.config.js";
+import logger from "../../logger/index.js";
 
 const userRepo = new UserRepository();
 

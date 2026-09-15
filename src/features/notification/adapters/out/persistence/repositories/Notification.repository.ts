@@ -1,11 +1,11 @@
-import NotificationModel from "@/features/notification/adapters/out/persistence/schemas/Notification.schema.js";
-import { NotificationMapper } from "@/features/notification/application/mappers/Notification.mapper.js";
-import type { AppNotification } from "@/features/notification/domain/entities/Notification.entity.js";
+import { RepositoryError } from "../../../../../../shared/errors/RepositoryError.js";
+import { NotificationMapper } from "../../../../application/mappers/Notification.mapper.js";
+import type { AppNotification } from "../../../../domain/entities/Notification.entity.js";
 import type {
 	IListNotificationsResponse,
 	INotificationRepository,
-} from "@/features/notification/domain/repositories/INotification.repository.js";
-import { RepositoryError } from "@/shared/errors/RepositoryError.js";
+} from "../../../../domain/repositories/INotification.repository.js";
+import NotificationModel from "../schemas/Notification.schema.js";
 
 export class NotificationRepository implements INotificationRepository {
 	async create(data: Partial<AppNotification>): Promise<AppNotification> {

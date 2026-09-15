@@ -230,6 +230,28 @@ describe("BuyTickets", () => {
 		assert.equal(purchased[0].buyerName, "Ana");
 	});
 
+	it("debería comprar números consecutivos si la sorteo es consecutiva", async () => {
+		const raffleService = new MockRaffleService({
+			...makeRaffle(),
+			ticketIssuance: "consecutive" as const,
+		});
+		const repo = new MockTicketRepository([]);
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
+
+		const purchased = await useCase.execute({
+			raffleId: "raffle-1",
+			quantity: 2,
+			buyerName: "Ana",
+			buyerEmail: "ana@mail.com",
+		});
+
+		assert.deepEqual(
+			purchased.map((t) => t.number).sort((a, b) => a - b),
+			[1, 2],
+			"números consecutivos desde 1",
+		);
+	});
+
 	it("debería fallar si la raffle no existe", async () => {
 		const raffleService = new MockRaffleService(null);
 		const repo = new MockTicketRepository(makeTickets(5, 0));

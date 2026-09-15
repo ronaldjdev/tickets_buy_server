@@ -1,4 +1,4 @@
-import type { OptionsPag, Paginate } from "@/shared/types/types.js";
+import type { OptionsPag, Paginate } from "../../../../shared/types/types.js";
 
 import type { Contact } from "../entities/Contact.entity.js";
 export interface IContactRepository {

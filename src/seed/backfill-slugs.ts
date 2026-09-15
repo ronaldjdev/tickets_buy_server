@@ -1,11 +1,11 @@
 import "dotenv/config";
 
-import RaffleModel from "@/features/raffle/adapters/out/persistence/schemas/Raffle.schema.js";
-import { env } from "@/platform/config/Env.config.js";
-import { connectDB } from "@/platform/database/Db.config.js";
-import logger from "@/platform/logger/index.js";
-import { ensureUniqueSlug } from "@/shared/utils/ensureUniqueSlug.js";
-import { slugify } from "@/shared/utils/slugify.js";
+import RaffleModel from "../features/raffle/adapters/out/persistence/schemas/Raffle.schema.js";
+import { env } from "../platform/config/Env.config.js";
+import { connectDB } from "../platform/database/Db.config.js";
+import logger from "../platform/logger/index.js";
+import { ensureUniqueSlug } from "../shared/utils/ensureUniqueSlug.js";
+import { slugify } from "../shared/utils/slugify.js";
 
 async function main(): Promise<void> {
 	await connectDB(env.mongodbUri);

@@ -1,13 +1,13 @@
-import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
-import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
-import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository.js";
 import type {
 	IRaffleService,
 	RafflePayload,
-} from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+} from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { GatewayIntent } from "../../../gateway/domain/entities/GatewayIntent.entity.js";
+import type { IGatewayIntentRepository } from "../../../gateway/domain/repositories/IGatewayIntent.repository.js";
+import type { ITicketRepository } from "../../../ticket/domain/repositories/ITicket.repository.js";
+import type { Contact } from "../../domain/entities/Contact.entity.js";
+import type { IContactRepository } from "../../domain/repositories/IContact.repository.js";
 
 export interface ContactPurchase {
 	reference: string;

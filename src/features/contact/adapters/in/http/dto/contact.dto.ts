@@ -1,4 +1,4 @@
-import type { UserStatus } from "@/shared/types/types.js";
+import type { UserStatus } from "../../../../../../shared/types/types.js";
 
 export interface CreateContactDTO {
 	name: string;

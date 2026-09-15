@@ -1,22 +1,22 @@
-import type { ConfigRepository } from "@/features/config/adapters/out/persistence/repositories/Config.repository.js";
-import { GatewayController } from "@/features/gateway/adapters/in/http/controllers/Gateway.controller.js";
+import type { ConfigRepository } from "../../features/config/adapters/out/persistence/repositories/Config.repository.js";
+import { GatewayController } from "../../features/gateway/adapters/in/http/controllers/Gateway.controller.js";
 import {
 	PublicIntentConfig,
 	WompiConfigReader,
-} from "@/features/gateway/adapters/out/config/WompiConfig.reader.js";
-import { GatewayIntentRepository } from "@/features/gateway/adapters/out/persistence/repositories/GatewayIntent.repository.js";
-import { WompiAdapter } from "@/features/gateway/adapters/out/wompi/Wompi.adapter.js";
-import { CreateTicketPayment } from "@/features/gateway/application/use-cases/CreateTicketPayment.uc.js";
-import { GetGatewayStatus } from "@/features/gateway/application/use-cases/GetGatewayStatus.uc.js";
-import { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
-import { HandleWompiEvent } from "@/features/gateway/application/use-cases/HandleWompiEvent.uc.js";
-import { ListGatewayIntents } from "@/features/gateway/application/use-cases/ListGatewayIntents.uc.js";
-import { WompiIntentProcessor } from "@/features/gateway/application/use-cases/shared/WompiIntentProcessor.js";
-import { VerifyGatewayTransaction } from "@/features/gateway/application/use-cases/VerifyGatewayTransaction.uc.js";
-import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository.js";
-import type { IConfirmTicketPayment } from "@/shared/contracts/IConfirmTicketPayment.contract.js";
-import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
+} from "../../features/gateway/adapters/out/config/WompiConfig.reader.js";
+import { GatewayIntentRepository } from "../../features/gateway/adapters/out/persistence/repositories/GatewayIntent.repository.js";
+import { WompiAdapter } from "../../features/gateway/adapters/out/wompi/Wompi.adapter.js";
+import { CreateTicketPayment } from "../../features/gateway/application/use-cases/CreateTicketPayment.uc.js";
+import { GetGatewayStatus } from "../../features/gateway/application/use-cases/GetGatewayStatus.uc.js";
+import { GetPublicIntent } from "../../features/gateway/application/use-cases/GetPublicIntent.uc.js";
+import { HandleWompiEvent } from "../../features/gateway/application/use-cases/HandleWompiEvent.uc.js";
+import { ListGatewayIntents } from "../../features/gateway/application/use-cases/ListGatewayIntents.uc.js";
+import { WompiIntentProcessor } from "../../features/gateway/application/use-cases/shared/WompiIntentProcessor.js";
+import { VerifyGatewayTransaction } from "../../features/gateway/application/use-cases/VerifyGatewayTransaction.uc.js";
+import { TicketRepository } from "../../features/ticket/adapters/out/persistence/repositories/Ticket.repository.js";
+import type { IConfirmTicketPayment } from "../../shared/contracts/IConfirmTicketPayment.contract.js";
+import type { IGatewayLinkCreator } from "../../shared/contracts/IGatewayLinkCreator.contract.js";
+import type { IRaffleService } from "../../shared/contracts/raffle/IRaffleService.contract.js";
 import { configPromise } from "../config/index.js";
 import { httpClient } from "./HttpClient.di.js";
 import { appLogger } from "./Logger.di.js";

@@ -1,6 +1,6 @@
 import { createTransport, type Transporter } from "nodemailer";
 
-import type { IEmailPort } from "@/shared/port/IEmail.port.js";
+import type { IEmailPort } from "../../shared/port/IEmail.port.js";
 import type { EmailSenderConfig } from "./Brevo.adapter.js";
 
 export interface SmtpAdapterConfig extends EmailSenderConfig {

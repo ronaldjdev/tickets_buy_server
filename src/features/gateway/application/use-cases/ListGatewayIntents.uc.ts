@@ -1,8 +1,8 @@
-import type { GatewayIntentStatus } from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
+import type { GatewayIntentStatus } from "../../domain/entities/GatewayIntent.entity.js";
 import type {
 	GatewayIntentListResult,
 	IGatewayIntentRepository,
-} from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
+} from "../../domain/repositories/IGatewayIntent.repository.js";
 
 export interface ListGatewayIntentsCommand {
 	status?: GatewayIntentStatus;

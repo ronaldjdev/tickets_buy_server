@@ -1,14 +1,14 @@
-import { TicketMapper } from "@/features/ticket/application/mappers/Ticket.mapper";
+import { RepositoryError } from "../../../../../../shared/errors/RepositoryError.js";
+import { TicketMapper } from "../../../../application/mappers/Ticket.mapper.js";
 import type {
 	Ticket,
 	TicketStatus,
-} from "@/features/ticket/domain/entities/Ticket.entity";
+} from "../../../../domain/entities/Ticket.entity.js";
 import type {
 	ITicketRepository,
 	ReserveTicketsData,
-} from "@/features/ticket/domain/repositories/ITicket.repository";
-import { RepositoryError } from "@/shared/errors/RepositoryError";
-import TicketModel from "../schemas/Ticket.schema";
+} from "../../../../domain/repositories/ITicket.repository.js";
+import TicketModel from "../schemas/Ticket.schema.js";
 
 export class TicketRepository implements ITicketRepository {
 	async findById(id: string): Promise<Ticket | null> {

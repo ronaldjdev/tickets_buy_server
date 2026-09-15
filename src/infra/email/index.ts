@@ -1,5 +1,5 @@
-import { configRepo } from "@/features/config/di";
-import type { IEmailPort } from "@/shared/port/IEmail.port.js";
+import { configRepo } from "../../features/config/di.js";
+import type { IEmailPort } from "../../shared/port/IEmail.port.js";
 import { BrevoAdapter, type EmailSenderConfig } from "./Brevo.adapter.js";
 import { SmtpAdapter } from "./Smtp.adapter.js";
 
@@ -20,8 +20,8 @@ export interface EmailIntegrationSettings {
 
 function resolveSenderConfig(): EmailSenderConfig {
 	return {
-		fromEmail: process.env.EMAIL_FROM_EMAIL ?? "no-reply@celux.com.co",
-		fromName: process.env.EMAIL_FROM_NAME ?? "Celux",
+		fromEmail: process.env.EMAIL_FROM_EMAIL ?? "cheveremas01@gmail.com",
+		fromName: process.env.EMAIL_FROM_NAME ?? "Chevere Max",
 	};
 }
 
@@ -65,8 +65,8 @@ export function createEmailClientFromConfig(
 	if (!settings?.enabled) return null;
 
 	const sender: EmailSenderConfig = {
-		fromEmail: settings.fromEmail ?? "no-reply@celux.com.co",
-		fromName: settings.fromName ?? "Celux",
+		fromEmail: settings.fromEmail ?? "cheveremas01@gmail.com",
+		fromName: settings.fromName ?? "Chevere Max",
 	};
 
 	if (settings.provider === "smtp") {

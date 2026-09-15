@@ -1,16 +1,16 @@
 import type { NextFunction, Request, Response } from "express";
-import type { ListNotificationsQueryDTO } from "@/features/notification/adapters/in/http/dto/notification.dto.js";
+import { ValidationError } from "../../../../../../shared/errors/ValidationError.js";
+import response from "../../../../../../shared/http/Response.utils.js";
+import type { ISseServer } from "../../../../../../shared/port/ISseServer.port.js";
+import type { Paginate } from "../../../../../../shared/types/types.js";
+import type { IUserRepository } from "../../../../../user/domain/repositories/IUser.repository.js";
 import type {
 	ListNotifications,
 	MarkAllAsRead,
 	MarkAsRead,
-} from "@/features/notification/application/use-cases/index.js";
-import type { INotificationRepository } from "@/features/notification/domain/repositories/INotification.repository.js";
-import type { IUserRepository } from "@/features/user/domain/repositories/IUser.repository.js";
-import { ValidationError } from "@/shared/errors/ValidationError.js";
-import response from "@/shared/http/Response.utils.js";
-import type { ISseServer } from "@/shared/port/ISseServer.port.js";
-import type { Paginate } from "@/shared/types/types.js";
+} from "../../../../application/use-cases/index.js";
+import type { INotificationRepository } from "../../../../domain/repositories/INotification.repository.js";
+import type { ListNotificationsQueryDTO } from "../dto/notification.dto.js";
 
 type NotificationPreferencesInput = {
 	toast?: boolean;

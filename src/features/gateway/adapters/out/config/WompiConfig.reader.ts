@@ -1,8 +1,8 @@
-import type { IPublicIntentConfig } from "@/shared/contracts/IPublicIntentConfig.contract.js";
+import type { IPublicIntentConfig } from "../../../../../shared/contracts/IPublicIntentConfig.contract.js";
 import type {
 	IWompiConfigReader,
 	WompiSettings,
-} from "@/shared/contracts/IWompiConfigReader.contract.js";
+} from "../../../../../shared/contracts/IWompiConfigReader.contract.js";
 
 type PaymentEnvironment = "sandbox" | "production";
 

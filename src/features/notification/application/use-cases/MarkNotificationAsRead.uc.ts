@@ -1,7 +1,7 @@
-import type { AppNotification } from "@/features/notification/domain/entities/Notification.entity.js";
-import type { INotificationRepository } from "@/features/notification/domain/repositories/INotification.repository.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import type { AppNotification } from "../../domain/entities/Notification.entity.js";
+import type { INotificationRepository } from "../../domain/repositories/INotification.repository.js";
 
 export class MarkAsRead {
 	constructor(

@@ -1,4 +1,4 @@
-import type { Paginate } from "@/shared/types/types";
+import type { Paginate } from "../types/types.js";
 
 type HttpLikeResponse = {
 	status(code: number): { json(body: unknown): unknown };

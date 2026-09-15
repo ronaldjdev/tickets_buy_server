@@ -25,6 +25,8 @@ export interface OptionsPag {
 	page: number;
 	filter?: Record<string, any>;
 	date?: string;
+	q?: string;
+	role?: string;
 }
 
 export interface Paginate {

@@ -5,7 +5,7 @@ import type {
 	GatewayIntentStatus,
 	GatewayMode,
 	GatewayName,
-} from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
+} from "../../../../domain/entities/GatewayIntent.entity.js";
 
 const GatewayIntentSchema = new Schema<GatewayIntent>(
 	{

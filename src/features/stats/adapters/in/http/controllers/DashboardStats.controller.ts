@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import type { GetDashboardStats } from "@/features/stats/application/use-cases/GetDashboardStats.uc.js";
-import response from "@/shared/http/Response.utils.js";
+import response from "../../../../../../shared/http/Response.utils.js";
+import type { GetDashboardStats } from "../../../../application/use-cases/GetDashboardStats.uc.js";
 
 export class DashboardStatsController {
 	constructor(private readonly getDashboardStats: GetDashboardStats) {}

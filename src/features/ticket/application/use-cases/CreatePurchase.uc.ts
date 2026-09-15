@@ -1,29 +1,31 @@
 import { randomUUID } from "node:crypto";
-import type { Combo } from "@/features/combo/domain/entities/Combo.entity.js";
-import type { IComboRepository } from "@/features/combo/domain/repositories/ICombo.repository.js";
-import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
-import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
+import type { IGatewayLinkCreator } from "../../../../shared/contracts/IGatewayLinkCreator.contract.js";
+import type {
+	IRaffleService,
+	RafflePayload,
+} from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import { pickConsecutiveFreeNumbers } from "../../../../shared/utils/pickConsecutiveFreeNumbers.js";
+import { pickRandomFreeNumbers } from "../../../../shared/utils/pickRandomFreeNumbers.js";
+import type { TicketIssuanceMode } from "../../../raffle/domain/entities/Raffle.entity.js";
+import type { Combo } from "../../../combo/domain/entities/Combo.entity.js";
+import type { IComboRepository } from "../../../combo/domain/repositories/ICombo.repository.js";
+import type { Contact } from "../../../contact/domain/entities/Contact.entity.js";
+import type { IContactRepository } from "../../../contact/domain/repositories/IContact.repository.js";
 import type {
 	Ticket,
 	TicketStatus,
-} from "@/features/ticket/domain/entities/Ticket.entity.js";
+} from "../../domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
 	RaffleSoldOutError,
-} from "@/features/ticket/domain/errors/Ticket.error.js";
+} from "../../domain/errors/Ticket.error.js";
 import type {
 	ITicketRepository,
 	ReserveTicketsData,
-} from "@/features/ticket/domain/repositories/ITicket.repository.js";
-import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
-import type {
-	IRaffleService,
-	RafflePayload,
-} from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
-import { pickRandomFreeNumbers } from "@/shared/utils/pickRandomFreeNumbers.js";
+} from "../../domain/repositories/ITicket.repository.js";
 
 export const RESERVATION_TTL_MINUTES = 15;
 const MAX_RESERVATION_ATTEMPTS = 10;
@@ -147,10 +149,11 @@ export class CreatePurchase {
 			Date.now() + RESERVATION_TTL_MINUTES * 60 * 1000,
 		);
 
-		const claimed = await this.reserveRandomTickets(
+		const claimed = await this.reserveTickets(
 			raffle.id,
 			raffle.maxTickets,
 			quantity,
+			raffle.ticketIssuance ?? "random",
 			{
 				purchaseId,
 				reservedUntil,
@@ -201,10 +204,11 @@ export class CreatePurchase {
 		};
 	}
 
-	private async reserveRandomTickets(
+	private async reserveTickets(
 		raffleId: string,
 		maxNumber: number,
 		quantity: number,
+		mode: TicketIssuanceMode,
 		data: ReserveTicketsData,
 	): Promise<Ticket[]> {
 		let claimed: Ticket[] = [];
@@ -226,7 +230,12 @@ export class CreatePurchase {
 			const existingNumbers = new Set(
 				await this.ticketRepository.findNumbersByRaffle(raffleId),
 			);
-			const numbers = pickRandomFreeNumbers(existingNumbers, maxNumber, needed);
+			const numbers = this.pickNumbers(
+				existingNumbers,
+				maxNumber,
+				needed,
+				mode,
+			);
 			if (numbers.length === 0) break;
 
 			await this.ticketRepository.saveMany(
@@ -252,6 +261,18 @@ export class CreatePurchase {
 
 		if (claimed.length < quantity) throw new RaffleSoldOutError(raffleId);
 		return claimed;
+	}
+
+	private pickNumbers(
+		existing: ReadonlySet<number>,
+		maxNumber: number,
+		count: number,
+		mode?: TicketIssuanceMode,
+	): number[] {
+		if (mode === "consecutive") {
+			return pickConsecutiveFreeNumbers(existing, maxNumber, count);
+		}
+		return pickRandomFreeNumbers(existing, maxNumber, count);
 	}
 
 	private async registerBuyer(

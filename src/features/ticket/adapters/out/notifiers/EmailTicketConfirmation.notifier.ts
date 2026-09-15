@@ -1,9 +1,10 @@
-import { resolveEmailClientFromConfig } from "@/infra/email/index";
-import logger from "@/platform/logger/index.js";
-import type { ITicketConfirmationNotifier } from "@/shared/contracts/ITicketConfirmationNotifier.contract.js";
-import type { RafflePrizePayload } from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import type { IEmailPort } from "@/shared/port/IEmail.port.js";
-import { getHtmlTemplate } from "@/shared/utils/emailTemplate.js";
+import { getSiteBranding } from "../../../../../infra/email/branding.js";
+import { resolveEmailClientFromConfig } from "../../../../../infra/email/index.js";
+import logger from "../../../../../platform/logger/index.js";
+import type { ITicketConfirmationNotifier } from "../../../../../shared/contracts/ITicketConfirmationNotifier.contract.js";
+import type { RafflePrizePayload } from "../../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import type { IEmailPort } from "../../../../../shared/port/IEmail.port.js";
+import { getHtmlTemplate } from "../../../../../shared/utils/emailTemplate.js";
 
 const PRIZE_LABELS: Record<string, string> = {
 	mayor: "Premio mayor",
@@ -37,6 +38,7 @@ export class EmailTicketConfirmationNotifier
 			const html = getHtmlTemplate({
 				title: `Tus boletos - ${notification.raffleTitle}`,
 				content,
+				...(await getSiteBranding()),
 			});
 
 			const emailClient = await this.resolveClient();
@@ -71,7 +73,7 @@ export class EmailTicketConfirmationNotifier
 			${raffleInfo}
 			${numbers}
 			<p>Total pagado: <strong>${copFormat.format(notification.amount)}</strong></p>
-			<p>Guarda tus números, el ganador se elige al azar entre todas las boletas vendidas.</p>`;
+			<p>¡Mucha suerte!</p>`;
 	}
 
 	private buildRaffleInfo(

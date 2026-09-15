@@ -6,8 +6,12 @@ import type {
 	Raffle,
 	RafflePrize,
 	RaffleStatus,
+	TicketIssuanceMode,
 } from "../../domain/entities/Raffle.entity.js";
-import { validatePrizes } from "../../domain/entities/Raffle.entity.js";
+import {
+	isTicketIssuanceMode,
+	validatePrizes,
+} from "../../domain/entities/Raffle.entity.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
 
 export interface CreateRaffleCommand {
@@ -19,6 +23,7 @@ export interface CreateRaffleCommand {
 	ticketPrice: number;
 	maxTickets: number;
 	minTickets?: number;
+	ticketIssuance?: TicketIssuanceMode;
 	status?: RaffleStatus;
 }
 
@@ -43,6 +48,13 @@ export class CreateRaffle {
 			throw new Error("minTickets no puede superar maxTickets");
 		}
 
+		const ticketIssuance = command.ticketIssuance ?? "random";
+		if (!isTicketIssuanceMode(ticketIssuance)) {
+			throw new Error(
+				"ticketIssuance debe ser 'random' o 'consecutive'",
+			);
+		}
+
 		validatePrizes(command.prizes);
 
 		const id = randomUUID();
@@ -65,6 +77,7 @@ export class CreateRaffle {
 			ticketPrice: command.ticketPrice,
 			maxTickets: command.maxTickets,
 			minTickets,
+			ticketIssuance,
 			status: command.status ?? "draft",
 		};
 

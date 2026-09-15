@@ -51,6 +51,9 @@ Crea un archivo `.env` en la raíz:
 ```env
 PORT=3000
 MONGODB_URI=mongodb://127.0.0.1:27017/tickets_buy
+SERVER_URL=https://api.tudominio.com
+FRONTEND_URL=https://tudominio.com
+BETTER_AUTH_SECRET=<secreto-largo-aleatorio>
 ```
 
 ## Instalación y uso
@@ -58,9 +61,32 @@ MONGODB_URI=mongodb://127.0.0.1:27017/tickets_buy
 ```bash
 npm install
 npm run dev       # Desarrollo con recarga (tsx watch src/main.ts)
-npm run build     # Compilar (tsc → dist/)
+npm run build     # Compilar (tsc -p tsconfig.build.json → dist/, sin tests)
 npm start         # Ejecutar build (node dist/main.js)
 ```
+
+## Producción (verificado)
+
+El build compila a ESM puro de Node: todos los imports son relativos con
+extensión `.js` (sin alias `@/`), por lo que `node dist/main.js` funciona
+directamente, sin bundler.
+
+```bash
+npm run build
+PORT=3000 npm start     # o con systemd/pm2 apuntando a dist/main.js
+```
+
+Verificación de humo:
+
+```bash
+curl http://localhost:3000/health   # -> {"status":"ok"}
+curl "http://localhost:3000/api/raffles?limit=1"   # -> 200
+```
+
+Variables necesarias en producción: `PORT`, `MONGODB_URI`, `SERVER_URL`,
+`FRONTEND_URL` (origen CORS), `BETTER_AUTH_SECRET` y las de correo del
+proveedor (`EMAIL_PROVIDER`, `BREVO_API_KEY`, `EMAIL_FROM_EMAIL`,
+`EMAIL_FROM_NAME`).
 
 ## Scripts
 

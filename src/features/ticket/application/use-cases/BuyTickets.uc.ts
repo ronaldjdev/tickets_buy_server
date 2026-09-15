@@ -1,19 +1,33 @@
 import { randomUUID } from "node:crypto";
+import type { IRaffleService } from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import type { TicketIssuanceMode } from "../../../raffle/domain/entities/Raffle.entity.js";
+import { pickConsecutiveFreeNumbers } from "../../../../shared/utils/pickConsecutiveFreeNumbers.js";
+import { pickRandomFreeNumbers } from "../../../../shared/utils/pickRandomFreeNumbers.js";
 import type {
 	Ticket,
 	TicketStatus,
-} from "@/features/ticket/domain/entities/Ticket.entity";
+} from "../../domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
 	RaffleSoldOutError,
-} from "@/features/ticket/domain/errors/Ticket.error";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
-import { pickRandomFreeNumbers } from "@/shared/utils/pickRandomFreeNumbers";
+} from "../../domain/errors/Ticket.error.js";
+import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
 
 const ASSIGNED_STATUSES: TicketStatus[] = ["reserved", "purchased", "winner"];
+
+export function pickFreeNumbers(
+	existing: ReadonlySet<number>,
+	maxNumber: number,
+	count: number,
+	mode?: TicketIssuanceMode,
+): number[] {
+	if (mode === "consecutive") {
+		return pickConsecutiveFreeNumbers(existing, maxNumber, count);
+	}
+	return pickRandomFreeNumbers(existing, maxNumber, count);
+}
 
 export interface BuyTicketsCommand {
 	raffleId: string;
@@ -45,10 +59,11 @@ export class BuyTickets {
 		const existingNumbers = new Set(
 			await this.ticketRepository.findNumbersByRaffle(command.raffleId),
 		);
-		const numbers = pickRandomFreeNumbers(
+		const numbers = pickFreeNumbers(
 			existingNumbers,
 			raffle.maxTickets,
 			command.quantity,
+			raffle.ticketIssuance,
 		);
 		if (numbers.length < command.quantity)
 			throw new RaffleSoldOutError(command.raffleId);

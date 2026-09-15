@@ -2,9 +2,9 @@ import "dotenv/config";
 
 import { ObjectId } from "mongodb";
 
-import db from "@/infra/mongodb/Mongo.config.js";
-import { initAuth } from "@/platform/auth/auth.config.js";
-import logger from "@/platform/logger/index.js";
+import db from "../infra/mongodb/Mongo.config.js";
+import { initAuth } from "../platform/auth/auth.config.js";
+import logger from "../platform/logger/index.js";
 
 const adminEmail = (
 	process.env.SEED_ADMIN_EMAIL ?? "admin@chevere.local"

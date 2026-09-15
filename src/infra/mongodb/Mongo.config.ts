@@ -1,7 +1,7 @@
 import { type Db, MongoClient } from "mongodb";
 import mongoose from "mongoose";
 
-import logger from "@/platform/logger/index.js";
+import logger from "../../platform/logger/index.js";
 
 let mongoClient: MongoClient | null = null;
 let dbInstance: Db | null = null;

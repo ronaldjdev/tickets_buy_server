@@ -1,6 +1,6 @@
 import { type Document, model, Schema } from "mongoose";
 
-import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
+import type { Contact } from "../../../../domain/entities/Contact.entity.js";
 
 type IContact = Document & Contact;
 

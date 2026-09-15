@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-import type { Config } from "@/features/config/domain/entities/Config.entity.js";
+import type { Config } from "../../../../domain/entities/Config.entity.js";
 
 const PaymentProviderSchema = new Schema(
 	{

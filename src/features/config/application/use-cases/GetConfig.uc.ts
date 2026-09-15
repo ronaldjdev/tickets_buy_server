@@ -1,5 +1,5 @@
-import type { Config } from "@/features/config/domain/entities/Config.entity.js";
-import type { IConfigRepository } from "@/features/config/domain/repositories/IConfig.repository.js";
+import type { Config } from "../../domain/entities/Config.entity.js";
+import type { IConfigRepository } from "../../domain/repositories/IConfig.repository.js";
 
 export class GetConfig {
 	constructor(private readonly configRepo: IConfigRepository) {}

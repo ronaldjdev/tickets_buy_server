@@ -1,12 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
+import { getAuthApi } from "../../../../../../platform/auth/auth.config.js";
+import logger from "../../../../../../platform/logger/index.js";
+import response from "../../../../../../shared/http/Response.utils.js";
 import type {
 	CreateUser,
 	UpdateUser,
-} from "@/features/user/application/use-cases/index.js";
-import type { IUserRepository } from "@/features/user/domain/repositories/IUser.repository.js";
-import { getAuthApi } from "@/platform/auth/auth.config.js";
-import logger from "@/platform/logger/index.js";
-import response from "@/shared/http/Response.utils.js";
+} from "../../../../application/use-cases/index.js";
+import type { IUserRepository } from "../../../../domain/repositories/IUser.repository.js";
 
 export class MeController {
 	constructor(

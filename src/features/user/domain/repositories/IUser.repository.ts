@@ -1,4 +1,4 @@
-import type { OptionsPag, Paginate } from "@/shared/types/types.js";
+import type { OptionsPag, Paginate } from "../../../../shared/types/types.js";
 
 import type { User } from "../entities/User.entity.js";
 export interface IUserRepository {

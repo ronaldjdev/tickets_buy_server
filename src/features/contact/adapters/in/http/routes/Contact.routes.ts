@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import type { ContactController } from "@/features/contact/adapters/in/http/controllers/Contact.controller.js";
+import type { ContactController } from "../controllers/Contact.controller.js";
 
 export function createContactRoutes(controller: ContactController): Router {
 	const router = Router();

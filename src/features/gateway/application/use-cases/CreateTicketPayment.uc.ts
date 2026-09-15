@@ -1,14 +1,13 @@
 import { randomBytes } from "node:crypto";
-
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
 import type {
 	GatewayLinkRequest,
 	GatewayLinkResult,
 	IGatewayLinkCreator,
-} from "@/shared/contracts/IGatewayLinkCreator.contract.js";
-import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+} from "../../../../shared/contracts/IGatewayLinkCreator.contract.js";
+import type { IWompiConfigReader } from "../../../../shared/contracts/IWompiConfigReader.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import type { IGatewayIntentRepository } from "../../domain/repositories/IGatewayIntent.repository.js";
 
 export class CreateTicketPayment implements IGatewayLinkCreator {
 	constructor(

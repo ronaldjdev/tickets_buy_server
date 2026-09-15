@@ -1,11 +1,11 @@
-import type { IHttpClient } from "@/shared/port/IHttpClient.port.js";
+import type { IHttpClient } from "../../../../../shared/port/IHttpClient.port.js";
 import type {
 	CreateWompiLinkInput,
 	IWompiPort,
 	WompiEventPayload,
 	WompiEventTransaction,
 	WompiLinkData,
-} from "@/shared/port/IWompi.port.js";
+} from "../../../../../shared/port/IWompi.port.js";
 
 import {
 	computeEventChecksum,

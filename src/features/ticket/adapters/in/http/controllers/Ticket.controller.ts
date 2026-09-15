@@ -1,13 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
-import type { BuyTickets } from "@/features/ticket/application/use-cases/BuyTickets.uc.js";
+import { ValidationError } from "../../../../../../shared/errors/ValidationError.js";
+import response from "../../../../../../shared/http/Response.utils.js";
+import type { BuyTickets } from "../../../../application/use-cases/BuyTickets.uc.js";
 import type {
 	ListTickets,
 	TicketListFilter,
-} from "@/features/ticket/application/use-cases/ListTickets.uc.js";
-import type { LookupTicketsByDocument } from "@/features/ticket/application/use-cases/LookupTicketsByDocument.uc.js";
-import type { ManageAvailability } from "@/features/ticket/application/use-cases/ManageAvailability.uc.js";
-import { ValidationError } from "@/shared/errors/ValidationError.js";
-import response from "@/shared/http/Response.utils.js";
+} from "../../../../application/use-cases/ListTickets.uc.js";
+import type { LookupTicketsByDocument } from "../../../../application/use-cases/LookupTicketsByDocument.uc.js";
+import type { ManageAvailability } from "../../../../application/use-cases/ManageAvailability.uc.js";
 
 const TICKET_LIST_FILTERS = new Set<string>([
 	"all",

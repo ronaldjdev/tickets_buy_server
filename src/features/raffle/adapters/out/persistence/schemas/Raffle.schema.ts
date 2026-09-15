@@ -29,6 +29,7 @@ const PrizeSchema = new Schema(
 		},
 		name: { type: String, required: true },
 		description: { type: String },
+		imageUrl: { type: String },
 		schedule: { type: PrizeScheduleSchema },
 	},
 	{ _id: false },
@@ -46,6 +47,11 @@ const RaffleSchema = new Schema(
 		ticketPrice: { type: Number, required: true },
 		maxTickets: { type: Number, required: true },
 		minTickets: { type: Number },
+		ticketIssuance: {
+			type: String,
+			enum: ["random", "consecutive"],
+			default: "random",
+		},
 		status: {
 			type: String,
 			enum: ["draft", "active", "drawn"],

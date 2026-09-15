@@ -1,4 +1,4 @@
-import type { OptionsPag, Paginate } from "@/shared/types/types";
+import type { OptionsPag, Paginate } from "../types/types.js";
 
 export type ListQueryDTO = OptionsPag;
 

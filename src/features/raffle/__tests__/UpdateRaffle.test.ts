@@ -378,4 +378,60 @@ describe("UpdateRaffle", () => {
 			/No se puede subir el mínimo a 3/,
 		);
 	});
+
+	it("debería preservar ticketIssuance por defecto random al actualizar", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			new MockTicketService([]),
+			createNoopLogger(),
+		);
+
+		const updated = await useCase.execute({
+			raffleId: "raffle-1",
+			title: "Nuevo título",
+		});
+
+		assert.equal(
+			(updated as unknown as { ticketIssuance?: string }).ticketIssuance,
+			"random",
+		);
+	});
+
+	it("debería actualizar ticketIssuance a consecutiva", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			new MockTicketService([]),
+			createNoopLogger(),
+		);
+
+		const updated = await useCase.execute({
+			raffleId: "raffle-1",
+			ticketIssuance: "consecutive",
+		});
+
+		assert.equal(
+			(updated as unknown as { ticketIssuance?: string }).ticketIssuance,
+			"consecutive",
+		);
+	});
+
+	it("debería rechazar ticketIssuance inválido", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			new MockTicketService([]),
+			createNoopLogger(),
+		);
+
+		await assert.rejects(
+			() =>
+				useCase.execute({
+					raffleId: "raffle-1",
+					ticketIssuance: "pepito" as never,
+				}),
+			/ticketIssuance debe ser 'random' o 'consecutive'/,
+		);
+	});
 });

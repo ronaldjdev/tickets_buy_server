@@ -1,19 +1,16 @@
 import type { NextFunction, Request, Response } from "express";
-import type {
-	CreateContactDTO,
-	UpdateContactDTO,
-} from "@/features/contact/adapters/in/http/dto/contact.dto.js";
+import logger from "../../../../../../platform/logger/index.js";
+import { ValidationError } from "../../../../../../shared/errors/ValidationError.js";
+import type { ListQueryDTO } from "../../../../../../shared/http/Common.dto.js";
+import response from "../../../../../../shared/http/Response.utils.js";
 import type {
 	CreateContact,
 	DeleteContact,
 	GetContact,
 	ListContacts,
 	UpdateContact,
-} from "@/features/contact/application/use-cases/index.js";
-import logger from "@/platform/logger/index.js";
-import { ValidationError } from "@/shared/errors/ValidationError.js";
-import type { ListQueryDTO } from "@/shared/http/Common.dto.js";
-import response from "@/shared/http/Response.utils.js";
+} from "../../../../application/use-cases/index.js";
+import type { CreateContactDTO, UpdateContactDTO } from "../dto/contact.dto.js";
 
 export class ContactController {
 	constructor(
@@ -64,6 +61,7 @@ export class ContactController {
 				page: pageNum,
 				date: date as string | undefined,
 				status: status as string | undefined,
+				q: String(req.query.q ?? "").trim() || undefined,
 			};
 
 			const { contacts, paginate } = await this.listContacts.execute(options);

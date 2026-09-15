@@ -2,11 +2,12 @@ import type { Auth } from "better-auth";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { admin, openAPI } from "better-auth/plugins";
-import { getEmailClient } from "@/infra/email/index";
-import db from "@/infra/mongodb/Mongo.config.js";
-import { configPromise } from "@/platform/config/index";
-import logger from "@/platform/logger/index.js";
-import { getHtmlTemplate } from "@/shared/utils/emailTemplate.js";
+import { getSiteBranding } from "../../infra/email/branding.js";
+import { getEmailClient } from "../../infra/email/index.js";
+import db from "../../infra/mongodb/Mongo.config.js";
+import { getHtmlTemplate } from "../../shared/utils/emailTemplate.js";
+import { configPromise } from "../config/index.js";
+import logger from "../logger/index.js";
 
 let authInstance: Auth | null = null;
 
@@ -43,6 +44,7 @@ export async function initAuth(): Promise<Auth> {
 					content: `<p>Hemos recibido una solicitud para restablecer tu contraseña. Haz clic en el botón de abajo para continuar.</p>`,
 					actionUrl: resetUrl,
 					actionText: "Restablecer contraseña",
+					...(await getSiteBranding()),
 				});
 
 				await getEmailClient()
@@ -62,6 +64,7 @@ export async function initAuth(): Promise<Auth> {
 					content: `<p>Gracias por registrarte. Por favor, verifica tu dirección de correo electrónico haciendo clic en el botón de abajo.</p>`,
 					actionUrl: url,
 					actionText: "Verificar correo",
+					...(await getSiteBranding()),
 				});
 
 				await getEmailClient().send(user.email, "Verifica tu correo", html);

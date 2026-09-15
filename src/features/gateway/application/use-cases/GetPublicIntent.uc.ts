@@ -1,14 +1,14 @@
-import { buildIntegritySignature } from "@/features/gateway/adapters/out/wompi/WompiSignature.utils.js";
+import type { IPublicIntentConfig } from "../../../../shared/contracts/IPublicIntentConfig.contract.js";
+import type { IWompiConfigReader } from "../../../../shared/contracts/IWompiConfigReader.contract.js";
+import type { IRaffleService } from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ITicketRepository } from "../../../ticket/domain/repositories/ITicket.repository.js";
+import { buildIntegritySignature } from "../../adapters/out/wompi/WompiSignature.utils.js";
 import type {
 	GatewayIntent,
 	PublicGatewayIntent,
-} from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository.js";
-import type { IPublicIntentConfig } from "@/shared/contracts/IPublicIntentConfig.contract.js";
-import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+} from "../../domain/entities/GatewayIntent.entity.js";
+import type { IGatewayIntentRepository } from "../../domain/repositories/IGatewayIntent.repository.js";
 
 export class GetPublicIntent {
 	constructor(

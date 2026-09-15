@@ -178,4 +178,48 @@ describe("CreateRaffle", () => {
 			{ message: /minTickets no puede superar maxTickets/i },
 		);
 	});
+
+	it("debería guardar ticketIssuance por defecto en random", async () => {
+		const result = await useCase.execute({
+			title: "x",
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+		assert.equal(
+			(result as unknown as { ticketIssuance?: string }).ticketIssuance,
+			"random",
+		);
+	});
+
+	it("debería guardar ticketIssuance consecutiva cuando se indica", async () => {
+		const result = await useCase.execute({
+			title: "x",
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+			ticketIssuance: "consecutive",
+		});
+		assert.equal(
+			(result as unknown as { ticketIssuance?: string }).ticketIssuance,
+			"consecutive",
+		);
+	});
+
+	it("debería rechazar ticketIssuance inválido", async () => {
+		await assert.rejects(
+			() =>
+				useCase.execute({
+					title: "x",
+					startDate: new Date(),
+					endDate: new Date(),
+					ticketPrice: 1,
+					maxTickets: 5,
+					ticketIssuance: "pepito" as never,
+				}),
+			{ message: /ticketIssuance debe ser 'random' o 'consecutive'/i },
+		);
+	});
 });

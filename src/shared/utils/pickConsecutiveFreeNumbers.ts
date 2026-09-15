@@ -1,0 +1,11 @@
+export function pickConsecutiveFreeNumbers(
+	existing: ReadonlySet<number>,
+	maxNumber: number,
+	count: number,
+): number[] {
+	const picked: number[] = [];
+	for (let n = 1; n <= maxNumber && picked.length < count; n += 1) {
+		if (!existing.has(n)) picked.push(n);
+	}
+	return picked;
+}

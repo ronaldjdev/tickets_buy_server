@@ -1,4 +1,4 @@
-import type { WompiSettings } from "@/shared/contracts/IWompiConfigReader.contract.js";
+import type { WompiSettings } from "../../../../shared/contracts/IWompiConfigReader.contract.js";
 
 interface General {
 	nameBusiness?: string;

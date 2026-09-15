@@ -1,17 +1,16 @@
 import type { NextFunction, Request, Response } from "express";
-
-import type { GetGatewayStatus } from "@/features/gateway/application/use-cases/GetGatewayStatus.uc.js";
-import type { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
-import type { HandleWompiEvent } from "@/features/gateway/application/use-cases/HandleWompiEvent.uc.js";
-import type { ListGatewayIntents } from "@/features/gateway/application/use-cases/ListGatewayIntents.uc.js";
+import logger from "../../../../../../platform/logger/index.js";
+import response from "../../../../../../shared/http/Response.utils.js";
+import type { WompiEventPayload } from "../../../../../../shared/port/IWompi.port.js";
+import type { Paginate } from "../../../../../../shared/types/types.js";
+import type { GetGatewayStatus } from "../../../../application/use-cases/GetGatewayStatus.uc.js";
+import type { GetPublicIntent } from "../../../../application/use-cases/GetPublicIntent.uc.js";
+import type { HandleWompiEvent } from "../../../../application/use-cases/HandleWompiEvent.uc.js";
+import type { ListGatewayIntents } from "../../../../application/use-cases/ListGatewayIntents.uc.js";
 import type {
 	VerifyGatewayTransaction,
 	VerifyGatewayTransactionInput,
-} from "@/features/gateway/application/use-cases/VerifyGatewayTransaction.uc";
-import logger from "@/platform/logger/index";
-import response from "@/shared/http/Response.utils";
-import type { WompiEventPayload } from "@/shared/port/IWompi.port";
-import type { Paginate } from "@/shared/types/types.js";
+} from "../../../../application/use-cases/VerifyGatewayTransaction.uc.js";
 
 export class GatewayController {
 	constructor(

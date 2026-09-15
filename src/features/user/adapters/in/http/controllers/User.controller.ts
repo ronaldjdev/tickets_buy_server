@@ -1,25 +1,28 @@
 import type { NextFunction, Request, Response } from "express";
+import { getAuthApi } from "../../../../../../platform/auth/auth.config.js";
+import logger from "../../../../../../platform/logger/index.js";
+import { AppError } from "../../../../../../shared/errors/AppError.js";
+import { ValidationError } from "../../../../../../shared/errors/ValidationError.js";
+import type { ListQueryDTO } from "../../../../../../shared/http/Common.dto.js";
+import response from "../../../../../../shared/http/Response.utils.js";
 import type {
-	CreateUserDTO,
-	PasswordResetDTO,
-	UpdateRoleDTO,
-	UpdateUserDTO,
-} from "@/features/user/adapters/in/http/dto/user.dto.js";
+	UserRole,
+	UserStatus,
+} from "../../../../../../shared/types/types.js";
 import type {
 	CreateUser,
 	DeleteUser,
 	GetUser,
 	ListUsers,
 	UpdateUser,
-} from "@/features/user/application/use-cases/index.js";
-import type { IUserRepository } from "@/features/user/domain/repositories/IUser.repository.js";
-import { getAuthApi } from "@/platform/auth/auth.config.js";
-import logger from "@/platform/logger/index.js";
-import { AppError } from "@/shared/errors/AppError.js";
-import { ValidationError } from "@/shared/errors/ValidationError.js";
-import type { ListQueryDTO } from "@/shared/http/Common.dto.js";
-import response from "@/shared/http/Response.utils.js";
-import type { UserRole, UserStatus } from "@/shared/types/types.js";
+} from "../../../../application/use-cases/index.js";
+import type { IUserRepository } from "../../../../domain/repositories/IUser.repository.js";
+import type {
+	CreateUserDTO,
+	PasswordResetDTO,
+	UpdateRoleDTO,
+	UpdateUserDTO,
+} from "../dto/user.dto.js";
 
 export class UserController {
 	constructor(
@@ -134,6 +137,8 @@ export class UserController {
 				page: pageNum,
 				date: date as string | undefined,
 				status: status as string | undefined,
+				q: String(req.query.q ?? "").trim() || undefined,
+				role: String(req.query.role ?? "").trim() || undefined,
 			};
 
 			const { users, paginate } = await this.listUsers.execute(options);

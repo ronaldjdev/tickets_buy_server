@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { DashboardStatsController } from "@/features/stats/adapters/in/http/controllers/DashboardStats.controller.js";
+import type { DashboardStatsController } from "../controllers/DashboardStats.controller.js";
 
 export function createStatsRoutes(
 	controller: DashboardStatsController,

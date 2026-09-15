@@ -1,17 +1,17 @@
-import { ContactController } from "@/features/contact/adapters/in/http/controllers/Contact.controller.js";
-import { ContactRepository } from "@/features/contact/adapters/out/persistence/repositories/Contact.repository.js";
+import { appLogger } from "../../platform/di/Logger.di.js";
+import type { IRaffleService } from "../../shared/contracts/raffle/IRaffleService.contract.js";
+import type { ILogger } from "../../shared/port/ILogger.port.js";
+import { GatewayIntentRepository } from "../gateway/adapters/out/persistence/repositories/GatewayIntent.repository.js";
+import { TicketRepository } from "../ticket/adapters/out/persistence/repositories/Ticket.repository.js";
+import { ContactController } from "./adapters/in/http/controllers/Contact.controller.js";
+import { ContactRepository } from "./adapters/out/persistence/repositories/Contact.repository.js";
 import {
 	CreateContact,
 	DeleteContact,
 	GetContact,
 	ListContacts,
 	UpdateContact,
-} from "@/features/contact/application/use-cases/index.js";
-import { GatewayIntentRepository } from "@/features/gateway/adapters/out/persistence/repositories/GatewayIntent.repository.js";
-import { TicketRepository } from "@/features/ticket/adapters/out/persistence/repositories/Ticket.repository.js";
-import { appLogger } from "@/platform/di/Logger.di.js";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+} from "./application/use-cases/index.js";
 
 export function createContactModule(deps: {
 	raffleService: IRaffleService;

@@ -1,7 +1,7 @@
-import { RaffleNotFoundError } from "@/features/ticket/domain/errors/Ticket.error.js";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import type { IRaffleService } from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import { RaffleNotFoundError } from "../../../ticket/domain/errors/Ticket.error.js";
 
 import type { Combo } from "../../domain/entities/Combo.entity.js";
 import { ComboNotFoundError } from "../../domain/errors/Combo.error.js";

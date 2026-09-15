@@ -1,14 +1,14 @@
-import { MeController } from "@/features/user/adapters/in/http/controllers/Me.controller.js";
-import { UserController } from "@/features/user/adapters/in/http/controllers/User.controller.js";
-import { UserRepository } from "@/features/user/adapters/out/persistence/repositories/User.repository.js";
+import { appLogger } from "../../platform/di/Logger.di.js";
+import { MeController } from "./adapters/in/http/controllers/Me.controller.js";
+import { UserController } from "./adapters/in/http/controllers/User.controller.js";
+import { UserRepository } from "./adapters/out/persistence/repositories/User.repository.js";
 import {
 	CreateUser,
 	DeleteUser,
 	GetUser,
 	ListUsers,
 	UpdateUser,
-} from "@/features/user/application/use-cases/index.js";
-import { appLogger } from "@/platform/di/Logger.di.js";
+} from "./application/use-cases/index.js";
 
 const userRepo = new UserRepository();
 

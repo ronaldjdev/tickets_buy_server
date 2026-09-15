@@ -1,9 +1,9 @@
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { OptionsPag } from "../../../../shared/types/types.js";
 import type {
 	IContactRepository,
 	IListContactsResponse,
-} from "@/features/contact/domain/repositories/IContact.repository.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { OptionsPag } from "@/shared/types/types.js";
+} from "../../domain/repositories/IContact.repository.js";
 
 export class ListContacts {
 	constructor(private contactRepo: IContactRepository) {}

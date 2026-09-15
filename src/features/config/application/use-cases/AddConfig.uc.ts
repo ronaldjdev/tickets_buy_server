@@ -1,6 +1,6 @@
-import type { Config } from "@/features/config/domain/entities/Config.entity.js";
-import type { IConfigRepository } from "@/features/config/domain/repositories/IConfig.repository.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import type { Config } from "../../domain/entities/Config.entity.js";
+import type { IConfigRepository } from "../../domain/repositories/IConfig.repository.js";
 
 export class AddConfig {
 	constructor(

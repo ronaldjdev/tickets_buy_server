@@ -1,12 +1,14 @@
-import ContactModel from "@/features/contact/adapters/out/persistence/schemas/Contact.schema.js";
-import { ContactMapper } from "@/features/contact/application/mappers/Contact.mapper.js";
-import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
+import { QueryFactory } from "../../../../../../infra/mongodb/Query.factory.js";
+import type { OptionsPag } from "../../../../../../shared/types/types.js";
+import { ContactMapper } from "../../../../application/mappers/Contact.mapper.js";
+import type { Contact } from "../../../../domain/entities/Contact.entity.js";
 import type {
 	IContactRepository,
 	IListContactsResponse,
-} from "@/features/contact/domain/repositories/IContact.repository.js";
-import { QueryFactory } from "@/infra/mongodb/Query.factory.js";
-import type { OptionsPag } from "@/shared/types/types.js";
+} from "../../../../domain/repositories/IContact.repository.js";
+import ContactModel from "../schemas/Contact.schema.js";
+
+const CONTACT_SEARCH_FIELDS = ["name", "email", "phone"];
 
 export class ContactRepository implements IContactRepository {
 	async create(data: Contact): Promise<Contact> {
@@ -43,6 +45,11 @@ export class ContactRepository implements IContactRepository {
 
 	async list(options: OptionsPag): Promise<IListContactsResponse> {
 		const query = QueryFactory.assembleQueryOptions(options);
+		const search = QueryFactory.createSearchQuery(
+			CONTACT_SEARCH_FIELDS,
+			options.q,
+		);
+		if (search) Object.assign(query, search);
 		const sortOptions = QueryFactory.createSortOptions();
 		const skip = (options.page - 1) * options.limit;
 

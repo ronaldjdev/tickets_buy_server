@@ -1,7 +1,7 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketIOServer } from "socket.io";
-import logger from "@/platform/logger/index.js";
-import type { ISocketServer } from "@/shared/port/ISocket.port.js";
+import logger from "../../platform/logger/index.js";
+import type { ISocketServer } from "../../shared/port/ISocket.port.js";
 
 export class SocketServer implements ISocketServer {
 	private io: SocketIOServer | null = null;

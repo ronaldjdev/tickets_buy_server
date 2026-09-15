@@ -1,13 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
+import type { EmailIntegrationSettings } from "../../../../../../infra/email/index.js";
+import response from "../../../../../../shared/http/Response.utils.js";
 import type {
 	AddConfig,
 	GetConfig,
 	TestEmailIntegration,
 	UpdateConfig,
-} from "@/features/config/application/use-cases/index.js";
-import type { Config } from "@/features/config/domain/entities/Config.entity.js";
-import type { EmailIntegrationSettings } from "@/infra/email/index.js";
-import response from "@/shared/http/Response.utils.js";
+} from "../../../../application/use-cases/index.js";
+import type { Config } from "../../../../domain/entities/Config.entity.js";
 
 export class ConfigController {
 	constructor(

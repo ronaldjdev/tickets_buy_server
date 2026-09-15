@@ -1,5 +1,21 @@
 export type RaffleStatus = "draft" | "active" | "drawn";
 
+export type TicketIssuanceMode = "random" | "consecutive";
+
+export const TICKET_ISSUANCE_MODES: TicketIssuanceMode[] = [
+	"random",
+	"consecutive",
+];
+
+export function isTicketIssuanceMode(
+	value: unknown,
+): value is TicketIssuanceMode {
+	return (
+		typeof value === "string" &&
+		(TICKET_ISSUANCE_MODES as string[]).includes(value)
+	);
+}
+
 export type RafflePrizeType = "mayor" | "seco1" | "seco2" | "seco3" | "seco4";
 
 export const PRIZE_LABELS: Record<RafflePrizeType, string> = {
@@ -18,6 +34,7 @@ export type RafflePrize = {
 	type: RafflePrizeType;
 	name: string;
 	description?: string;
+	imageUrl?: string;
 	schedule?: RafflePrizeSchedule;
 };
 
@@ -74,6 +91,12 @@ export function validatePrizes(prizes: RafflePrize[] | undefined): void {
 		if (!prize || typeof prize.type !== "string") {
 			throw new Error("Cada premio debe tener un tipo");
 		}
+		if (prize.type !== "mayor" && prize.imageUrl !== undefined) {
+			throw new Error("Solo el premio mayor puede incluir una imagen");
+		}
+		if (prize.imageUrl !== undefined && typeof prize.imageUrl !== "string") {
+			throw new Error("La imagen del premio mayor debe ser una URL");
+		}
 		if (prize.type === "mayor" && prize.schedule) {
 			throw new Error(
 				"El premio mayor no puede definir fecha de sorteo propia",
@@ -96,6 +119,7 @@ export interface Raffle {
 	ticketPrice: number;
 	maxTickets: number;
 	minTickets?: number;
+	ticketIssuance?: TicketIssuanceMode;
 	status: RaffleStatus;
 	winnerTicketId?: string;
 	createdAt?: Date;

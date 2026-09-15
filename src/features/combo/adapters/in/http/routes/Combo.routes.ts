@@ -3,7 +3,7 @@ import { Router } from "express";
 import {
 	requireAuth,
 	requireRole,
-} from "@/platform/http/middleware/Auth.middleware.js";
+} from "../../../../../../platform/http/middleware/Auth.middleware.js";
 
 import type { ComboController } from "../controllers/Combo.controller.js";
 

@@ -1,4 +1,4 @@
-import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
+import type { Contact } from "../../domain/entities/Contact.entity.js";
 
 export const ContactMapper = {
 	toDomain(doc: Contact): Contact {

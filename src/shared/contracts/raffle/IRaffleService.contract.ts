@@ -11,6 +11,7 @@ export interface RafflePayload {
 	ticketPrice: number;
 	maxTickets: number;
 	minTickets?: number;
+	ticketIssuance?: "random" | "consecutive";
 	description?: string;
 	endDate?: string;
 	prizes?: RafflePrizePayload[];

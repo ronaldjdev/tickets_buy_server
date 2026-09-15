@@ -80,7 +80,10 @@ describe("CreateTicketPayment", () => {
 		const result = await useCase.execute(makeInput());
 
 		assert.ok(result.reference.startsWith("purchase-1-"));
-		assert.equal(result.checkoutUrl, `https://frontend.com/pagar/${result.reference}`);
+		assert.equal(
+			result.checkoutUrl,
+			`https://frontend.com/pagar/${result.reference}`,
+		);
 		assert.equal(result.amountInCents, 2000);
 		assert.equal(intentRepo.created.length, 1);
 		assert.equal(intentRepo.created[0].ticketIds.length, 2);

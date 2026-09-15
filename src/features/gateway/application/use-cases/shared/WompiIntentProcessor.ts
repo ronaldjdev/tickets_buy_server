@@ -1,15 +1,15 @@
-import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
 import type {
 	ConfirmTicketPaymentInput,
 	IConfirmTicketPayment,
-} from "@/shared/contracts/IConfirmTicketPayment.contract.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+} from "../../../../../shared/contracts/IConfirmTicketPayment.contract.js";
+import type { ILogger } from "../../../../../shared/port/ILogger.port.js";
 import type {
 	WompiEventTransaction,
 	WompiTransactionStatus,
-} from "@/shared/port/IWompi.port.js";
-import type { PaymentMethod } from "@/shared/types/types.js";
+} from "../../../../../shared/port/IWompi.port.js";
+import type { PaymentMethod } from "../../../../../shared/types/types.js";
+import type { GatewayIntent } from "../../../domain/entities/GatewayIntent.entity.js";
+import type { IGatewayIntentRepository } from "../../../domain/repositories/IGatewayIntent.repository.js";
 
 export const INTENT_STATUS_MAP: Record<
 	WompiTransactionStatus,

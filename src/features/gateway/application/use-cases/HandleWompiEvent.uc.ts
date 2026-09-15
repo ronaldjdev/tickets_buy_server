@@ -1,11 +1,11 @@
-import type { WompiIntentProcessor } from "@/features/gateway/application/use-cases/shared/WompiIntentProcessor.js";
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
-import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import type { IWompiConfigReader } from "../../../../shared/contracts/IWompiConfigReader.contract.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import type {
 	IWompiPort,
 	WompiEventPayload,
-} from "@/shared/port/IWompi.port.js";
+} from "../../../../shared/port/IWompi.port.js";
+import type { IGatewayIntentRepository } from "../../domain/repositories/IGatewayIntent.repository.js";
+import type { WompiIntentProcessor } from "./shared/WompiIntentProcessor.js";
 
 export interface HandleWompiEventResult {
 	handled: boolean;

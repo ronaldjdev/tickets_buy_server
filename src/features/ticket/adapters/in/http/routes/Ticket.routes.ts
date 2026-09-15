@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { TicketController } from "@/features/ticket/adapters/in/http/controllers/Ticket.controller";
+import type { TicketController } from "../controllers/Ticket.controller.js";
 
 export function createTicketRoutes(controller: TicketController): Router {
 	const router = Router();

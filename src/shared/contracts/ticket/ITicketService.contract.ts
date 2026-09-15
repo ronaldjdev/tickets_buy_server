@@ -1,4 +1,4 @@
-import type { TicketStatus } from "@/features/ticket/domain/entities/Ticket.entity.js";
+import type { TicketStatus } from "../../../features/ticket/domain/entities/Ticket.entity.js";
 
 export type { TicketStatus };
 

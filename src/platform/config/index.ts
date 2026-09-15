@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { env } from "./Env.config";
+import { env } from "./Env.config.js";
 
 export type ConfigType = {
 	server: {

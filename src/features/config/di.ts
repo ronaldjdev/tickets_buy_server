@@ -1,13 +1,13 @@
-import { ConfigController } from "@/features/config/adapters/in/http/controllers/Config.controller.js";
-import { ConfigRepository } from "@/features/config/adapters/out/persistence/repositories/Config.repository.js";
+import { appLogger } from "../../platform/di/Logger.di.js";
+import { ConfigController } from "./adapters/in/http/controllers/Config.controller.js";
+import { ConfigRepository } from "./adapters/out/persistence/repositories/Config.repository.js";
 import {
 	AddConfig,
 	GetConfig,
 	TestEmailIntegration,
 	UpdateConfig,
-} from "@/features/config/application/use-cases/index.js";
-import { SeedConfigFromEnv } from "@/features/config/application/use-cases/SeedConfigFromEnv.uc.js";
-import { appLogger } from "@/platform/di/Logger.di.js";
+} from "./application/use-cases/index.js";
+import { SeedConfigFromEnv } from "./application/use-cases/SeedConfigFromEnv.uc.js";
 
 export const configRepo = new ConfigRepository();
 

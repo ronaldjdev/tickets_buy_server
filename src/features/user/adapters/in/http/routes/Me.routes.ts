@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { meController } from "@/features/user/di.js";
+import { meController } from "../../../../di.js";
 
 const router = Router();
 router.get("/", meController.get);

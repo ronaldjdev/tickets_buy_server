@@ -1,13 +1,13 @@
 import { Types } from "mongoose";
-
-import type { NotificationType } from "@/features/notification/domain/entities/Notification.entity.js";
-import type { INotificationRepository } from "@/features/notification/domain/repositories/INotification.repository.js";
-import db from "@/infra/mongodb/Mongo.config.js";
-import logger from "@/platform/logger/index.js";
-import type { IUserReader } from "@/shared/contracts/IUserReader.contract.js";
-import type { IEmailPort } from "@/shared/port/IEmail.port.js";
-import type { ISseServer } from "@/shared/port/ISseServer.port.js";
-import { getHtmlTemplate } from "@/shared/utils/emailTemplate.js";
+import { getSiteBranding } from "../../../../infra/email/branding.js";
+import db from "../../../../infra/mongodb/Mongo.config.js";
+import logger from "../../../../platform/logger/index.js";
+import type { IUserReader } from "../../../../shared/contracts/IUserReader.contract.js";
+import type { IEmailPort } from "../../../../shared/port/IEmail.port.js";
+import type { ISseServer } from "../../../../shared/port/ISseServer.port.js";
+import { getHtmlTemplate } from "../../../../shared/utils/emailTemplate.js";
+import type { NotificationType } from "../../domain/entities/Notification.entity.js";
+import type { INotificationRepository } from "../../domain/repositories/INotification.repository.js";
 
 export interface NotifyUsersInput {
 	type: NotificationType;
@@ -81,6 +81,7 @@ export class NotificationService {
 		const html = getHtmlTemplate({
 			title: input.title,
 			content: `<p>${input.message}</p>`,
+			...(await getSiteBranding()),
 		});
 
 		for (const [userId, email] of emails) {

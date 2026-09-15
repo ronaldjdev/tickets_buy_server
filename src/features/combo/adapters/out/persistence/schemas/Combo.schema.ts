@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-import type { Combo } from "@/features/combo/domain/entities/Combo.entity.js";
+import type { Combo } from "../../../../domain/entities/Combo.entity.js";
 
 const ComboSchema = new Schema(
 	{

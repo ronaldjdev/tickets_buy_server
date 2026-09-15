@@ -2,7 +2,7 @@ import type {
 	DocumentType,
 	UserRole,
 	UserStatus,
-} from "@/shared/types/types.js";
+} from "../../../../shared/types/types.js";
 
 export interface NotificationPreferences {
 	toast?: boolean;

@@ -1,43 +1,43 @@
 import { toNodeHandler } from "better-auth/node";
-import { createComboRoutes } from "./features/combo/adapters/in/http/routes/Combo.routes";
-import { ComboRepository } from "./features/combo/adapters/out/persistence/repositories/Combo.repository";
-import { createComboModule } from "./features/combo/di";
-import configRoutes from "./features/config/adapters/in/http/routes/Config.routes";
-import publicConfigRoutes from "./features/config/adapters/in/http/routes/PublicConfig.routes";
-import { configRepo, seedConfigFromEnv } from "./features/config/di";
-import { createContactRoutes } from "./features/contact/adapters/in/http/routes/Contact.routes";
-import { createContactModule } from "./features/contact/di";
-import { createGatewayRoutes } from "./features/gateway/adapters/in/http/routes/Gateways.routes";
-import { createWompiWebhookRoutes } from "./features/gateway/adapters/in/http/routes/WompiWebhook.routes";
-import notificationRoutes from "./features/notification/adapters/in/http/routes/Notification.routes";
-import { createRaffleRoutes } from "./features/raffle/adapters/in/http/routes/Raffle.routes";
-import { createRaffleModule } from "./features/raffle/di";
-import { createStatsRoutes } from "./features/stats/adapters/in/http/routes/Stats.routes";
-import { dashboardStatsController } from "./features/stats/di";
-import { createPurchaseRoutes } from "./features/ticket/adapters/in/http/routes/Purchase.routes";
-import { createTicketRoutes } from "./features/ticket/adapters/in/http/routes/Ticket.routes";
+import { createComboRoutes } from "./features/combo/adapters/in/http/routes/Combo.routes.js";
+import { ComboRepository } from "./features/combo/adapters/out/persistence/repositories/Combo.repository.js";
+import { createComboModule } from "./features/combo/di.js";
+import configRoutes from "./features/config/adapters/in/http/routes/Config.routes.js";
+import publicConfigRoutes from "./features/config/adapters/in/http/routes/PublicConfig.routes.js";
+import { configRepo, seedConfigFromEnv } from "./features/config/di.js";
+import { createContactRoutes } from "./features/contact/adapters/in/http/routes/Contact.routes.js";
+import { createContactModule } from "./features/contact/di.js";
+import { createGatewayRoutes } from "./features/gateway/adapters/in/http/routes/Gateways.routes.js";
+import { createWompiWebhookRoutes } from "./features/gateway/adapters/in/http/routes/WompiWebhook.routes.js";
+import notificationRoutes from "./features/notification/adapters/in/http/routes/Notification.routes.js";
+import { createRaffleRoutes } from "./features/raffle/adapters/in/http/routes/Raffle.routes.js";
+import { createRaffleModule } from "./features/raffle/di.js";
+import { createStatsRoutes } from "./features/stats/adapters/in/http/routes/Stats.routes.js";
+import { dashboardStatsController } from "./features/stats/di.js";
+import { createPurchaseRoutes } from "./features/ticket/adapters/in/http/routes/Purchase.routes.js";
+import { createTicketRoutes } from "./features/ticket/adapters/in/http/routes/Ticket.routes.js";
 import {
 	createTicketModule,
 	createTicketPurchaseModule,
-} from "./features/ticket/di";
-import meRoutes from "./features/user/adapters/in/http/routes/Me.routes";
-import userRoutes from "./features/user/adapters/in/http/routes/User.routes";
-import { userController } from "./features/user/di";
-import { initAuth } from "./platform/auth/auth.config";
-import { env } from "./platform/config/Env.config";
-import { connectDB } from "./platform/database/Db.config";
-import { createGatewayModule } from "./platform/di/Gateway.di";
-import { appLogger } from "./platform/di/Logger.di";
-import { notificationService } from "./platform/di/Notification.di";
-import { createApp } from "./platform/http/App";
-import { errorHandler } from "./platform/http/Error.middleware";
+} from "./features/ticket/di.js";
+import meRoutes from "./features/user/adapters/in/http/routes/Me.routes.js";
+import userRoutes from "./features/user/adapters/in/http/routes/User.routes.js";
+import { userController } from "./features/user/di.js";
+import { initAuth } from "./platform/auth/auth.config.js";
+import { env } from "./platform/config/Env.config.js";
+import { connectDB } from "./platform/database/Db.config.js";
+import { createGatewayModule } from "./platform/di/Gateway.di.js";
+import { appLogger } from "./platform/di/Logger.di.js";
+import { notificationService } from "./platform/di/Notification.di.js";
+import { createApp } from "./platform/http/App.js";
+import { errorHandler } from "./platform/http/Error.middleware.js";
 import {
 	requireAuth,
 	requireRole,
-} from "./platform/http/middleware/Auth.middleware";
-import type { IConfirmTicketPayment } from "./shared/contracts/IConfirmTicketPayment.contract";
-import type { IGatewayLinkCreator } from "./shared/contracts/IGatewayLinkCreator.contract";
-import type { IRaffleService } from "./shared/contracts/raffle/IRaffleService.contract";
+} from "./platform/http/middleware/Auth.middleware.js";
+import type { IConfirmTicketPayment } from "./shared/contracts/IConfirmTicketPayment.contract.js";
+import type { IGatewayLinkCreator } from "./shared/contracts/IGatewayLinkCreator.contract.js";
+import type { IRaffleService } from "./shared/contracts/raffle/IRaffleService.contract.js";
 
 async function main() {
 	await connectDB(env.mongodbUri);

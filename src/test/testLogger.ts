@@ -1,4 +1,4 @@
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import type { ILogger } from "../shared/port/ILogger.port.js";
 
 export function createNoopLogger(): ILogger {
 	return {

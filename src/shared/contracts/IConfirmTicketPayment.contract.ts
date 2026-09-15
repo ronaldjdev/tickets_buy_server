@@ -1,4 +1,4 @@
-import type { PaymentMethod, PaymentStatus } from "@/shared/types/types.js";
+import type { PaymentMethod, PaymentStatus } from "../types/types.js";
 
 export interface ConfirmTicketPaymentInput {
 	purchaseId: string;

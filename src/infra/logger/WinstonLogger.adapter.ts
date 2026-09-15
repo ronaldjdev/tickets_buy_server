@@ -1,6 +1,6 @@
 import winston from "winston";
 
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import type { ILogger } from "../../shared/port/ILogger.port.js";
 
 const { combine, timestamp, colorize, printf, errors } = winston.format;
 

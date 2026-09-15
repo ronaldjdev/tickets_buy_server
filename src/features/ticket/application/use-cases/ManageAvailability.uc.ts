@@ -1,10 +1,10 @@
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import type {
 	Ticket,
 	TicketStatus,
-} from "@/features/ticket/domain/entities/Ticket.entity";
-import { TicketNotFoundError } from "@/features/ticket/domain/errors/Ticket.error";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+} from "../../domain/entities/Ticket.entity.js";
+import { TicketNotFoundError } from "../../domain/errors/Ticket.error.js";
+import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
 
 export type AvailabilityAction = "release" | "purchase";
 

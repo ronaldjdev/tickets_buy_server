@@ -1,13 +1,13 @@
-import type { WompiIntentProcessor } from "@/features/gateway/application/use-cases/shared/WompiIntentProcessor";
-import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity";
-import type { IGatewayIntentRepository } from "@/features/gateway/domain/repositories/IGatewayIntent.repository";
-import type { IWompiConfigReader } from "@/shared/contracts/IWompiConfigReader.contract";
-import { UseCaseError } from "@/shared/errors/UseCaseError";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import type { IWompiConfigReader } from "../../../../shared/contracts/IWompiConfigReader.contract.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import type {
 	IWompiPort,
 	WompiEventTransaction,
-} from "@/shared/port/IWompi.port.js";
+} from "../../../../shared/port/IWompi.port.js";
+import type { GatewayIntent } from "../../domain/entities/GatewayIntent.entity.js";
+import type { IGatewayIntentRepository } from "../../domain/repositories/IGatewayIntent.repository.js";
+import type { WompiIntentProcessor } from "./shared/WompiIntentProcessor.js";
 
 export interface VerifyGatewayTransactionInput {
 	reference: string;

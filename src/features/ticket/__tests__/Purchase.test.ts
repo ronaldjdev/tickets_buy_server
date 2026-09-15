@@ -427,6 +427,46 @@ describe("CreatePurchase (combos)", () => {
 		assert.equal(overlap.length, 0, "números nunca se repiten entre compras");
 	});
 
+	it("debería reservar números consecutivos si la sorteo es consecutiva", async () => {
+		const { useCase, raffleService, ticketRepo } = build();
+		raffleService.raffle = {
+			...makeRaffle(),
+			ticketIssuance: "consecutive" as const,
+		};
+		ticketRepo.store = [];
+
+		const first = await useCase.execute(makeCommand());
+		assert.deepEqual(first.ticketNumbers, [1, 2]);
+
+		const second = await useCase.execute(
+			makeCommand({ buyerEmail: "l@mail.com" }),
+		);
+		assert.deepEqual(second.ticketNumbers, [3, 4]);
+
+		const reserved = ticketRepo.store.filter((t) => t.status === "reserved");
+		assert.equal(reserved.length, 4);
+	});
+
+	it("debería rellenar huecos al liberar una reserva en modo consecutivo", async () => {
+		const { useCase, raffleService, ticketRepo } = build();
+		raffleService.raffle = {
+			...makeRaffle(),
+			ticketIssuance: "consecutive" as const,
+		};
+		ticketRepo.store = [];
+
+		const first = await useCase.execute(makeCommand());
+		assert.deepEqual(first.ticketNumbers, [1, 2]);
+		ticketRepo.store = ticketRepo.store.filter(
+			(t) => !first.ticketIds.includes(t.id),
+		);
+
+		const second = await useCase.execute(
+			makeCommand({ buyerEmail: "l@mail.com" }),
+		);
+		assert.deepEqual(second.ticketNumbers, [1, 2], "usa los libres más bajos");
+	});
+
 	it("debería fallar si el combo no existe", async () => {
 		const { useCase, comboRepo } = build();
 		comboRepo.combos = [];

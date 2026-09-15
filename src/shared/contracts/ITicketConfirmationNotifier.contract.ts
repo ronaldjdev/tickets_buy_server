@@ -1,4 +1,4 @@
-import type { RafflePrizePayload } from "@/shared/contracts/raffle/IRaffleService.contract.js";
+import type { RafflePrizePayload } from "./raffle/IRaffleService.contract.js";
 
 export interface TicketConfirmationNotification {
 	purchaseId: string;

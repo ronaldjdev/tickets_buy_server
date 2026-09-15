@@ -1,8 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-
-import type { GetPublicIntent } from "@/features/gateway/application/use-cases/GetPublicIntent.uc.js";
-import type { CreatePurchase } from "@/features/ticket/application/use-cases/CreatePurchase.uc.js";
-import response from "@/shared/http/Response.utils.js";
+import response from "../../../../../../shared/http/Response.utils.js";
+import type { GetPublicIntent } from "../../../../../gateway/application/use-cases/GetPublicIntent.uc.js";
+import type { CreatePurchase } from "../../../../application/use-cases/CreatePurchase.uc.js";
 
 export class PurchaseController {
 	constructor(

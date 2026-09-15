@@ -1,6 +1,6 @@
 import { BrevoClient } from "@getbrevo/brevo";
 
-import type { IEmailPort } from "@/shared/port/IEmail.port.js";
+import type { IEmailPort } from "../../shared/port/IEmail.port.js";
 
 export interface EmailSenderConfig {
 	fromEmail: string;

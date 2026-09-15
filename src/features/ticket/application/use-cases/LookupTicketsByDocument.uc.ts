@@ -1,10 +1,10 @@
-import type { Ticket } from "@/features/ticket/domain/entities/Ticket.entity.js";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository.js";
 import type {
 	IRaffleService,
 	RafflePayload,
-} from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import { ValidationError } from "@/shared/errors/ValidationError.js";
+} from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
+import { ValidationError } from "../../../../shared/errors/ValidationError.js";
+import type { Ticket } from "../../domain/entities/Ticket.entity.js";
+import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
 
 export type DocumentLookupTicketStatus = "pagada" | "pendiente";
 

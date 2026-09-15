@@ -1,12 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
-
+import response from "../../../../../../shared/http/Response.utils.js";
 import type {
 	CreateCombo,
 	DeleteCombo,
 	ListCombos,
 	UpdateCombo,
-} from "@/features/combo/application/use-cases/index.js";
-import response from "@/shared/http/Response.utils.js";
+} from "../../../../application/use-cases/index.js";
 
 export class ComboController {
 	constructor(

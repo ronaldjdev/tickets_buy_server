@@ -1,6 +1,6 @@
-import { appLogger } from "@/platform/di/Logger.di.js";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+import { appLogger } from "../../platform/di/Logger.di.js";
+import type { IRaffleService } from "../../shared/contracts/raffle/IRaffleService.contract.js";
+import type { ILogger } from "../../shared/port/ILogger.port.js";
 
 import { ComboController } from "./adapters/in/http/controllers/Combo.controller.js";
 import { ComboRepository } from "./adapters/out/persistence/repositories/Combo.repository.js";

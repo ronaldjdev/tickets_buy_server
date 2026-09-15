@@ -1,11 +1,10 @@
 import type { ClientSession } from "mongoose";
-
-import type { GatewayIntent } from "@/features/gateway/domain/entities/GatewayIntent.entity.js";
+import { RepositoryError } from "../../../../../../shared/errors/RepositoryError.js";
+import type { GatewayIntent } from "../../../../domain/entities/GatewayIntent.entity.js";
 import type {
 	GatewayIntentListQuery,
 	IGatewayIntentRepository,
-} from "@/features/gateway/domain/repositories/IGatewayIntent.repository.js";
-import { RepositoryError } from "@/shared/errors/RepositoryError.js";
+} from "../../../../domain/repositories/IGatewayIntent.repository.js";
 
 import GatewayIntentModel from "../schemas/GatewayIntent.schema.js";
 

@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
 	requireAuth,
 	requireRole,
-} from "@/platform/http/middleware/Auth.middleware.js";
+} from "../../../../../../platform/http/middleware/Auth.middleware.js";
 import type { RaffleController } from "../controllers/Raffle.controller.js";
 
 export function createRaffleRoutes(controller: RaffleController): Router {

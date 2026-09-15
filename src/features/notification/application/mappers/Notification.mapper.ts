@@ -1,4 +1,4 @@
-import type { AppNotification } from "@/features/notification/domain/entities/Notification.entity.js";
+import type { AppNotification } from "../../domain/entities/Notification.entity.js";
 
 export const NotificationMapper = {
 	toDomain(doc: any): AppNotification {

@@ -1,6 +1,6 @@
 import { type Document, model, Schema } from "mongoose";
 
-import type { AppNotification } from "@/features/notification/domain/entities/Notification.entity.js";
+import type { AppNotification } from "../../../../domain/entities/Notification.entity.js";
 
 interface INotification extends Document, Omit<AppNotification, "id"> {}
 

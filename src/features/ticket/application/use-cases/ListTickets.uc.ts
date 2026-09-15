@@ -1,8 +1,8 @@
 import type {
 	Ticket,
 	TicketStatus,
-} from "@/features/ticket/domain/entities/Ticket.entity";
-import type { ITicketRepository } from "@/features/ticket/domain/repositories/ITicket.repository";
+} from "../../domain/entities/Ticket.entity.js";
+import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
 
 export type TicketListFilter = "all" | "sold" | TicketStatus;
 

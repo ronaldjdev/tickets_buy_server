@@ -1,8 +1,8 @@
-import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
-import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
-import { normalizePhone } from "@/shared/utils/phone.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import { normalizePhone } from "../../../../shared/utils/phone.js";
+import type { Contact } from "../../domain/entities/Contact.entity.js";
+import type { IContactRepository } from "../../domain/repositories/IContact.repository.js";
 
 export class UpdateContact {
 	constructor(

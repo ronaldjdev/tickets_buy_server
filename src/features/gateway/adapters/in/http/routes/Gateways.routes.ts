@@ -1,9 +1,9 @@
 import { Router } from "express";
-import type { GatewayController } from "@/features/gateway/adapters/in/http/controllers/Gateway.controller.js";
 import {
 	requireAuth,
 	requireRole,
-} from "@/platform/http/middleware/Auth.middleware.js";
+} from "../../../../../../platform/http/middleware/Auth.middleware.js";
+import type { GatewayController } from "../controllers/Gateway.controller.js";
 
 export function createGatewayRoutes(controller: GatewayController): Router {
 	const router = Router();

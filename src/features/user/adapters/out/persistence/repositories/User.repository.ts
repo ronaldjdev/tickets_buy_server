@@ -1,13 +1,15 @@
 import type { SortOrder } from "mongoose";
-import UserModel from "@/features/user/adapters/out/persistence/schemas/User.schema.js";
-import { UserMapper } from "@/features/user/application/mappers/User.mapper.js";
-import type { User } from "@/features/user/domain/entities/User.entity.js";
+import { QueryFactory } from "../../../../../../infra/mongodb/Query.factory.js";
+import type { OptionsPag } from "../../../../../../shared/types/types.js";
+import { UserMapper } from "../../../../application/mappers/User.mapper.js";
+import type { User } from "../../../../domain/entities/User.entity.js";
 import type {
 	IListUsersResponse,
 	IUserRepository,
-} from "@/features/user/domain/repositories/IUser.repository.js";
-import { QueryFactory } from "@/infra/mongodb/Query.factory.js";
-import type { OptionsPag } from "@/shared/types/types.js";
+} from "../../../../domain/repositories/IUser.repository.js";
+import UserModel from "../schemas/User.schema.js";
+
+const USER_SEARCH_FIELDS = ["name", "phone", "documentNumber"];
 
 export class UserRepository implements IUserRepository {
 	async create(data: User): Promise<User> {
@@ -40,6 +42,8 @@ export class UserRepository implements IUserRepository {
 
 	async list(options: OptionsPag): Promise<IListUsersResponse> {
 		const query = QueryFactory.assembleQueryOptions(options);
+		const search = QueryFactory.createSearchQuery(USER_SEARCH_FIELDS, options.q);
+		if (search) Object.assign(query, search);
 		const sortOptions = QueryFactory.createSortOptions();
 		const skip = (options.page - 1) * options.limit;
 

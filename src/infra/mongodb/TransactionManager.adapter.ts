@@ -3,7 +3,7 @@ import mongoose, { type ClientSession } from "mongoose";
 import type {
 	ITransaction,
 	ITransactionManager,
-} from "@/shared/port/ITransactionManager.port.js";
+} from "../../shared/port/ITransactionManager.port.js";
 
 class MongooseTransaction implements ITransaction {
 	constructor(readonly session: ClientSession) {}

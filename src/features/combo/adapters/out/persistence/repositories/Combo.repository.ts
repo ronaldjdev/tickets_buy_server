@@ -1,6 +1,6 @@
-import type { Combo } from "@/features/combo/domain/entities/Combo.entity.js";
-import type { IComboRepository } from "@/features/combo/domain/repositories/ICombo.repository.js";
-import { RepositoryError } from "@/shared/errors/RepositoryError.js";
+import { RepositoryError } from "../../../../../../shared/errors/RepositoryError.js";
+import type { Combo } from "../../../../domain/entities/Combo.entity.js";
+import type { IComboRepository } from "../../../../domain/repositories/ICombo.repository.js";
 
 import ComboModel from "../schemas/Combo.schema.js";
 

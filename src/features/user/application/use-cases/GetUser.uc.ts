@@ -1,6 +1,6 @@
-import type { User } from "@/features/user/domain/entities/User.entity.js";
-import type { IUserRepository } from "@/features/user/domain/repositories/IUser.repository.js";
-import { UseCaseError } from "@/shared/errors/UseCaseError.js";
+import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
+import type { User } from "../../domain/entities/User.entity.js";
+import type { IUserRepository } from "../../domain/repositories/IUser.repository.js";
 
 export class GetUser {
 	constructor(private userRepo: IUserRepository) {}

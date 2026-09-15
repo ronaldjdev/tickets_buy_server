@@ -1,8 +1,8 @@
 import {
 	createEmailClientFromConfig,
 	type EmailIntegrationSettings,
-} from "@/infra/email/index.js";
-import type { ILogger } from "@/shared/port/ILogger.port.js";
+} from "../../../../infra/email/index.js";
+import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 
 export type EmailTestResult = { ok: boolean; message: string };
 

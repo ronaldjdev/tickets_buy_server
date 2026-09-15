@@ -6,8 +6,12 @@ import type { IComboRepository } from "../../../combo/domain/repositories/ICombo
 import type {
 	Raffle,
 	RafflePrize,
+	TicketIssuanceMode,
 } from "../../domain/entities/Raffle.entity.js";
-import { validatePrizes } from "../../domain/entities/Raffle.entity.js";
+import {
+	isTicketIssuanceMode,
+	validatePrizes,
+} from "../../domain/entities/Raffle.entity.js";
 import { RaffleNotFoundError } from "../../domain/errors/Raffle.error.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
 
@@ -21,6 +25,7 @@ export interface UpdateRaffleCommand {
 	ticketPrice?: number;
 	maxTickets?: number;
 	minTickets?: number;
+	ticketIssuance?: TicketIssuanceMode;
 	winnerTicketId?: string;
 }
 
@@ -41,6 +46,12 @@ export class UpdateRaffle {
 
 		if (command.ticketPrice !== undefined && command.ticketPrice < 0) {
 			throw new Error("ticketPrice no puede ser negativo");
+		}
+		if (
+			command.ticketIssuance !== undefined &&
+			!isTicketIssuanceMode(command.ticketIssuance)
+		) {
+			throw new Error("ticketIssuance debe ser 'random' o 'consecutive'");
 		}
 		validatePrizes(command.prizes);
 
@@ -113,6 +124,7 @@ export class UpdateRaffle {
 			ticketPrice: command.ticketPrice ?? raffle.ticketPrice,
 			maxTickets,
 			minTickets,
+			ticketIssuance: command.ticketIssuance ?? raffle.ticketIssuance ?? "random",
 			winnerTicketId: command.winnerTicketId ?? raffle.winnerTicketId,
 		});
 

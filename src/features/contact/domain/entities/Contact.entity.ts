@@ -1,4 +1,7 @@
-import type { DocumentType, UserStatus } from "@/shared/types/types.js";
+import type {
+	DocumentType,
+	UserStatus,
+} from "../../../../shared/types/types.js";
 
 export interface Contact {
 	name: string;

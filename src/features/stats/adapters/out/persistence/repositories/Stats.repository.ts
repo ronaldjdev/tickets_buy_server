@@ -1,16 +1,16 @@
 import type { Model } from "mongoose";
 
-import ContactModel from "@/features/contact/adapters/out/persistence/schemas/Contact.schema.js";
-import GatewayIntentModel from "@/features/gateway/adapters/out/persistence/schemas/GatewayIntent.schema.js";
-import RaffleModel from "@/features/raffle/adapters/out/persistence/schemas/Raffle.schema.js";
+import ContactModel from "../../../../../contact/adapters/out/persistence/schemas/Contact.schema.js";
+import GatewayIntentModel from "../../../../../gateway/adapters/out/persistence/schemas/GatewayIntent.schema.js";
+import RaffleModel from "../../../../../raffle/adapters/out/persistence/schemas/Raffle.schema.js";
+import TicketModel from "../../../../../ticket/adapters/out/persistence/schemas/Ticket.schema.js";
+import UserModel from "../../../../../user/adapters/out/persistence/schemas/User.schema.js";
 import type {
 	DashboardStats,
 	RafflePerformance,
 	SalesPoint,
-} from "@/features/stats/domain/entities/DashboardStats.entity.js";
-import type { IStatsRepository } from "@/features/stats/domain/repositories/IStats.repository.js";
-import TicketModel from "@/features/ticket/adapters/out/persistence/schemas/Ticket.schema.js";
-import UserModel from "@/features/user/adapters/out/persistence/schemas/User.schema.js";
+} from "../../../../domain/entities/DashboardStats.entity.js";
+import type { IStatsRepository } from "../../../../domain/repositories/IStats.repository.js";
 
 const SOLD_TICKET_STATUSES = ["purchased", "winner"] as const;
 
