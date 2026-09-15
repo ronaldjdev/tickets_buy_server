@@ -13,11 +13,7 @@ import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.co
 import type { ILogger } from "@/shared/port/ILogger.port.js";
 import { pickRandomFreeNumbers } from "@/shared/utils/pickRandomFreeNumbers";
 
-const ASSIGNED_STATUSES: TicketStatus[] = [
-	"reserved",
-	"purchased",
-	"winner",
-];
+const ASSIGNED_STATUSES: TicketStatus[] = ["reserved", "purchased", "winner"];
 
 export interface BuyTicketsCommand {
 	raffleId: string;

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { Combo } from "@/features/combo/domain/entities/Combo.entity.js";
 import type { IComboRepository } from "@/features/combo/domain/repositories/ICombo.repository.js";
 import type { Contact } from "@/features/contact/domain/entities/Contact.entity.js";
 import type { IContactRepository } from "@/features/contact/domain/repositories/IContact.repository.js";
@@ -16,7 +17,10 @@ import type {
 	ReserveTicketsData,
 } from "@/features/ticket/domain/repositories/ITicket.repository.js";
 import type { IGatewayLinkCreator } from "@/shared/contracts/IGatewayLinkCreator.contract.js";
-import type { IRaffleService } from "@/shared/contracts/raffle/IRaffleService.contract.js";
+import type {
+	IRaffleService,
+	RafflePayload,
+} from "@/shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "@/shared/errors/UseCaseError.js";
 import type { ILogger } from "@/shared/port/ILogger.port.js";
 import { pickRandomFreeNumbers } from "@/shared/utils/pickRandomFreeNumbers.js";
@@ -26,7 +30,9 @@ const MAX_RESERVATION_ATTEMPTS = 10;
 const ASSIGNED_STATUSES: TicketStatus[] = ["reserved", "purchased", "winner"];
 
 export interface CreatePurchaseCommand {
-	comboId: string;
+	comboId?: string;
+	raffleId?: string;
+	quantity?: number;
 	buyerName: string;
 	buyerLastName: string;
 	buyerEmail: string;
@@ -42,8 +48,8 @@ export interface CreatePurchaseResult {
 	checkoutUrl: string;
 	amount: number;
 	quantity: number;
-	comboId: string;
-	comboName: string;
+	comboId?: string;
+	comboName?: string;
 	ticketIds: string[];
 	ticketNumbers: number[];
 }
@@ -59,8 +65,6 @@ export class CreatePurchase {
 	) {}
 
 	async execute(command: CreatePurchaseCommand): Promise<CreatePurchaseResult> {
-		if (!command?.comboId?.trim())
-			throw new UseCaseError("El combo es obligatorio.");
 		if (
 			!command.buyerName?.trim() ||
 			!command.buyerLastName?.trim() ||
@@ -76,13 +80,65 @@ export class CreatePurchase {
 			);
 		}
 
-		const combo = await this.comboRepository.findById(command.comboId);
-		if (!combo) throw new UseCaseError("El combo seleccionado no existe.");
+		const hasCombo = Boolean(command.comboId?.trim());
+		const hasQuantity = command.quantity !== undefined;
+		if (!hasCombo && !hasQuantity) {
+			throw new UseCaseError(
+				"Debes indicar un combo o una cantidad de boletos.",
+			);
+		}
+		if (hasCombo && hasQuantity) {
+			throw new UseCaseError(
+				"Indica un combo o una cantidad personalizada, no ambos.",
+			);
+		}
 
-		const raffle = await this.raffleService.findById(combo.raffleId);
-		if (!raffle) throw new RaffleNotFoundError(combo.raffleId);
-		if (raffle.status !== "active")
-			throw new RaffleNotActiveError(combo.raffleId);
+		let raffle: RafflePayload | null;
+		let quantity: number;
+		let amount: number;
+		let combo: Combo | null = null;
+
+		if (hasCombo) {
+			combo = await this.comboRepository.findById(command.comboId!.trim());
+			if (!combo) throw new UseCaseError("El combo seleccionado no existe.");
+			raffle = await this.raffleService.findById(combo.raffleId);
+			quantity = combo.ticketCount;
+			amount = combo.price;
+		} else {
+			if (!command.raffleId?.trim()) {
+				throw new UseCaseError("La sorteo es obligatoria.");
+			}
+			raffle = await this.raffleService.findById(command.raffleId.trim());
+			quantity = command.quantity!;
+			amount = raffle ? raffle.ticketPrice * quantity : 0;
+		}
+
+		if (!raffle) {
+			throw new RaffleNotFoundError(
+				hasCombo ? combo!.raffleId : command.raffleId!,
+			);
+		}
+		if (raffle.status !== "active") throw new RaffleNotActiveError(raffle.id);
+
+		if (!Number.isInteger(quantity) || quantity < 1) {
+			throw new UseCaseError(
+				"La cantidad de boletos debe ser un número entero mayor a 0.",
+			);
+		}
+		const minTickets = raffle.minTickets ?? 1;
+		if (quantity < minTickets) {
+			throw new UseCaseError(
+				`El mínimo de boletos por compra es ${minTickets}.`,
+			);
+		}
+		if (quantity > raffle.maxTickets) {
+			throw new UseCaseError(
+				`No puedes comprar más de ${raffle.maxTickets} boletos en este sorteo.`,
+			);
+		}
+		if (!Number.isFinite(amount) || amount < 0) {
+			throw new UseCaseError("No se pudo calcular el valor de la compra.");
+		}
 
 		await this.ticketRepository.releaseExpiredReserved(new Date());
 
@@ -94,7 +150,7 @@ export class CreatePurchase {
 		const claimed = await this.reserveRandomTickets(
 			raffle.id,
 			raffle.maxTickets,
-			combo.ticketCount,
+			quantity,
 			{
 				purchaseId,
 				reservedUntil,
@@ -117,17 +173,17 @@ export class CreatePurchase {
 			contactId: this.contactId(contact),
 			contactName: command.buyerName,
 			contactPhone: command.buyerPhone,
-			amountInCents: Math.round(combo.price * 100),
+			amountInCents: Math.round(amount * 100),
 			expiresInMinutes: RESERVATION_TTL_MINUTES,
 		});
 
 		this.logger.info("Compra iniciada", {
 			operation: "ticket.create_purchase",
 			reference: link.reference,
-			comboId: combo.id,
-			comboName: combo.name,
-			quantity: combo.ticketCount,
-			amount: combo.price,
+			comboId: combo?.id,
+			comboName: combo?.name,
+			quantity,
+			amount,
 			ticketNumbers: claimed.map((t) => t.number).sort((a, b) => a - b),
 			buyerName: command.buyerName,
 			buyerEmail: command.buyerEmail,
@@ -136,10 +192,10 @@ export class CreatePurchase {
 		return {
 			reference: link.reference,
 			checkoutUrl: link.checkoutUrl,
-			amount: combo.price,
-			quantity: combo.ticketCount,
-			comboId: combo.id,
-			comboName: combo.name,
+			amount,
+			quantity,
+			comboId: combo?.id,
+			comboName: combo?.name,
 			ticketIds: claimed.map((t) => t.id),
 			ticketNumbers: claimed.map((t) => t.number).sort((a, b) => a - b),
 		};

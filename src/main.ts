@@ -1,5 +1,6 @@
 import { toNodeHandler } from "better-auth/node";
 import { createComboRoutes } from "./features/combo/adapters/in/http/routes/Combo.routes";
+import { ComboRepository } from "./features/combo/adapters/out/persistence/repositories/Combo.repository";
 import { createComboModule } from "./features/combo/di";
 import configRoutes from "./features/config/adapters/in/http/routes/Config.routes";
 import publicConfigRoutes from "./features/config/adapters/in/http/routes/PublicConfig.routes";
@@ -66,10 +67,12 @@ async function main() {
 	});
 
 	const ticketModule = createTicketModule(raffleServiceProxy, appLogger);
+	const comboRepository = new ComboRepository();
 	const raffleModule = createRaffleModule(
 		ticketModule.sharedService,
 		appLogger,
 		notificationService,
+		comboRepository,
 	);
 	raffleShared = raffleModule.sharedService;
 

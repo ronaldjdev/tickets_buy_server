@@ -2,6 +2,7 @@ import type { ITicketService } from "../../../../shared/contracts/ticket/ITicket
 import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
 import { slugify } from "../../../../shared/utils/slugify.js";
+import type { IComboRepository } from "../../../combo/domain/repositories/ICombo.repository.js";
 import type {
 	Raffle,
 	RafflePrize,
@@ -19,6 +20,7 @@ export interface UpdateRaffleCommand {
 	endDate?: Date;
 	ticketPrice?: number;
 	maxTickets?: number;
+	minTickets?: number;
 	winnerTicketId?: string;
 }
 
@@ -27,6 +29,7 @@ export class UpdateRaffle {
 		private readonly raffleRepository: IRaffleRepository,
 		private readonly ticketService: ITicketService,
 		private readonly logger: ILogger,
+		private readonly comboRepository?: IComboRepository,
 	) {}
 
 	async execute(command: UpdateRaffleCommand): Promise<Raffle> {
@@ -76,6 +79,29 @@ export class UpdateRaffle {
 			maxTickets = newMax;
 		}
 
+		let minTickets = raffle.minTickets ?? 1;
+		if (command.minTickets !== undefined) {
+			const newMin = command.minTickets;
+			if (!Number.isInteger(newMin) || newMin < 1) {
+				throw new Error("minTickets debe ser un entero mayor o igual a 1");
+			}
+			if (newMin > maxTickets) {
+				throw new Error("minTickets no puede superar maxTickets");
+			}
+			if (this.comboRepository && newMin > minTickets) {
+				const combos = await this.comboRepository.byRaffle(raffle.id);
+				const below = combos
+					.filter((c) => c.ticketCount < newMin)
+					.map((c) => `${c.name} (${c.ticketCount})`);
+				if (below.length > 0) {
+					throw new Error(
+						`No se puede subir el mínimo a ${newMin}: los combos ${below.join(", ")} tienen menos boletos. Ajusta o elimina esos combos primero.`,
+					);
+				}
+			}
+			minTickets = newMin;
+		}
+
 		const updated = await this.raffleRepository.update({
 			...raffle,
 			slug,
@@ -86,6 +112,7 @@ export class UpdateRaffle {
 			endDate: command.endDate ?? raffle.endDate,
 			ticketPrice: command.ticketPrice ?? raffle.ticketPrice,
 			maxTickets,
+			minTickets,
 			winnerTicketId: command.winnerTicketId ?? raffle.winnerTicketId,
 		});
 

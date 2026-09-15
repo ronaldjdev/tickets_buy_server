@@ -153,6 +153,34 @@ describe("CreateCombo", () => {
 		);
 	});
 
+	it("debería rechazar un combo por debajo del mínimo de compra", async () => {
+		const { repo, raffleService } = build();
+		const uc = new CreateCombo(repo, raffleService, noopLogger);
+
+		raffleService.raffle = { ...makeRaffle(), minTickets: 5 };
+		await assert.rejects(
+			() =>
+				uc.execute({
+					raffleId: "raffle-1",
+					name: "y",
+					ticketCount: 2,
+					price: 18000,
+				}),
+			(e: Error) =>
+				e instanceof UseCaseError &&
+				e.message.includes("mínimo de compra de la sorteo"),
+		);
+
+		const combo = await uc.execute({
+			raffleId: "raffle-1",
+			name: "Combo 5 boletos",
+			ticketCount: 5,
+			price: 40000,
+		});
+		assert.equal(combo.ticketCount, 5);
+		assert.equal(repo.combos.length, 1);
+	});
+
 	it("debería rechazar si ya existe un combo con el mismo nombre en la sorteo", async () => {
 		const { repo, raffleService } = build();
 		const uc = new CreateCombo(repo, raffleService, noopLogger);

@@ -152,4 +152,30 @@ describe("CreateRaffle", () => {
 			{ message: /maxTickets debe ser mayor a 0/i },
 		);
 	});
+
+	it("debería guardar minTickets por defecto en 1", async () => {
+		const result = await useCase.execute({
+			title: "x",
+			startDate: new Date(),
+			endDate: new Date(),
+			ticketPrice: 1,
+			maxTickets: 5,
+		});
+		assert.equal((result as unknown as { minTickets?: number }).minTickets, 1);
+	});
+
+	it("debería rechazar minTickets mayor a maxTickets", async () => {
+		await assert.rejects(
+			() =>
+				useCase.execute({
+					title: "x",
+					startDate: new Date(),
+					endDate: new Date(),
+					ticketPrice: 1,
+					maxTickets: 5,
+					minTickets: 6,
+				}),
+			{ message: /minTickets no puede superar maxTickets/i },
+		);
+	});
 });

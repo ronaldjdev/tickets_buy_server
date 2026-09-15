@@ -14,6 +14,7 @@ type RaffleDoc = {
 	endDate: Date;
 	ticketPrice: number;
 	maxTickets: number;
+	minTickets?: number;
 	status: Raffle["status"];
 	winnerTicketId?: string;
 	createdAt?: Date;
@@ -47,6 +48,7 @@ export class RaffleMapper {
 			endDate: d.endDate,
 			ticketPrice: d.ticketPrice,
 			maxTickets: d.maxTickets,
+			minTickets: d.minTickets,
 			status: d.status,
 			winnerTicketId: d.winnerTicketId,
 			createdAt: d.createdAt,
@@ -65,6 +67,7 @@ export class RaffleMapper {
 			endDate: raffle.endDate,
 			ticketPrice: raffle.ticketPrice,
 			maxTickets: raffle.maxTickets,
+			minTickets: raffle.minTickets,
 			status: raffle.status,
 			winnerTicketId: raffle.winnerTicketId,
 		};

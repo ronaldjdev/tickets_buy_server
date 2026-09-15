@@ -1,3 +1,4 @@
+import type { IComboRepository } from "../../features/combo/domain/repositories/ICombo.repository.js";
 import type { NotificationService } from "../../features/notification/application/services/NotificationService.js";
 import type { IRaffleService } from "../../shared/contracts/raffle/IRaffleService.contract.js";
 import type { ITicketService } from "../../shared/contracts/ticket/ITicketService.contract.js";
@@ -18,6 +19,7 @@ export function createRaffleModule(
 	ticketService: ITicketService,
 	logger: ILogger,
 	notificationService?: NotificationService,
+	comboRepository?: IComboRepository,
 ): {
 	controller: RaffleController;
 	sharedService: IRaffleService;
@@ -38,6 +40,7 @@ export function createRaffleModule(
 		raffleRepository,
 		ticketService,
 		logger,
+		comboRepository,
 	);
 	const changeRaffleStatus = new ChangeRaffleStatus(
 		raffleRepository,

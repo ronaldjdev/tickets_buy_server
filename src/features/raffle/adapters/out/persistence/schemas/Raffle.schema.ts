@@ -45,6 +45,7 @@ const RaffleSchema = new Schema(
 		endDate: { type: Date, required: true },
 		ticketPrice: { type: Number, required: true },
 		maxTickets: { type: Number, required: true },
+		minTickets: { type: Number },
 		status: {
 			type: String,
 			enum: ["draft", "active", "drawn"],

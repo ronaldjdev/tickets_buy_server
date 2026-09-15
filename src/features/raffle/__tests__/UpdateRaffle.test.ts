@@ -5,6 +5,7 @@ import type {
 	TicketPayload,
 } from "../../../shared/contracts/ticket/ITicketService.contract.js";
 import { createNoopLogger } from "../../../test/testLogger.js";
+import type { IComboRepository } from "../../combo/domain/repositories/ICombo.repository.js";
 import { UpdateRaffle } from "../application/use-cases/UpdateRaffle.uc.js";
 import type { Raffle } from "../domain/entities/Raffle.entity.js";
 import { RaffleNotFoundError } from "../domain/errors/Raffle.error.js";
@@ -305,5 +306,76 @@ describe("UpdateRaffle", () => {
 		assert.equal(updated.title, "Nuevo título");
 		assert.equal(updated.slug, "nuevo-titulo");
 		assert.equal(ticketService.store.length, before);
+	});
+
+	it("debería guardar minTickets por defecto en 1", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const ticketService = new MockTicketService([]);
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			ticketService,
+			createNoopLogger(),
+		);
+
+		const updated = await useCase.execute({ raffleId: "raffle-1", title: "A" });
+		assert.equal(updated.minTickets, 1);
+	});
+
+	it("debería actualizar minTickets dentro del rango", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const ticketService = new MockTicketService([]);
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			ticketService,
+			createNoopLogger(),
+		);
+
+		const updated = await useCase.execute({
+			raffleId: "raffle-1",
+			minTickets: 3,
+		});
+		assert.equal(updated.minTickets, 3);
+	});
+
+	it("debería rechazar minTickets mayor a maxTickets", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const ticketService = new MockTicketService([]);
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			ticketService,
+			createNoopLogger(),
+		);
+
+		await assert.rejects(
+			() => useCase.execute({ raffleId: "raffle-1", minTickets: 6 }),
+			/minTickets no puede superar maxTickets/,
+		);
+	});
+
+	it("debería rechazar subir el mínimo si hay combos con menos boletos", async () => {
+		const raffleRepo = new MockRaffleRepository([makeRaffle(5)]);
+		const ticketService = new MockTicketService([]);
+		const comboRepo = {
+			byRaffle: async () => [
+				{
+					id: "c1",
+					raffleId: "raffle-1",
+					name: "Combo 2",
+					ticketCount: 2,
+					price: 100,
+				},
+			],
+		} as unknown as IComboRepository;
+		const useCase = new UpdateRaffle(
+			raffleRepo,
+			ticketService,
+			createNoopLogger(),
+			comboRepo,
+		);
+
+		await assert.rejects(
+			() => useCase.execute({ raffleId: "raffle-1", minTickets: 3 }),
+			/No se puede subir el mínimo a 3/,
+		);
 	});
 });

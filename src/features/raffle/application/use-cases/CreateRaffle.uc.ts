@@ -18,6 +18,7 @@ export interface CreateRaffleCommand {
 	endDate: Date;
 	ticketPrice: number;
 	maxTickets: number;
+	minTickets?: number;
 	status?: RaffleStatus;
 }
 
@@ -33,6 +34,15 @@ export class CreateRaffle {
 			throw new Error("maxTickets debe ser mayor a 0");
 		if (command.ticketPrice < 0)
 			throw new Error("ticketPrice no puede ser negativo");
+
+		const minTickets = command.minTickets ?? 1;
+		if (!Number.isInteger(minTickets) || minTickets < 1) {
+			throw new Error("minTickets debe ser un entero mayor o igual a 1");
+		}
+		if (minTickets > command.maxTickets) {
+			throw new Error("minTickets no puede superar maxTickets");
+		}
+
 		validatePrizes(command.prizes);
 
 		const id = randomUUID();
@@ -54,6 +64,7 @@ export class CreateRaffle {
 			endDate: command.endDate,
 			ticketPrice: command.ticketPrice,
 			maxTickets: command.maxTickets,
+			minTickets,
 			status: command.status ?? "draft",
 		};
 

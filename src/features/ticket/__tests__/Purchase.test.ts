@@ -488,6 +488,102 @@ describe("CreatePurchase (combos)", () => {
 	});
 });
 
+describe("CreatePurchase (mínimo y cantidad)", () => {
+	it("debería rechazar un combo por debajo del mínimo", async () => {
+		const { useCase, raffleService } = build();
+		raffleService.raffle = { ...makeRaffle(), minTickets: 4 };
+
+		await assert.rejects(
+			() => useCase.execute(makeCommand()),
+			(e: Error) =>
+				e instanceof UseCaseError &&
+				e.message.includes("mínimo de boletos por compra es 4"),
+		);
+	});
+
+	it("debería permitir un combo igual al mínimo", async () => {
+		const { useCase, raffleService } = build();
+		raffleService.raffle = { ...makeRaffle(), minTickets: 2 };
+
+		const result = await useCase.execute(makeCommand());
+		assert.equal(result.quantity, 2);
+		assert.equal(result.amount, 18000);
+		assert.equal(result.comboId, "combo-1");
+	});
+
+	it("debería rechazar cantidad personalizada por debajo del mínimo", async () => {
+		const { useCase, raffleService } = build();
+		raffleService.raffle = { ...makeRaffle(), minTickets: 4 };
+
+		await assert.rejects(
+			() =>
+				useCase.execute(
+					makeCommand({
+						comboId: undefined,
+						raffleId: "raffle-1",
+						quantity: 2,
+					}),
+				),
+			(e: Error) =>
+				e instanceof UseCaseError &&
+				e.message.includes("mínimo de boletos por compra es 4"),
+		);
+	});
+
+	it("debería rechazar cantidad personalizada mayor al máximo", async () => {
+		const { useCase } = build();
+
+		await assert.rejects(
+			() =>
+				useCase.execute(
+					makeCommand({
+						comboId: undefined,
+						raffleId: "raffle-1",
+						quantity: 11,
+					}),
+				),
+			(e: Error) =>
+				e instanceof UseCaseError &&
+				e.message.includes("No puedes comprar más de 10"),
+		);
+	});
+
+	it("debería fallar si no se indica combo ni cantidad", async () => {
+		const { useCase } = build();
+
+		await assert.rejects(
+			() =>
+				useCase.execute(
+					makeCommand({
+						comboId: undefined,
+						raffleId: undefined,
+						quantity: undefined,
+					}),
+				),
+			(e: Error) =>
+				e instanceof UseCaseError && e.message.includes("combo o una cantidad"),
+		);
+	});
+
+	it("debería cobrar la cantidad personalizada al valor del boleto", async () => {
+		const { useCase, ticketRepo, linkCreator } = build();
+
+		const result = await useCase.execute(
+			makeCommand({ comboId: undefined, raffleId: "raffle-1", quantity: 3 }),
+		);
+
+		assert.equal(result.quantity, 3);
+		assert.equal(result.amount, 30000);
+		assert.ok(!result.comboId);
+		assert.ok(!result.comboName);
+		assert.equal(linkCreator.inputs[0].amountInCents, 3000000);
+		assert.equal(
+			ticketRepo.store.filter((t) => t.status === "reserved").length,
+			3,
+		);
+	});
+});
+
 describe("ConfirmTicketPayment", () => {
 	it("debería marcar como comprados y notificar con los números", async () => {
 		const repo = new MockTicketRepo(makeTickets(3));

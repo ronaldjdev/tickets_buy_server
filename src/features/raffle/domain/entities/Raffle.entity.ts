@@ -95,6 +95,7 @@ export interface Raffle {
 	endDate: Date;
 	ticketPrice: number;
 	maxTickets: number;
+	minTickets?: number;
 	status: RaffleStatus;
 	winnerTicketId?: string;
 	createdAt?: Date;

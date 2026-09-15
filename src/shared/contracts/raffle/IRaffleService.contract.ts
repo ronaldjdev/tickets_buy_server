@@ -10,6 +10,7 @@ export interface RafflePayload {
 	status: "draft" | "active" | "drawn";
 	ticketPrice: number;
 	maxTickets: number;
+	minTickets?: number;
 	description?: string;
 	endDate?: string;
 	prizes?: RafflePrizePayload[];

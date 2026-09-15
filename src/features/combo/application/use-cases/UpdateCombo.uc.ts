@@ -55,6 +55,12 @@ export class UpdateCombo {
 				`El combo no puede superar los ${raffle.maxTickets} boletos de la sorteo.`,
 			);
 		}
+		const minTickets = raffle.minTickets ?? 1;
+		if (next.ticketCount < minTickets) {
+			throw new UseCaseError(
+				`El combo no puede tener menos de ${minTickets} boletos (mínimo de compra de la sorteo).`,
+			);
+		}
 
 		const combos = await this.comboRepository.byRaffle(combo.raffleId);
 		if (combos.some((c) => c.id !== combo.id && c.name === next.name)) {
