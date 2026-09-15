@@ -137,13 +137,20 @@ export async function initAuth(): Promise<Auth> {
 		telemetry: {
 			enabled: false,
 		},
+
+		trustedOrigins: [config.frontend.url, config.server.url],
+
 		advanced: {
-			disableOriginCheck: true,
-			disableCSRFCheck: true,
+			disableOriginCheck: false,
+			disableCSRFCheck: false,
 			cookies: {
 				session_token: {
 					attributes: {
-						httpOnly: false,
+						httpOnly: true,
+						sameSite: "lax",
+						secure:
+							config.server.env === "production" &&
+							config.server.url.startsWith("https://"),
 					},
 				},
 			},

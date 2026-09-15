@@ -19,31 +19,7 @@ export async function requireAuth(
 		});
 
 		if (session?.user) {
-			let role = (session.user as any).role || "vendedor";
-
-			const user = await userRepo.findByUserId(session.user.id);
-
-			if (user) {
-				if (user.status !== "activo") {
-					const messages: Record<string, string> = {
-						pendiente:
-							"Tu cuenta está pendiente de aprobación por un administrador",
-						suspendido:
-							"Tu cuenta ha sido suspendida. Contacta al administrador",
-						bloqueado: "Tu cuenta ha sido bloqueada. Contacta al administrador",
-					};
-					throw new AppError(messages[user.status] || "Cuenta no activa", 403);
-				}
-				role = user.role || role;
-			}
-
-			req.user = {
-				id: session.user.id,
-				email: session.user.email,
-				name: session.user.name,
-				role,
-			};
-
+			await attachUser(req, session.user, true);
 			return next();
 		}
 
@@ -58,6 +34,58 @@ export async function requireAuth(
 			next(new AppError("Error de autenticación", 401));
 		}
 	}
+}
+
+export async function optionalAuth(
+	req: Request,
+	_res: Response,
+	next: NextFunction,
+) {
+	try {
+		const auth = await getAuthApi();
+		const session = await auth.getSession({
+			headers: req.headers as Record<string, string>,
+		});
+
+		if (session?.user) {
+			await attachUser(req, session.user, false);
+		}
+		next();
+	} catch {
+		next();
+	}
+}
+
+async function attachUser(
+	req: Request,
+	sessionUser: any,
+	strict: boolean,
+) {
+	const user = await userRepo.findByUserId(sessionUser.id);
+	if (!user) return;
+
+	const role = sessionUser.role || "vendedor";
+
+	if (user.status !== "activo") {
+		if (strict) {
+			const messages: Record<string, string> = {
+				pendiente:
+					"Tu cuenta está pendiente de aprobación por un administrador",
+				suspendido:
+					"Tu cuenta ha sido suspendida. Contacta al administrador",
+				bloqueado: "Tu cuenta ha sido bloqueada. Contacta al administrador",
+			};
+			throw new AppError(messages[user.status] || "Cuenta no activa", 403);
+		}
+		return;
+	}
+
+	req.user = {
+		id: sessionUser.id,
+		email: sessionUser.email,
+		name: sessionUser.name,
+		role: user.role || role,
+	};
 }
 
 export function requireRole(...roles: string[]) {

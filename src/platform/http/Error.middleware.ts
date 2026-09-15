@@ -18,5 +18,5 @@ export function errorHandler(
 		error: message,
 		stack: (error as Error)?.stack,
 	});
-	return response(res, 500, message);
+	return response(res, 500, "Error interno del servidor");
 }

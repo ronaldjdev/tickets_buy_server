@@ -39,8 +39,11 @@ export class RaffleController {
 		next: NextFunction,
 	) => {
 		try {
+			const isAdmin = req.user?.role === "admin";
+			const status = req.query.status as never;
+
 			const raffles = await this.listRaffles.execute({
-				status: req.query.status as never,
+				status: isAdmin ? status : "active",
 				limit: req.query.limit ? Number(req.query.limit) : undefined,
 				offset: req.query.offset ? Number(req.query.offset) : undefined,
 			});
@@ -59,6 +62,12 @@ export class RaffleController {
 			const raffle = await this.getRaffle.execute({
 				raffleId: String(req.params.id),
 			});
+			if (isDraftHidden(raffle, req.user?.role)) {
+				return res.status(404).json({
+					success: false,
+					message: "Rifa no encontrada",
+				});
+			}
 			res.status(200).json({ data: raffle });
 		} catch (error) {
 			next(error);
@@ -74,6 +83,12 @@ export class RaffleController {
 			const raffle = await this.getRaffleBySlug.execute({
 				slug: String(req.params.slug),
 			});
+			if (isDraftHidden(raffle, req.user?.role)) {
+				return res.status(404).json({
+					success: false,
+					message: "Rifa no encontrada",
+				});
+			}
 			res.status(200).json({ data: raffle });
 		} catch (error) {
 			next(error);
@@ -141,4 +156,11 @@ export class RaffleController {
 			next(error);
 		}
 	};
+}
+
+function isDraftHidden(
+	raffle: { status?: string } | null,
+	role: string | undefined,
+): boolean {
+	return raffle?.status === "draft" && role !== "admin";
 }
