@@ -92,7 +92,10 @@ async function main() {
 	confirmRef = purchaseModule.confirmTicketPayment;
 
 	app.use("/api/raffles", createRaffleRoutes(raffleModule.controller));
-	app.use("/api/combos", createComboRoutes(comboModule.controller, raffleServiceProxy));
+	app.use(
+		"/api/combos",
+		createComboRoutes(comboModule.controller, raffleServiceProxy),
+	);
 	app.use("/api/tickets", createTicketRoutes(ticketModule.controller));
 	app.use("/api/purchases", createPurchaseRoutes(purchaseModule.controller));
 	app.use("/api/gateway", createGatewayRoutes(gatewayModule.controller));

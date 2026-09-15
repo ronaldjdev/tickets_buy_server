@@ -124,7 +124,8 @@ export class UpdateRaffle {
 			ticketPrice: command.ticketPrice ?? raffle.ticketPrice,
 			maxTickets,
 			minTickets,
-			ticketIssuance: command.ticketIssuance ?? raffle.ticketIssuance ?? "random",
+			ticketIssuance:
+				command.ticketIssuance ?? raffle.ticketIssuance ?? "random",
 			winnerTicketId: command.winnerTicketId ?? raffle.winnerTicketId,
 		});
 

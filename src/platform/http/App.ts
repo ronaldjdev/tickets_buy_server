@@ -44,8 +44,7 @@ export function createApp() {
 		legacyHeaders: false,
 		message: {
 			success: false,
-			message:
-				"Demasiados intentos de autenticación. Inténtalo más tarde",
+			message: "Demasiados intentos de autenticación. Inténtalo más tarde",
 		},
 	});
 
@@ -56,8 +55,7 @@ export function createApp() {
 		legacyHeaders: false,
 		message: {
 			success: false,
-			message:
-				"Demasiados intentos de autenticación. Inténtalo más tarde",
+			message: "Demasiados intentos de autenticación. Inténtalo más tarde",
 		},
 	});
 

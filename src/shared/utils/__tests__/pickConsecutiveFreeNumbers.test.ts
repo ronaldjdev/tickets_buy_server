@@ -8,10 +8,7 @@ describe("pickConsecutiveFreeNumbers", () => {
 	});
 
 	it("debería saltarse los números ya asignados", () => {
-		assert.deepEqual(
-			pickConsecutiveFreeNumbers(new Set([1, 3]), 5, 2),
-			[2, 4],
-		);
+		assert.deepEqual(pickConsecutiveFreeNumbers(new Set([1, 3]), 5, 2), [2, 4]);
 	});
 
 	it("debería respetar el límite maxNumber", () => {
@@ -22,16 +19,10 @@ describe("pickConsecutiveFreeNumbers", () => {
 	});
 
 	it("debería devolver vacío si no hay libres", () => {
-		assert.deepEqual(
-			pickConsecutiveFreeNumbers(new Set([1, 2, 3]), 3, 1),
-			[],
-		);
+		assert.deepEqual(pickConsecutiveFreeNumbers(new Set([1, 2, 3]), 3, 1), []);
 	});
 
 	it("debería rellenar huecos de números liberados", () => {
-		assert.deepEqual(
-			pickConsecutiveFreeNumbers(new Set([2, 4]), 4, 3),
-			[1, 3],
-		);
+		assert.deepEqual(pickConsecutiveFreeNumbers(new Set([2, 4]), 4, 3), [1, 3]);
 	});
 });

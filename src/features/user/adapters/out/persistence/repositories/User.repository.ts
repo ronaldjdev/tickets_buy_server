@@ -42,7 +42,10 @@ export class UserRepository implements IUserRepository {
 
 	async list(options: OptionsPag): Promise<IListUsersResponse> {
 		const query = QueryFactory.assembleQueryOptions(options);
-		const search = QueryFactory.createSearchQuery(USER_SEARCH_FIELDS, options.q);
+		const search = QueryFactory.createSearchQuery(
+			USER_SEARCH_FIELDS,
+			options.q,
+		);
 		if (search) Object.assign(query, search);
 		const sortOptions = QueryFactory.createSortOptions();
 		const skip = (options.page - 1) * options.limit;

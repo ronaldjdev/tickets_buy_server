@@ -56,11 +56,7 @@ export async function optionalAuth(
 	}
 }
 
-async function attachUser(
-	req: Request,
-	sessionUser: any,
-	strict: boolean,
-) {
+async function attachUser(req: Request, sessionUser: any, strict: boolean) {
 	const user = await userRepo.findByUserId(sessionUser.id);
 	if (!user) return;
 
@@ -71,8 +67,7 @@ async function attachUser(
 			const messages: Record<string, string> = {
 				pendiente:
 					"Tu cuenta está pendiente de aprobación por un administrador",
-				suspendido:
-					"Tu cuenta ha sido suspendida. Contacta al administrador",
+				suspendido: "Tu cuenta ha sido suspendida. Contacta al administrador",
 				bloqueado: "Tu cuenta ha sido bloqueada. Contacta al administrador",
 			};
 			throw new AppError(messages[user.status] || "Cuenta no activa", 403);

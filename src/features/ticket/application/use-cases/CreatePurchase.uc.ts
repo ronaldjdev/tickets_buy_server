@@ -8,11 +8,11 @@ import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
 import type { ILogger } from "../../../../shared/port/ILogger.port.js";
 import { pickConsecutiveFreeNumbers } from "../../../../shared/utils/pickConsecutiveFreeNumbers.js";
 import { pickRandomFreeNumbers } from "../../../../shared/utils/pickRandomFreeNumbers.js";
-import type { TicketIssuanceMode } from "../../../raffle/domain/entities/Raffle.entity.js";
 import type { Combo } from "../../../combo/domain/entities/Combo.entity.js";
 import type { IComboRepository } from "../../../combo/domain/repositories/ICombo.repository.js";
 import type { Contact } from "../../../contact/domain/entities/Contact.entity.js";
 import type { IContactRepository } from "../../../contact/domain/repositories/IContact.repository.js";
+import type { TicketIssuanceMode } from "../../../raffle/domain/entities/Raffle.entity.js";
 import type {
 	Ticket,
 	TicketStatus,

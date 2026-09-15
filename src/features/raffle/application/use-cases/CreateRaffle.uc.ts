@@ -50,9 +50,7 @@ export class CreateRaffle {
 
 		const ticketIssuance = command.ticketIssuance ?? "random";
 		if (!isTicketIssuanceMode(ticketIssuance)) {
-			throw new Error(
-				"ticketIssuance debe ser 'random' o 'consecutive'",
-			);
+			throw new Error("ticketIssuance debe ser 'random' o 'consecutive'");
 		}
 
 		validatePrizes(command.prizes);

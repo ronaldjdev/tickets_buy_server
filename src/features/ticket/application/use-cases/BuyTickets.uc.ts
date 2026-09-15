@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { IRaffleService } from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
 import type { ILogger } from "../../../../shared/port/ILogger.port.js";
-import type { TicketIssuanceMode } from "../../../raffle/domain/entities/Raffle.entity.js";
 import { pickConsecutiveFreeNumbers } from "../../../../shared/utils/pickConsecutiveFreeNumbers.js";
 import { pickRandomFreeNumbers } from "../../../../shared/utils/pickRandomFreeNumbers.js";
+import type { TicketIssuanceMode } from "../../../raffle/domain/entities/Raffle.entity.js";
 import type {
 	Ticket,
 	TicketStatus,
