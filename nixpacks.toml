@@ -1,6 +1,7 @@
 [variables]
 NIXPACKS_NODE_VERSION = "22"
 PNPM_HOME = "/app/.pnpm"
+FRONTEND_URL = "http://localhost:3000,https://cheveremax-frontend-gxenjz-72c3cb-72-60-24-235.sslip.io"
 
 [phases.install]
 cmds = [

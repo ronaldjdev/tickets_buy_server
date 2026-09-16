@@ -43,7 +43,10 @@ const nodeEnv = process.env.NODE_ENV || "development";
 
 function loadConfig(): ConfigType {
 	const serverUrl = process.env.SERVER_URL ?? `http://localhost:${env.port}`;
-	const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
+	const frontendUrl =
+		(process.env.FRONTEND_URL ?? "http://localhost:3000")
+			.split(",")[0]
+			?.trim() ?? "http://localhost:3000";
 
 	return {
 		server: {

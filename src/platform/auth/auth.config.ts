@@ -138,7 +138,13 @@ export async function initAuth(): Promise<Auth> {
 			enabled: false,
 		},
 
-		trustedOrigins: [config.frontend.url, config.server.url],
+		trustedOrigins: [
+			...config.frontend.url
+				.split(",")
+				.map((origin) => origin.trim())
+				.filter(Boolean),
+			config.server.url,
+		],
 
 		advanced: {
 			disableOriginCheck: false,
