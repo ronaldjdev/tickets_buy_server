@@ -1,0 +1,13 @@
+[variables]
+NIXPACKS_NODE_VERSION = "22"
+PNPM_HOME = "/app/.pnpm"
+
+[phases.install]
+cmds = [
+  "npm install -g corepack@latest && corepack enable",
+  "corepack prepare pnpm@11.15.1 --activate",
+  "pnpm i --frozen-lockfile"
+]
+
+[start]
+cmd = "node dist/main.js"
