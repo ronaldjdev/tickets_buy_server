@@ -6,10 +6,17 @@ import helmet from "helmet";
 const API_RATE_LIMIT_MAX = Number(process.env.API_RATE_LIMIT_MAX ?? 600);
 const AUTH_RATE_LIMIT_MAX = Number(process.env.AUTH_RATE_LIMIT_MAX ?? 100);
 
+function parseOrigins(value: string | undefined): string[] {
+	return (value ?? "http://localhost:3000")
+		.split(",")
+		.map((origin) => origin.trim())
+		.filter(Boolean);
+}
+
 export function createApp() {
 	const app = express();
 
-	const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
+	const frontendOrigins = parseOrigins(process.env.FRONTEND_URL);
 
 	app.set("trust proxy", 1);
 	app.use(
@@ -21,7 +28,7 @@ export function createApp() {
 
 	app.use(
 		cors({
-			origin: frontendUrl,
+			origin: frontendOrigins,
 			credentials: true,
 			allowedHeaders: ["Content-Type", "Authorization"],
 		}),

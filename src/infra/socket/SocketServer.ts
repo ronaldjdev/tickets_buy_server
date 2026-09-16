@@ -7,14 +7,14 @@ export class SocketServer implements ISocketServer {
 	private io: SocketIOServer | null = null;
 	private httpServer: HttpServer | null = null;
 
-	init(server: HttpServer, clientUrl: string) {
+	init(server: HttpServer, clientOrigins: string[]) {
 		this.httpServer = server;
 
 		this.io = new SocketIOServer(server, {
 			cors: {
 				origin:
 					process.env.NODE_ENV === "production"
-						? [clientUrl, "http://localhost:3000"]
+						? [...clientOrigins, "http://localhost:3000"]
 						: true,
 				credentials: true,
 			},
