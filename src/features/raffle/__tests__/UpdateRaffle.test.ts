@@ -104,6 +104,28 @@ class MockTicketService implements ITicketService {
 		return winner;
 	}
 
+	async createGuaranteedWinner(
+		raffleId: string,
+		number: number,
+	): Promise<TicketPayload> {
+		const ticket: TicketPayload = {
+			id: `g-${number}`,
+			raffleId,
+			number,
+			status: "guaranteed",
+		};
+		this.store.push(ticket);
+		return ticket;
+	}
+
+	async countSoldTickets(raffleId: string): Promise<number> {
+		return this.store.filter(
+			(t) =>
+				t.raffleId === raffleId &&
+				(t.status === "purchased" || t.status === "winner"),
+		).length;
+	}
+
 	async releaseAvailableBeyond(
 		raffleId: string,
 		count: number,

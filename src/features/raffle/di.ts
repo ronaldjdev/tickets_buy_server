@@ -10,6 +10,7 @@ import { ChangeRaffleStatus } from "./application/use-cases/ChangeRaffleStatus.u
 import { CreateRaffle } from "./application/use-cases/CreateRaffle.uc.js";
 import { DeleteRaffle } from "./application/use-cases/DeleteRaffle.uc.js";
 import { DrawWinner } from "./application/use-cases/DrawWinner.uc.js";
+import { ExpediteWinningNumber } from "./application/use-cases/ExpediteWinningNumber.uc.js";
 import { GetRaffle } from "./application/use-cases/GetRaffle.uc.js";
 import { GetRaffleBySlug } from "./application/use-cases/GetRaffleBySlug.uc.js";
 import { ListRaffles } from "./application/use-cases/ListRaffles.uc.js";
@@ -52,6 +53,11 @@ export function createRaffleModule(
 		ticketService,
 		logger,
 	);
+	const expediteWinningNumber = new ExpediteWinningNumber(
+		raffleRepository,
+		ticketService,
+		logger,
+	);
 
 	const controller = new RaffleController(
 		createRaffle,
@@ -62,8 +68,10 @@ export function createRaffleModule(
 		updateRaffle,
 		changeRaffleStatus,
 		deleteRaffle,
+		expediteWinningNumber,
+		ticketService,
 	);
-	const sharedService = new RaffleSharedService(raffleRepository);
+	const sharedService = new RaffleSharedService(raffleRepository, ticketService);
 
 	return { controller, sharedService };
 }

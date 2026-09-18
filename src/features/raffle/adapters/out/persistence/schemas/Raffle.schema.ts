@@ -31,6 +31,10 @@ const PrizeSchema = new Schema(
 		description: { type: String },
 		imageUrl: { type: String },
 		schedule: { type: PrizeScheduleSchema },
+		winningNumber: { type: Number },
+		winningMinSoldTickets: { type: Number },
+		winningExpeditedAt: { type: String },
+		winningExpeditedBy: { type: String },
 	},
 	{ _id: false },
 );

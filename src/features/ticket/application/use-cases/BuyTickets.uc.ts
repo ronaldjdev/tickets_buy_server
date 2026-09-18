@@ -8,6 +8,7 @@ import type {
 	Ticket,
 	TicketStatus,
 } from "../../domain/entities/Ticket.entity.js";
+import { ASSIGNED_TICKET_STATUSES } from "../../domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
@@ -15,18 +16,19 @@ import {
 } from "../../domain/errors/Ticket.error.js";
 import type { ITicketRepository } from "../../domain/repositories/ITicket.repository.js";
 
-const ASSIGNED_STATUSES: TicketStatus[] = ["reserved", "purchased", "winner"];
+const ASSIGNED_STATUSES: TicketStatus[] = [...ASSIGNED_TICKET_STATUSES];
 
 export function pickFreeNumbers(
 	existing: ReadonlySet<number>,
 	maxNumber: number,
 	count: number,
 	mode?: TicketIssuanceMode,
+	excluded: ReadonlySet<number> = new Set(),
 ): number[] {
 	if (mode === "consecutive") {
-		return pickConsecutiveFreeNumbers(existing, maxNumber, count);
+		return pickConsecutiveFreeNumbers(existing, maxNumber, count, excluded);
 	}
-	return pickRandomFreeNumbers(existing, maxNumber, count);
+	return pickRandomFreeNumbers(existing, maxNumber, count, excluded);
 }
 
 export interface BuyTicketsCommand {
@@ -59,11 +61,17 @@ export class BuyTickets {
 		const existingNumbers = new Set(
 			await this.ticketRepository.findNumbersByRaffle(command.raffleId),
 		);
+		const protectedNumbers = new Set(
+			(raffle.prizes ?? [])
+				.map((p) => p.winningNumber)
+				.filter((n): n is number => n !== undefined),
+		);
 		const numbers = pickFreeNumbers(
 			existingNumbers,
 			raffle.maxTickets,
 			command.quantity,
 			raffle.ticketIssuance,
+			protectedNumbers,
 		);
 		if (numbers.length < command.quantity)
 			throw new RaffleSoldOutError(command.raffleId);

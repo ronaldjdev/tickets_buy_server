@@ -80,7 +80,7 @@ export class TicketRepository implements ITicketRepository {
 	async findWinningTicket(raffleId: string): Promise<Ticket | null> {
 		const doc = await TicketModel.findOne({
 			raffleId,
-			status: "winner",
+			status: { $in: ["winner", "guaranteed"] },
 		}).lean();
 		return doc
 			? TicketMapper.toDomain(doc as unknown as Record<string, unknown>)

@@ -2,6 +2,11 @@ export interface RafflePrizePayload {
 	type: string;
 	name: string;
 	description?: string;
+	winningNumber?: number;
+	winningMinSoldTickets?: number;
+	winningStatus?: "blocked" | "enabled" | "expedited";
+	winningExpeditedAt?: string;
+	winningExpeditedBy?: string;
 }
 
 export interface RafflePayload {
@@ -14,6 +19,7 @@ export interface RafflePayload {
 	ticketIssuance?: "random" | "consecutive";
 	description?: string;
 	endDate?: string;
+	soldTickets?: number;
 	prizes?: RafflePrizePayload[];
 }
 

@@ -252,6 +252,65 @@ describe("BuyTickets", () => {
 		);
 	});
 
+	it("debería saltarse el número ganador en modo consecutivo", async () => {
+		const raffleService = new MockRaffleService({
+			...makeRaffle(),
+			ticketIssuance: "consecutive" as const,
+			prizes: [
+				{
+					type: "mayor",
+					name: "Premio",
+					winningNumber: 3,
+					winningMinSoldTickets: 3,
+				},
+			],
+		});
+		const repo = new MockTicketRepository([]);
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
+
+		const purchased = await useCase.execute({
+			raffleId: "raffle-1",
+			quantity: 4,
+			buyerName: "Ana",
+			buyerEmail: "ana@mail.com",
+		});
+
+		assert.deepEqual(
+			purchased.map((t) => t.number).sort((a, b) => a - b),
+			[1, 2, 4, 5],
+			"el número ganador 3 nunca se entrega",
+		);
+	});
+
+	it("debería excluir el número ganador en varias compras aleatorias", async () => {
+		const raffleService = new MockRaffleService({
+			...makeRaffle(),
+			prizes: [
+				{
+					type: "mayor",
+					name: "Premio",
+					winningNumber: 7,
+					winningMinSoldTickets: 3,
+				},
+			],
+		});
+		const repo = new MockTicketRepository(makeTickets(4, 0));
+		const useCase = new BuyTickets(raffleService, repo, noopLogger);
+
+		for (let i = 0; i < 3; i++) {
+			const purchased = await useCase.execute({
+				raffleId: "raffle-1",
+				quantity: 1,
+				buyerName: "Ana",
+				buyerEmail: "ana@mail.com",
+			});
+			assert.ok(
+				!purchased.some((t) => t.number === 7),
+				`nunca asigna el número ganador: ${purchased.map((t) => t.number)}`,
+			);
+		}
+	});
+
 	it("debería fallar si la raffle no existe", async () => {
 		const raffleService = new MockRaffleService(null);
 		const repo = new MockTicketRepository(makeTickets(5, 0));

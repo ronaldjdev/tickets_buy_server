@@ -17,6 +17,7 @@ import type {
 	Ticket,
 	TicketStatus,
 } from "../../domain/entities/Ticket.entity.js";
+import { ASSIGNED_TICKET_STATUSES } from "../../domain/entities/Ticket.entity.js";
 import {
 	RaffleNotActiveError,
 	RaffleNotFoundError,
@@ -29,7 +30,7 @@ import type {
 
 export const RESERVATION_TTL_MINUTES = 15;
 const MAX_RESERVATION_ATTEMPTS = 10;
-const ASSIGNED_STATUSES: TicketStatus[] = ["reserved", "purchased", "winner"];
+const ASSIGNED_STATUSES: TicketStatus[] = [...ASSIGNED_TICKET_STATUSES];
 
 export interface CreatePurchaseCommand {
 	comboId?: string;
@@ -148,12 +149,18 @@ export class CreatePurchase {
 		const reservedUntil = new Date(
 			Date.now() + RESERVATION_TTL_MINUTES * 60 * 1000,
 		);
+		const protectedNumbers = new Set(
+			(raffle.prizes ?? [])
+				.map((p) => p.winningNumber)
+				.filter((n): n is number => n !== undefined),
+		);
 
 		const claimed = await this.reserveTickets(
 			raffle.id,
 			raffle.maxTickets,
 			quantity,
 			raffle.ticketIssuance ?? "random",
+			protectedNumbers,
 			{
 				purchaseId,
 				reservedUntil,
@@ -209,6 +216,7 @@ export class CreatePurchase {
 		maxNumber: number,
 		quantity: number,
 		mode: TicketIssuanceMode,
+		protectedNumbers: ReadonlySet<number>,
 		data: ReserveTicketsData,
 	): Promise<Ticket[]> {
 		let claimed: Ticket[] = [];
@@ -223,7 +231,8 @@ export class CreatePurchase {
 				raffleId,
 				ASSIGNED_STATUSES,
 			);
-			const freeSlots = maxNumber - assigned;
+			const freeSlots =
+				maxNumber - assigned - protectedNumbers.size;
 			if (freeSlots <= 0) break;
 
 			const needed = Math.min(quantity - claimed.length, freeSlots);
@@ -235,6 +244,7 @@ export class CreatePurchase {
 				maxNumber,
 				needed,
 				mode,
+				protectedNumbers,
 			);
 			if (numbers.length === 0) break;
 
@@ -268,11 +278,12 @@ export class CreatePurchase {
 		maxNumber: number,
 		count: number,
 		mode?: TicketIssuanceMode,
+		excluded: ReadonlySet<number> = new Set(),
 	): number[] {
 		if (mode === "consecutive") {
-			return pickConsecutiveFreeNumbers(existing, maxNumber, count);
+			return pickConsecutiveFreeNumbers(existing, maxNumber, count, excluded);
 		}
-		return pickRandomFreeNumbers(existing, maxNumber, count);
+		return pickRandomFreeNumbers(existing, maxNumber, count, excluded);
 	}
 
 	private async registerBuyer(

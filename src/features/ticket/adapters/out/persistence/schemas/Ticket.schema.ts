@@ -21,7 +21,7 @@ const TicketSchema = new Schema(
 		reservedUntil: { type: Date },
 		status: {
 			type: String,
-			enum: ["available", "reserved", "purchased", "winner"],
+			enum: ["available", "reserved", "purchased", "winner", "guaranteed"],
 			default: "available",
 			required: true,
 		},

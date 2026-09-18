@@ -11,6 +11,7 @@ import type {
 import {
 	isTicketIssuanceMode,
 	validatePrizes,
+	validateWinningNumberConfig,
 } from "../../domain/entities/Raffle.entity.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
 
@@ -54,6 +55,7 @@ export class CreateRaffle {
 		}
 
 		validatePrizes(command.prizes);
+		validateWinningNumberConfig(command.prizes, command.maxTickets);
 
 		const id = randomUUID();
 		const slug = await ensureUniqueSlug(slugify(command.title), (s) =>

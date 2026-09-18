@@ -6,13 +6,12 @@ import db from "../infra/mongodb/Mongo.config.js";
 import { initAuth } from "../platform/auth/auth.config.js";
 import logger from "../platform/logger/index.js";
 
-const adminEmail = (process.env.SEED_ADMIN_EMAIL!).toLowerCase();
+const adminEmail = process.env.SEED_ADMIN_EMAIL	!.toLowerCase();
 const adminPassword = process.env.SEED_ADMIN_PASSWORD!;
 const adminName = process.env.SEED_ADMIN_NAME!;
 const adminDocumentType = process.env.SEED_ADMIN_DOCUMENT_TYPE!;
 const adminDocumentNumber = process.env.SEED_ADMIN_DOCUMENT_NUMBER!;
 const adminPhone = process.env.SEED_ADMIN_PHONE!;
-const adminRole = process.env.SEED_ADMIN_ROLE!;
 
 async function main(): Promise<void> {
 	const auth = await initAuth();
@@ -26,9 +25,9 @@ async function main(): Promise<void> {
 		adminId = String(existing._id);
 		await authUsers.updateOne(
 			{ email: adminEmail },
-			{ $set: { role: adminRole } },
+			{ $set: { role: "admin" } },
 		);
-		logger.warn(`Usuario existente promovido a rol ${adminRole}: ${adminEmail}`);
+		logger.warn(`Usuario existente promovido a rol admin: ${adminEmail}`);
 	} else {
 		const result = await auth.api.signUpEmail({
 			body: {
@@ -43,9 +42,9 @@ async function main(): Promise<void> {
 		adminId = result.user.id;
 		await authUsers.updateOne(
 			{ email: adminEmail },
-			{ $set: { role: adminRole } },
+			{ $set: { role: "admin" } },
 		);
-		logger.info(`Usuario ${adminRole} creado: ${adminEmail}`);
+		logger.info(`Usuario admin creado: ${adminEmail}`);
 	}
 
 	await db.collection("users").updateOne(
@@ -53,7 +52,7 @@ async function main(): Promise<void> {
 		{
 			$setOnInsert: {
 				name: adminName,
-				role: adminRole,
+				role: "admin",
 				documentType: adminDocumentType,
 				documentNumber: adminDocumentNumber,
 				phone: adminPhone,

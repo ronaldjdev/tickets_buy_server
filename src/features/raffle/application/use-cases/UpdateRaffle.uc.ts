@@ -11,6 +11,7 @@ import type {
 import {
 	isTicketIssuanceMode,
 	validatePrizes,
+	validateWinningNumberConfig,
 } from "../../domain/entities/Raffle.entity.js";
 import { RaffleNotFoundError } from "../../domain/errors/Raffle.error.js";
 import type { IRaffleRepository } from "../../domain/repositories/IRaffle.repository.js";
@@ -88,6 +89,25 @@ export class UpdateRaffle {
 			}
 
 			maxTickets = newMax;
+		}
+
+		validateWinningNumberConfig(command.prizes, maxTickets);
+		if (command.prizes) {
+			const existingNumbers = new Set(
+				(await this.ticketService.listTickets(raffle.id)).map(
+					(t) => t.number,
+				),
+			);
+			for (const prize of command.prizes) {
+				if (
+					prize.winningNumber !== undefined &&
+					existingNumbers.has(prize.winningNumber)
+				) {
+					throw new Error(
+						`El número ganador ${prize.winningNumber} ya está asignado a un boleto; elige otro número`,
+					);
+				}
+			}
 		}
 
 		let minTickets = raffle.minTickets ?? 1;

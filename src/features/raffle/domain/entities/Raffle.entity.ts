@@ -30,13 +30,101 @@ export type RafflePrizeSchedule =
 	| { mode: "weekday"; weekday: number }
 	| { mode: "date"; date: string };
 
+export type WinningNumberStatus = "blocked" | "enabled" | "expedited";
+
 export type RafflePrize = {
 	type: RafflePrizeType;
 	name: string;
 	description?: string;
 	imageUrl?: string;
 	schedule?: RafflePrizeSchedule;
+	/**
+	 * Número ganador fijo del premio (p.ej. 7). Mientras no se expida, ese
+	 * número queda bloqueado: no se entrega ni aleatoria ni consecutivamente.
+	 */
+	winningNumber?: number;
+	/**
+	 * Mínimo de boletos vendidos necesario para que el número ganador pase de
+	 * "bloqueado" a "habilitado". Si se omite, queda bloqueado hasta que un
+	 * admin lo expida manualmente.
+	 */
+	winningMinSoldTickets?: number;
+	/** Fecha (ISO) de expedición manual del número ganador. */
+	winningExpeditedAt?: string;
+	/** Identificador del admin que expidió el número ganador. */
+	winningExpeditedBy?: string;
 };
+
+/**
+ * Deriva el estado del número ganador: null si no hay número configurado;
+ * "expedited" si ya se expidió; "enabled" si se alcanzó el mínimo de ventas;
+ * "blocked" en cualquier otro caso.
+ */
+export function getWinningNumberStatus(
+	prize: RafflePrize,
+	soldTickets: number,
+): WinningNumberStatus | null {
+	if (prize.winningNumber === undefined) return null;
+	if (prize.winningExpeditedAt) return "expedited";
+	if (
+		prize.winningMinSoldTickets !== undefined &&
+		soldTickets >= prize.winningMinSoldTickets
+	) {
+		return "enabled";
+	}
+	return "blocked";
+}
+
+/**
+ * Valida la configuración de números ganadores de los premios contra el
+ * máximo de boletos del sorteo (rango, mínimo, duplicados y consistencia).
+ */
+export function validateWinningNumberConfig(
+	prizes: RafflePrize[] | undefined,
+	maxTickets: number,
+): void {
+	if (!prizes) return;
+	const seen = new Set<number>();
+	for (const prize of prizes) {
+		if (prize.winningNumber === undefined) {
+			if (
+				prize.winningMinSoldTickets !== undefined ||
+				prize.winningExpeditedAt !== undefined
+			) {
+				throw new Error(
+					"El premio define mínimo o expedición sin un número ganador",
+				);
+			}
+			continue;
+		}
+		if (
+			!Number.isInteger(prize.winningNumber) ||
+			prize.winningNumber < 1 ||
+			prize.winningNumber > maxTickets
+		) {
+			throw new Error(
+				`El número ganador debe ser un entero entre 1 y ${maxTickets}`,
+			);
+		}
+		if (seen.has(prize.winningNumber)) {
+			throw new Error(
+				`El número ganador ${prize.winningNumber} no puede asignarse a dos premios`,
+			);
+		}
+		seen.add(prize.winningNumber);
+		if (prize.winningMinSoldTickets !== undefined) {
+			if (
+				!Number.isInteger(prize.winningMinSoldTickets) ||
+				prize.winningMinSoldTickets < 1 ||
+				prize.winningMinSoldTickets > maxTickets
+			) {
+				throw new Error(
+					`El mínimo de ventas del número ganador debe ser un entero entre 1 y ${maxTickets}`,
+				);
+			}
+		}
+	}
+}
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -27,6 +27,16 @@ export class DrawWinner {
 		if (raffle.status === "drawn")
 			throw new RaffleAlreadyDrawnError(command.raffleId);
 
+		const expeditedPrize =
+			(raffle.prizes ?? []).find((p) => p.type === "mayor" && p.winningExpeditedAt) ??
+			(raffle.prizes ?? []).find(
+				(p) => p.winningExpeditedAt && p.winningNumber !== undefined,
+			);
+
+		if (expeditedPrize?.winningNumber !== undefined) {
+			return this.drawGuaranteedWinner(raffle, expeditedPrize.winningNumber);
+		}
+
 		const tickets = await this.ticketService.listTickets(command.raffleId);
 		const purchased = tickets.filter((t) => t.status === "purchased");
 		if (purchased.length === 0)
@@ -41,26 +51,7 @@ export class DrawWinner {
 			winnerTicketId: winnerTicket.id,
 		});
 
-		if (this.notificationService) {
-			try {
-				await this.notificationService.notifyUsers({
-					type: "sale_drawn",
-					title: "Ganador asignado",
-					message: `El sorteo "${drawn.title}" ya tiene ganador (boleta #${winnerTicket.number}).`,
-					metadata: {
-						raffleId: drawn.id,
-						winnerTicketId: winnerTicket.id,
-					},
-				});
-			} catch (error) {
-				this.logger?.warn(
-					"No se pudo emitir notificación de ganador asignado",
-					{
-						error,
-					},
-				);
-			}
-		}
+		await this.notifyDrawn(drawn, winnerTicket.number, winnerTicket.id);
 
 		this.logger?.info("Ganador asignado", {
 			operation: "raffle.draw_winner",
@@ -71,5 +62,60 @@ export class DrawWinner {
 		});
 
 		return drawn;
+	}
+
+	private async drawGuaranteedWinner(
+		raffle: Raffle,
+		winningNumber: number,
+	): Promise<Raffle> {
+		const winnerTicket = await this.ticketService.createGuaranteedWinner(
+			raffle.id,
+			winningNumber,
+		);
+
+		const drawn = await this.raffleRepository.update({
+			...raffle,
+			status: "drawn",
+			winnerTicketId: winnerTicket.id,
+		});
+
+		await this.notifyDrawn(drawn, winnerTicket.number, winnerTicket.id);
+
+		this.logger?.info("Ganador garantizado asignado", {
+			operation: "raffle.draw_winner",
+			raffleId: drawn.id,
+			winnerTicketId: winnerTicket.id,
+			winnerNumber: winnerTicket.number,
+			guaranteed: true,
+			title: drawn.title,
+		});
+
+		return drawn;
+	}
+
+	private async notifyDrawn(
+		drawn: Raffle,
+		winnerNumber: number,
+		winnerTicketId: string,
+	): Promise<void> {
+		if (!this.notificationService) return;
+		try {
+			await this.notificationService.notifyUsers({
+				type: "sale_drawn",
+				title: "Ganador asignado",
+				message: `El sorteo "${drawn.title}" ya tiene ganador (boleta #${winnerNumber}).`,
+				metadata: {
+					raffleId: drawn.id,
+					winnerTicketId,
+				},
+			});
+		} catch (error) {
+			this.logger?.warn(
+				"No se pudo emitir notificación de ganador asignado",
+				{
+					error,
+				},
+			);
+		}
 	}
 }

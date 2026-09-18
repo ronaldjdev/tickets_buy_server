@@ -1,8 +1,12 @@
+import { randomUUID } from "node:crypto";
 import type {
 	ITicketService,
 	TicketPayload,
 } from "../../../../../shared/contracts/ticket/ITicketService.contract.js";
-import type { Ticket } from "../../../domain/entities/Ticket.entity.js";
+import {
+	SOLD_TICKET_STATUSES,
+	type Ticket,
+} from "../../../domain/entities/Ticket.entity.js";
 import { TicketNotFoundError } from "../../../domain/errors/Ticket.error.js";
 import type { ITicketRepository } from "../../../domain/repositories/ITicket.repository.js";
 
@@ -26,6 +30,25 @@ export class TicketSharedService implements ITicketService {
 			status: "winner",
 		});
 		return this.toPayload(winner);
+	}
+
+	async createGuaranteedWinner(
+		raffleId: string,
+		number: number,
+	): Promise<TicketPayload> {
+		const ticket = await this.ticketRepository.save({
+			id: randomUUID(),
+			raffleId,
+			number,
+			status: "guaranteed",
+		});
+		return this.toPayload(ticket);
+	}
+
+	async countSoldTickets(raffleId: string): Promise<number> {
+		return this.ticketRepository.countByRaffle(raffleId, [
+			...SOLD_TICKET_STATUSES,
+		]);
 	}
 
 	async releaseAvailableBeyond(

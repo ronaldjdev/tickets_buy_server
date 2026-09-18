@@ -427,6 +427,31 @@ describe("CreatePurchase (combos)", () => {
 		assert.equal(overlap.length, 0, "números nunca se repiten entre compras");
 	});
 
+	it("debería excluir el número ganador configurado de la compra", async () => {
+		const { useCase, raffleService } = build();
+		raffleService.raffle = {
+			...makeRaffle(),
+			prizes: [
+				{
+					type: "mayor",
+					name: "Premio",
+					winningNumber: 7,
+					winningMinSoldTickets: 3,
+				},
+			],
+		};
+
+		for (let i = 0; i < 2; i++) {
+			const result = await useCase.execute(
+				makeCommand({ buyerEmail: `c${i}@mail.com` }),
+			);
+			assert.ok(
+				!result.ticketNumbers.includes(7),
+				`nunca asigna el número ganador: ${result.ticketNumbers}`,
+			);
+		}
+	});
+
 	it("debería reservar números consecutivos si la sorteo es consecutiva", async () => {
 		const { useCase, raffleService, ticketRepo } = build();
 		raffleService.raffle = {

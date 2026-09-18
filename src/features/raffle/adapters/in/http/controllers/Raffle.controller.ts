@@ -1,12 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
+import type { ITicketService } from "../../../../../../shared/contracts/ticket/ITicketService.contract.js";
 import type { ChangeRaffleStatus } from "../../../../application/use-cases/ChangeRaffleStatus.uc.js";
 import type { CreateRaffle } from "../../../../application/use-cases/CreateRaffle.uc.js";
 import type { DeleteRaffle } from "../../../../application/use-cases/DeleteRaffle.uc.js";
 import type { DrawWinner } from "../../../../application/use-cases/DrawWinner.uc.js";
+import type { ExpediteWinningNumber } from "../../../../application/use-cases/ExpediteWinningNumber.uc.js";
 import type { GetRaffle } from "../../../../application/use-cases/GetRaffle.uc.js";
 import type { GetRaffleBySlug } from "../../../../application/use-cases/GetRaffleBySlug.uc.js";
 import type { ListRaffles } from "../../../../application/use-cases/ListRaffles.uc.js";
 import type { UpdateRaffle } from "../../../../application/use-cases/UpdateRaffle.uc.js";
+import {
+	getWinningNumberStatus,
+	type Raffle,
+	type RafflePrize,
+} from "../../../../domain/entities/Raffle.entity.js";
 
 export class RaffleController {
 	constructor(
@@ -18,6 +25,8 @@ export class RaffleController {
 		private readonly updateRaffle: UpdateRaffle,
 		private readonly changeRaffleStatus: ChangeRaffleStatus,
 		private readonly deleteRaffle: DeleteRaffle,
+		private readonly expediteWinningNumber: ExpediteWinningNumber,
+		private readonly ticketService: ITicketService,
 	) {}
 
 	createRaffleHandler = async (
@@ -68,7 +77,9 @@ export class RaffleController {
 					message: "Rifa no encontrada",
 				});
 			}
-			res.status(200).json({ data: raffle });
+			res.status(200).json({
+				data: await this.withWinningInfo(raffle),
+			});
 		} catch (error) {
 			next(error);
 		}
@@ -89,7 +100,9 @@ export class RaffleController {
 					message: "Rifa no encontrada",
 				});
 			}
-			res.status(200).json({ data: raffle });
+			res.status(200).json({
+				data: await this.withWinningInfo(raffle),
+			});
 		} catch (error) {
 			next(error);
 		}
@@ -141,6 +154,50 @@ export class RaffleController {
 			next(error);
 		}
 	};
+
+	expediteWinningNumberHandler = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
+		try {
+			const raffle = await this.expediteWinningNumber.execute({
+				raffleId: String(req.params.id),
+				prizeType: req.body.prizeType,
+				expeditedBy: req.user?.email ?? req.user?.id ?? "admin",
+			});
+			res.status(200).json({ data: raffle });
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	/**
+	 * Enriquece la respuesta pública con el total de vendidos y el estado
+	 * derivado del número ganador de cada premio (blocked/enabled/expedited).
+	 */
+	private async withWinningInfo(
+		raffle: Raffle | null,
+	): Promise<
+		| (Omit<Raffle, "prizes"> & {
+				soldTickets: number;
+				prizes: (RafflePrize & {
+					winningStatus: ReturnType<typeof getWinningNumberStatus>;
+				})[];
+		  })
+		| null
+	> {
+		if (!raffle) return null;
+		const soldTickets = await this.ticketService.countSoldTickets(raffle.id);
+		return {
+			...raffle,
+			soldTickets,
+			prizes: (raffle.prizes ?? []).map((p) => ({
+				...p,
+				winningStatus: getWinningNumberStatus(p, soldTickets),
+			})),
+		};
+	}
 
 	deleteRaffleHandler = async (
 		req: Request,

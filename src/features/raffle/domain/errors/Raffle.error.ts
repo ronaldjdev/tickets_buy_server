@@ -25,3 +25,26 @@ export class NoTicketsPurchasedError extends Error {
 		this.name = "NoTicketsPurchasedError";
 	}
 }
+
+export class PrizeWithoutWinningNumberError extends Error {
+	constructor(raffleId: string, prizeType: string) {
+		super(`El premio ${prizeType} del sorteo ${raffleId} no tiene número ganador`);
+		this.name = "PrizeWithoutWinningNumberError";
+	}
+}
+
+export class WinningNumberAlreadyExpeditedError extends Error {
+	constructor(raffleId: string, prizeType: string) {
+		super(`El número ganador del premio ${prizeType} ya fue expedido`);
+		this.name = "WinningNumberAlreadyExpeditedError";
+	}
+}
+
+export class WinningNumberSalesNotReachedError extends Error {
+	constructor(raffleId: string, prizeType: string, minimum: number) {
+		super(
+			`El premio ${prizeType} requiere mínimo ${minimum} boletos vendidos para expedir su número ganador y aún no se alcanzan.`,
+		);
+		this.name = "WinningNumberSalesNotReachedError";
+	}
+}

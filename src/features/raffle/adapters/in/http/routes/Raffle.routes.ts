@@ -17,6 +17,11 @@ export function createRaffleRoutes(controller: RaffleController): Router {
 	router.patch("/:id", admin, controller.updateRaffleHandler);
 	router.patch("/:id/status", admin, controller.changeRaffleStatusHandler);
 	router.post("/:id/draw", admin, controller.drawWinnerHandler);
+	router.post(
+		"/:id/winning-number/expedite",
+		admin,
+		controller.expediteWinningNumberHandler,
+	);
 	router.delete("/:id", admin, controller.deleteRaffleHandler);
 
 	return router;
