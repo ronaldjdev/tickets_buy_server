@@ -9,6 +9,7 @@ const ComboSchema = new Schema(
 		name: { type: String, required: true },
 		ticketCount: { type: Number, required: true, min: 1 },
 		price: { type: Number, required: true, min: 0 },
+		plays: { type: Number, required: true, default: 0, min: 0 },
 		recommended: { type: Boolean, default: false },
 	},
 	{ timestamps: true, versionKey: false },

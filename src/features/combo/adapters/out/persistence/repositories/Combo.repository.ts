@@ -10,6 +10,7 @@ type ComboDoc = {
 	name: string;
 	ticketCount: number;
 	price: number;
+	plays: number;
 	recommended: boolean;
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -23,6 +24,7 @@ export class ComboRepository implements IComboRepository {
 			name: doc.name,
 			ticketCount: doc.ticketCount,
 			price: doc.price,
+			plays: doc.plays ?? 0,
 			recommended: doc.recommended,
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,
@@ -35,6 +37,7 @@ export class ComboRepository implements IComboRepository {
 			name: combo.name,
 			ticketCount: combo.ticketCount,
 			price: combo.price,
+			plays: combo.plays ?? 0,
 			recommended: combo.recommended ?? false,
 		};
 	}
