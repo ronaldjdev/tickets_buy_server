@@ -32,7 +32,7 @@ export class MachineGrantRepository implements IMachineGrantRepository {
 
 	async save(grant: MachineGrant): Promise<MachineGrant> {
 		try {
-			const doc = await MachineGrantModel.create(grant);
+			const doc = await MachineGrantModel.create({ _id: grant.id, ...grant });
 			return this.toDomain(doc.toObject() as unknown as MachineGrantDoc);
 		} catch (error) {
 			throw new RepositoryError(
