@@ -9,8 +9,14 @@ import { createContactRoutes } from "./features/contact/adapters/in/http/routes/
 import { createContactModule } from "./features/contact/di.js";
 import { createGatewayRoutes } from "./features/gateway/adapters/in/http/routes/Gateways.routes.js";
 import { createWompiWebhookRoutes } from "./features/gateway/adapters/in/http/routes/WompiWebhook.routes.js";
+import {
+	createMachineAdminRoutes,
+	createMachineRoutes,
+} from "./features/machine/adapters/in/http/routes/Machine.routes.js";
+import { createMachineModule } from "./features/machine/di.js";
 import notificationRoutes from "./features/notification/adapters/in/http/routes/Notification.routes.js";
 import { createRaffleRoutes } from "./features/raffle/adapters/in/http/routes/Raffle.routes.js";
+import { RaffleRepository } from "./features/raffle/adapters/out/persistence/repositories/Raffle.repository.js";
 import { createRaffleModule } from "./features/raffle/di.js";
 import { createStatsRoutes } from "./features/stats/adapters/in/http/routes/Stats.routes.js";
 import { dashboardStatsController } from "./features/stats/di.js";
@@ -76,6 +82,12 @@ async function main() {
 	);
 	raffleShared = raffleModule.sharedService;
 
+	const machineModule = createMachineModule({
+		raffleService: raffleServiceProxy,
+		raffleRepository: new RaffleRepository(),
+		logger: appLogger,
+	});
+
 	const comboModule = createComboModule(raffleServiceProxy, appLogger);
 
 	const purchaseModule = createTicketPurchaseModule({
@@ -99,6 +111,13 @@ async function main() {
 	app.use("/api/tickets", createTicketRoutes(ticketModule.controller));
 	app.use("/api/purchases", createPurchaseRoutes(purchaseModule.controller));
 	app.use("/api/gateway", createGatewayRoutes(gatewayModule.controller));
+	app.use(
+		"/api/machine/admin",
+		requireAuth,
+		requireRole("admin"),
+		createMachineAdminRoutes(machineModule.controller),
+	);
+	app.use("/api/machine", createMachineRoutes(machineModule.controller));
 	app.use(
 		"/api/webhook/wompi",
 		createWompiWebhookRoutes(gatewayModule.controller),

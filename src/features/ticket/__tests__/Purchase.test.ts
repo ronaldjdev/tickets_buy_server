@@ -316,6 +316,7 @@ function makeCombo(): Combo {
 		name: "Combo 2 boletos",
 		ticketCount: 2,
 		price: 18000,
+		plays: 0,
 	};
 }
 

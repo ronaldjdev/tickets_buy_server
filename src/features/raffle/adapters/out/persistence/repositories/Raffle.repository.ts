@@ -64,4 +64,72 @@ export class RaffleRepository implements IRaffleRepository {
 			{ $set: { status: "draft" } },
 		);
 	}
+
+	async claimMachineSecoPrize(
+		raffleId: string,
+		prizeType: string,
+		claimedByPurchaseId: string,
+	): Promise<boolean> {
+		const result = await RaffleModel.updateOne(
+			{
+				_id: raffleId,
+				"prizes.type": prizeType,
+				"prizes.machineClaimedAt": { $exists: false },
+			},
+			{
+				$set: {
+					"prizes.$.machineClaimedAt": new Date().toISOString(),
+					"prizes.$.machineClaimedByPurchaseId": claimedByPurchaseId,
+				},
+			},
+		);
+		return (result.modifiedCount ?? 0) > 0;
+	}
+
+	async decrementMachineInstantStock(
+		raffleId: string,
+		prizeId: string,
+	): Promise<boolean> {
+		const result = await RaffleModel.updateOne(
+			{
+				_id: raffleId,
+				"machine.prizes.id": prizeId,
+				"machine.prizes.stock": { $gt: 0 },
+			},
+			{ $inc: { "machine.prizes.$.stock": -1 } },
+		);
+		return (result.modifiedCount ?? 0) > 0;
+	}
+
+	async releaseMachineSecoPrize(
+		raffleId: string,
+		prizeType: string,
+	): Promise<boolean> {
+		const result = await RaffleModel.updateOne(
+			{
+				_id: raffleId,
+				"prizes.type": prizeType,
+				"prizes.machineClaimedAt": { $exists: true },
+			},
+			{
+				$unset: {
+					"prizes.$.machineClaimedAt": "",
+					"prizes.$.machineClaimedByPurchaseId": "",
+				},
+			},
+		);
+		return (result.modifiedCount ?? 0) > 0;
+	}
+
+	async restockMachineInstantPrize(
+		raffleId: string,
+		prizeId: string,
+		amount: number,
+	): Promise<boolean> {
+		const result = await RaffleModel.updateOne(
+			{ _id: raffleId, "machine.prizes.id": prizeId },
+			{ $inc: { "machine.prizes.$.stock": amount } },
+		);
+		return (result.modifiedCount ?? 0) > 0;
+	}
 }

@@ -208,9 +208,30 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 	it("debería listar por sorteo y completos", async () => {
 		const repo = new MockComboRepo();
 		repo.combos = [
-			{ id: "a", raffleId: "r1", name: "A", ticketCount: 1, price: 10, plays: 0 },
-			{ id: "b", raffleId: "r2", name: "B", ticketCount: 1, price: 10, plays: 0 },
-			{ id: "c", raffleId: "r1", name: "C", ticketCount: 1, price: 10, plays: 0 },
+			{
+				id: "a",
+				raffleId: "r1",
+				name: "A",
+				ticketCount: 1,
+				price: 10,
+				plays: 0,
+			},
+			{
+				id: "b",
+				raffleId: "r2",
+				name: "B",
+				ticketCount: 1,
+				price: 10,
+				plays: 0,
+			},
+			{
+				id: "c",
+				raffleId: "r1",
+				name: "C",
+				ticketCount: 1,
+				price: 10,
+				plays: 0,
+			},
 		];
 		const uc = new ListCombos(repo);
 
@@ -303,7 +324,14 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 	it("debería listar los combos recomendados primero por sorteo", async () => {
 		const repo = new MockComboRepo();
 		repo.combos = [
-			{ id: "a", raffleId: "r1", name: "A", ticketCount: 5, price: 10, plays: 0 },
+			{
+				id: "a",
+				raffleId: "r1",
+				name: "A",
+				ticketCount: 5,
+				price: 10,
+				plays: 0,
+			},
 			{
 				id: "b",
 				raffleId: "r1",
@@ -313,7 +341,14 @@ describe("ListCombos / UpdateCombo / DeleteCombo", () => {
 				plays: 3,
 				recommended: true,
 			},
-			{ id: "c", raffleId: "r1", name: "C", ticketCount: 2, price: 10, plays: 0 },
+			{
+				id: "c",
+				raffleId: "r1",
+				name: "C",
+				ticketCount: 2,
+				price: 10,
+				plays: 0,
+			},
 		];
 		const uc = new ListCombos(repo);
 

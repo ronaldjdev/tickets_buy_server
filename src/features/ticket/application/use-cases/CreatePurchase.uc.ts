@@ -180,6 +180,9 @@ export class CreatePurchase {
 		const link = await this.linkCreator.execute({
 			purchaseId,
 			ticketIds: claimed.map((t) => t.id),
+			raffleId: raffle.id,
+			buyerDocumentNumber: command.buyerDocumentNumber?.trim(),
+			plays: combo?.plays ?? 0,
 			contactId: this.contactId(contact),
 			contactName: command.buyerName,
 			contactPhone: command.buyerPhone,
@@ -231,8 +234,7 @@ export class CreatePurchase {
 				raffleId,
 				ASSIGNED_STATUSES,
 			);
-			const freeSlots =
-				maxNumber - assigned - protectedNumbers.size;
+			const freeSlots = maxNumber - assigned - protectedNumbers.size;
 			if (freeSlots <= 0) break;
 
 			const needed = Math.min(quantity - claimed.length, freeSlots);

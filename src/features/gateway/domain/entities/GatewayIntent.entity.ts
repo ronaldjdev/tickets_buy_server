@@ -20,6 +20,12 @@ export interface GatewayIntent {
 	amountInCents: number;
 	currency: string;
 	status: GatewayIntentStatus;
+	/** Sorteo a la que pertenece la compra. */
+	raffleId?: string;
+	/** Documento (cédula) del comprador; permite jugar la máquina por documento. */
+	buyerDocumentNumber?: string;
+	/** Tiros de la máquina de premios otorgados por esta compra. */
+	plays?: number;
 	linkId?: string | null;
 	checkoutUrl?: string | null;
 	transactionId?: string | null;
@@ -41,6 +47,7 @@ export interface PublicGatewayIntent {
 	purchaseId?: string;
 	ticketNumbers?: number[];
 	maxTickets?: number;
+	plays?: number;
 	widget?: { publicKey: string; signatureIntegrity: string } | null;
 	expiresAt?: string | null;
 }

@@ -42,11 +42,12 @@ export class GetPublicIntent {
 			);
 			base.ticketNumbers = tickets.map((t) => t.number).sort((a, b) => a - b);
 
-			const raffleId = tickets[0]?.raffleId;
+			const raffleId = tickets[0]?.raffleId ?? intent.raffleId;
 			if (raffleId) {
 				const raffle = await this.raffleService.findById(raffleId);
 				base.maxTickets = raffle?.maxTickets;
 			}
+			base.plays = intent.plays ?? 0;
 		}
 
 		if (intent.status !== "creada" || intent.gateway !== "wompi") {

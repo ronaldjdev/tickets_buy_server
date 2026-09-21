@@ -35,6 +35,32 @@ const PrizeSchema = new Schema(
 		winningMinSoldTickets: { type: Number },
 		winningExpeditedAt: { type: String },
 		winningExpeditedBy: { type: String },
+		/** Fecha ISO en que el premio fue entregado vía máquina de tiros. */
+		machineClaimedAt: { type: String },
+		/** Compra (purchaseId) que reclamó el premio en la máquina. */
+		machineClaimedByPurchaseId: { type: String },
+	},
+	{ _id: false },
+);
+
+const MachinePrizeSchema = new Schema(
+	{
+		kind: { type: String, enum: ["seco", "instant"], required: true },
+		prizeType: { type: String },
+		id: { type: String },
+		name: { type: String },
+		description: { type: String },
+		imageUrl: { type: String },
+		stock: { type: Number },
+		winRate: { type: Number, required: true, min: 0, max: 100 },
+	},
+	{ _id: false },
+);
+
+const MachineConfigSchema = new Schema(
+	{
+		prizes: { type: [MachinePrizeSchema], default: [] },
+		enabled: { type: Boolean, default: true },
 	},
 	{ _id: false },
 );
@@ -63,6 +89,7 @@ const RaffleSchema = new Schema(
 			required: true,
 		},
 		winnerTicketId: { type: String },
+		machine: { type: MachineConfigSchema },
 	},
 	{ timestamps: true, versionKey: false },
 );

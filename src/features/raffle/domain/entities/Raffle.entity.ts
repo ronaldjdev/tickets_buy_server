@@ -83,6 +83,8 @@ export type MachinePrizeConfig =
 /** Pool de premios jugables de la máquina de tiros de una sorteo. */
 export type RaffleMachineConfig = {
 	prizes: MachinePrizeConfig[];
+	/** Interruptor de la máquina para esta sorteo (default true). */
+	enabled?: boolean;
 };
 
 /**
@@ -134,10 +136,7 @@ export function validateMachineConfig(
 					"Los premios instantáneos de la máquina requieren id y nombre",
 				);
 			}
-			if (
-				prize.imageUrl !== undefined &&
-				typeof prize.imageUrl !== "string"
-			) {
+			if (prize.imageUrl !== undefined && typeof prize.imageUrl !== "string") {
 				throw new Error("La imagen de un premio instantáneo debe ser una URL");
 			}
 			if (!Number.isInteger(prize.stock) || prize.stock < 1) {
@@ -315,6 +314,7 @@ export interface Raffle {
 	ticketIssuance?: TicketIssuanceMode;
 	status: RaffleStatus;
 	winnerTicketId?: string;
+	machine?: RaffleMachineConfig;
 	createdAt?: Date;
 	updatedAt?: Date;
 }

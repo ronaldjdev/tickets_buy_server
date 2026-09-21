@@ -841,3 +841,4 @@
 {"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-15 02:19:19"}
 {"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-15 02:34:22"}
 {"level":"info","message":"Initializing lazy MongoClient...","service":"call-automation","timestamp":"2026-09-15 02:37:59"}
+{"level":"info","message":"Correo de boletos enviado","purchaseId":"purchase-1","service":"call-automation","timestamp":"2026-09-21 10:34:27"}

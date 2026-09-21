@@ -6,7 +6,7 @@ import db from "../infra/mongodb/Mongo.config.js";
 import { initAuth } from "../platform/auth/auth.config.js";
 import logger from "../platform/logger/index.js";
 
-const adminEmail = process.env.SEED_ADMIN_EMAIL	!.toLowerCase();
+const adminEmail = process.env.SEED_ADMIN_EMAIL!.toLowerCase();
 const adminPassword = process.env.SEED_ADMIN_PASSWORD!;
 const adminName = process.env.SEED_ADMIN_NAME!;
 const adminDocumentType = process.env.SEED_ADMIN_DOCUMENT_TYPE!;

@@ -28,7 +28,9 @@ export class NoTicketsPurchasedError extends Error {
 
 export class PrizeWithoutWinningNumberError extends Error {
 	constructor(raffleId: string, prizeType: string) {
-		super(`El premio ${prizeType} del sorteo ${raffleId} no tiene número ganador`);
+		super(
+			`El premio ${prizeType} del sorteo ${raffleId} no tiene número ganador`,
+		);
 		this.name = "PrizeWithoutWinningNumberError";
 	}
 }

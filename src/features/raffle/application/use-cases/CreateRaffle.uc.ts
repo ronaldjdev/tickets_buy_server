@@ -4,12 +4,14 @@ import { ensureUniqueSlug } from "../../../../shared/utils/ensureUniqueSlug.js";
 import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
 	Raffle,
+	RaffleMachineConfig,
 	RafflePrize,
 	RaffleStatus,
 	TicketIssuanceMode,
 } from "../../domain/entities/Raffle.entity.js";
 import {
 	isTicketIssuanceMode,
+	validateMachineConfig,
 	validatePrizes,
 	validateWinningNumberConfig,
 } from "../../domain/entities/Raffle.entity.js";
@@ -26,6 +28,7 @@ export interface CreateRaffleCommand {
 	minTickets?: number;
 	ticketIssuance?: TicketIssuanceMode;
 	status?: RaffleStatus;
+	machine?: RaffleMachineConfig;
 }
 
 export class CreateRaffle {
@@ -56,6 +59,7 @@ export class CreateRaffle {
 
 		validatePrizes(command.prizes);
 		validateWinningNumberConfig(command.prizes, command.maxTickets);
+		validateMachineConfig(command.machine, command.prizes);
 
 		const id = randomUUID();
 		const slug = await ensureUniqueSlug(slugify(command.title), (s) =>
@@ -79,6 +83,7 @@ export class CreateRaffle {
 			minTickets,
 			ticketIssuance,
 			status: command.status ?? "draft",
+			machine: command.machine,
 		};
 
 		const saved = await this.raffleRepository.save(raffle);

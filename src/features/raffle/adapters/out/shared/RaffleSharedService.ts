@@ -31,12 +31,17 @@ export class RaffleSharedService implements IRaffleService {
 				type: p.type,
 				name: p.name,
 				description: p.description,
+				imageUrl: p.imageUrl,
+				schedule: p.schedule,
 				winningNumber: p.winningNumber,
 				winningMinSoldTickets: p.winningMinSoldTickets,
 				winningStatus: getWinningNumberStatus(p, soldTickets) ?? undefined,
 				winningExpeditedAt: p.winningExpeditedAt,
 				winningExpeditedBy: p.winningExpeditedBy,
+				machineClaimedAt: p.machineClaimedAt,
+				machineClaimedByPurchaseId: p.machineClaimedByPurchaseId,
 			})),
+			machine: raffle.machine,
 		};
 	}
 }
