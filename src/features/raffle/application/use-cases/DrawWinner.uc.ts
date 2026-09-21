@@ -28,7 +28,9 @@ export class DrawWinner {
 			throw new RaffleAlreadyDrawnError(command.raffleId);
 
 		const expeditedPrize =
-			(raffle.prizes ?? []).find((p) => p.type === "mayor" && p.winningExpeditedAt) ??
+			(raffle.prizes ?? []).find(
+				(p) => p.type === "mayor" && p.winningExpeditedAt,
+			) ??
 			(raffle.prizes ?? []).find(
 				(p) => p.winningExpeditedAt && p.winningNumber !== undefined,
 			);
@@ -110,12 +112,9 @@ export class DrawWinner {
 				},
 			});
 		} catch (error) {
-			this.logger?.warn(
-				"No se pudo emitir notificación de ganador asignado",
-				{
-					error,
-				},
-			);
+			this.logger?.warn("No se pudo emitir notificación de ganador asignado", {
+				error,
+			});
 		}
 	}
 }

@@ -1,4 +1,5 @@
 import { appLogger } from "../../platform/di/Logger.di.js";
+import type { IMachineSettings } from "../../shared/contracts/IMachineSettings.contract.js";
 import { ConfigController } from "./adapters/in/http/controllers/Config.controller.js";
 import { ConfigRepository } from "./adapters/out/persistence/repositories/Config.repository.js";
 import {
@@ -24,3 +25,13 @@ export const configController = new ConfigController(
 );
 
 export const seedConfigFromEnv = new SeedConfigFromEnv(configRepo, appLogger);
+
+export const machineSettings: IMachineSettings = {
+	async isEnabled() {
+		const config = await configRepo.findSingleton();
+		return config?.machine?.enabled ?? true;
+	},
+	async setEnabled(enabled: boolean) {
+		await configRepo.update({ machine: { enabled } });
+	},
+};

@@ -71,7 +71,10 @@ export function createRaffleModule(
 		expediteWinningNumber,
 		ticketService,
 	);
-	const sharedService = new RaffleSharedService(raffleRepository, ticketService);
+	const sharedService = new RaffleSharedService(
+		raffleRepository,
+		ticketService,
+	);
 
 	return { controller, sharedService };
 }

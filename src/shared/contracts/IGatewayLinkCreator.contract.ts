@@ -6,6 +6,9 @@ export interface GatewayLinkRequest {
 	contactPhone?: string;
 	amountInCents: number;
 	expiresInMinutes?: number;
+	raffleId?: string;
+	buyerDocumentNumber?: string;
+	plays?: number;
 }
 
 export interface GatewayLinkResult {

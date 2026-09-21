@@ -43,6 +43,22 @@ class MockRaffleRepository implements IRaffleRepository {
 				: e,
 		);
 	}
+
+	async claimMachineSecoPrize(): Promise<boolean> {
+		return false;
+	}
+
+	async decrementMachineInstantStock(): Promise<boolean> {
+		return false;
+	}
+
+	async releaseMachineSecoPrize(): Promise<boolean> {
+		return false;
+	}
+
+	async restockMachineInstantPrize(): Promise<boolean> {
+		return false;
+	}
 }
 
 describe("CreateRaffle", () => {

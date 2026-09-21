@@ -200,6 +200,9 @@ const ConfigSchema = new Schema<Config>(
 			sms: SmsIntegrationSchema,
 		},
 		homepage: { type: HomepageCmsSchema },
+		machine: {
+			enabled: { type: Boolean, default: true },
+		},
 	},
 	{ timestamps: true },
 );

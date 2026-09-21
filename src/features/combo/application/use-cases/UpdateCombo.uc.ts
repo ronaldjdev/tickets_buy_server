@@ -12,6 +12,7 @@ export interface UpdateComboCommand {
 	name?: string;
 	ticketCount?: number;
 	price?: number;
+	plays?: number;
 	recommended?: boolean;
 }
 
@@ -32,6 +33,7 @@ export class UpdateCombo {
 			name: command.name?.trim() ?? combo.name,
 			ticketCount: command.ticketCount ?? combo.ticketCount,
 			price: command.price ?? combo.price,
+			plays: command.plays ?? combo.plays ?? 0,
 			recommended:
 				command.recommended === undefined
 					? combo.recommended
@@ -46,6 +48,11 @@ export class UpdateCombo {
 		}
 		if (!Number.isFinite(next.price) || next.price < 0) {
 			throw new UseCaseError("El precio del combo no puede ser negativo.");
+		}
+		if (!Number.isInteger(next.plays) || next.plays < 0) {
+			throw new UseCaseError(
+				"Los tiros de la máquina deben ser un número entero mayor o igual a 0.",
+			);
 		}
 
 		const raffle = await this.raffleService.findById(combo.raffleId);
@@ -82,6 +89,7 @@ export class UpdateCombo {
 			raffleId: updated.raffleId,
 			name: updated.name,
 			ticketCount: updated.ticketCount,
+			plays: updated.plays,
 		});
 		return updated;
 	}

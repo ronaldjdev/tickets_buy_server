@@ -74,6 +74,22 @@ class MockRaffleRepository implements IRaffleRepository {
 	async delete(): Promise<void> {}
 
 	async deactivateActiveRaffles(): Promise<void> {}
+
+	async claimMachineSecoPrize(): Promise<boolean> {
+		return false;
+	}
+
+	async decrementMachineInstantStock(): Promise<boolean> {
+		return false;
+	}
+
+	async releaseMachineSecoPrize(): Promise<boolean> {
+		return false;
+	}
+
+	async restockMachineInstantPrize(): Promise<boolean> {
+		return false;
+	}
 }
 
 class MockTicketService implements ITicketService {

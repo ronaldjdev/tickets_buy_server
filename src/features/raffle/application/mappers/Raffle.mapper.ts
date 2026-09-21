@@ -1,6 +1,8 @@
 import { slugify } from "../../../../shared/utils/slugify.js";
 import type {
+	MachinePrizeConfig,
 	Raffle,
+	RaffleMachineConfig,
 	RafflePrize,
 	TicketIssuanceMode,
 } from "../../domain/entities/Raffle.entity.js";
@@ -19,6 +21,7 @@ type RaffleDoc = {
 	ticketIssuance?: TicketIssuanceMode;
 	status: Raffle["status"];
 	winnerTicketId?: string;
+	machine?: RaffleMachineConfig;
 	createdAt?: Date;
 	updatedAt?: Date;
 };
@@ -54,8 +57,32 @@ export class RaffleMapper {
 			ticketIssuance: d.ticketIssuance ?? "random",
 			status: d.status,
 			winnerTicketId: d.winnerTicketId,
+			machine: d.machine
+				? {
+						prizes: (d.machine.prizes ?? []).map((p) => this.normalizePrize(p)),
+					}
+				: undefined,
 			createdAt: d.createdAt,
 			updatedAt: d.updatedAt,
+		};
+	}
+
+	private static normalizePrize(prize: MachinePrizeConfig): MachinePrizeConfig {
+		if (prize.kind === "seco") {
+			return {
+				kind: "seco",
+				prizeType: prize.prizeType,
+				winRate: prize.winRate,
+			};
+		}
+		return {
+			kind: "instant",
+			id: prize.id,
+			name: prize.name,
+			description: prize.description,
+			imageUrl: prize.imageUrl,
+			stock: prize.stock,
+			winRate: prize.winRate,
 		};
 	}
 
@@ -74,6 +101,7 @@ export class RaffleMapper {
 			ticketIssuance: raffle.ticketIssuance ?? "random",
 			status: raffle.status,
 			winnerTicketId: raffle.winnerTicketId,
+			machine: raffle.machine,
 		};
 	}
 }

@@ -66,6 +66,22 @@ class MockRaffleRepository implements IRaffleRepository {
 				: r,
 		);
 	}
+
+	async claimMachineSecoPrize(): Promise<boolean> {
+		return false;
+	}
+
+	async decrementMachineInstantStock(): Promise<boolean> {
+		return false;
+	}
+
+	async releaseMachineSecoPrize(): Promise<boolean> {
+		return false;
+	}
+
+	async restockMachineInstantPrize(): Promise<boolean> {
+		return false;
+	}
 }
 
 function makeNotificationService(): NotificationService {

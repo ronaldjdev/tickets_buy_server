@@ -53,7 +53,111 @@ export type RafflePrize = {
 	winningExpeditedAt?: string;
 	/** Identificador del admin que expidió el número ganador. */
 	winningExpeditedBy?: string;
+	/** Fecha ISO en que el premio fue entregado vía máquina de tiros. */
+	machineClaimedAt?: string;
+	/** Compra (purchaseId) que reclamó el premio en la máquina. */
+	machineClaimedByPurchaseId?: string;
 };
+
+/**
+ * Configuración de un premio del pool de la máquina de tiros.
+ * - kind "seco": premio seco del sorteo.
+ * - kind "instant": premio instantáneo propio de la máquina, con stock limitado.
+ */
+export type MachinePrizeConfig =
+	| {
+			kind: "seco";
+			prizeType: RafflePrizeType;
+			winRate: number;
+	  }
+	| {
+			kind: "instant";
+			id: string;
+			name: string;
+			description?: string;
+			imageUrl?: string;
+			stock: number;
+			winRate: number;
+	  };
+
+/** Pool de premios jugables de la máquina de tiros de una sorteo. */
+export type RaffleMachineConfig = {
+	prizes: MachinePrizeConfig[];
+	/** Interruptor de la máquina para esta sorteo (default true). */
+	enabled?: boolean;
+};
+
+/**
+ * Valida el pool de la máquina: solo premios secos o instantáneos, con su
+ * respectivo % (suma ≤ 100), stock válido y sin duplicados.
+ */
+export function validateMachineConfig(
+	machine: RaffleMachineConfig | undefined,
+	prizes: RafflePrize[] | undefined,
+): void {
+	if (!machine) return;
+	if (!machine.prizes || !Array.isArray(machine.prizes)) {
+		throw new Error("machine.prizes debe ser un arreglo");
+	}
+	let total = 0;
+	const secoSeen = new Set<RafflePrizeType>();
+	const instantSeen = new Set<string>();
+	for (const prize of machine.prizes) {
+		if (
+			!Number.isFinite(prize.winRate) ||
+			prize.winRate <= 0 ||
+			prize.winRate > 100
+		) {
+			throw new Error(
+				"El porcentaje de cada premio de la máquina debe estar entre 0 (excluido) y 100",
+			);
+		}
+		total += prize.winRate;
+		if (prize.kind === "seco") {
+			if (!prize.prizeType.startsWith("seco")) {
+				throw new Error(
+					"La máquina solo puede jugar por premios secos del sorteo",
+				);
+			}
+			if (!(prizes ?? []).some((p) => p.type === prize.prizeType)) {
+				throw new Error(
+					`El premio seco ${prize.prizeType} no existe en la sorteo`,
+				);
+			}
+			if (secoSeen.has(prize.prizeType)) {
+				throw new Error(
+					`El premio seco ${prize.prizeType} no puede repetirse en la máquina`,
+				);
+			}
+			secoSeen.add(prize.prizeType);
+		} else {
+			if (!prize.id?.trim() || !prize.name?.trim()) {
+				throw new Error(
+					"Los premios instantáneos de la máquina requieren id y nombre",
+				);
+			}
+			if (prize.imageUrl !== undefined && typeof prize.imageUrl !== "string") {
+				throw new Error("La imagen de un premio instantáneo debe ser una URL");
+			}
+			if (!Number.isInteger(prize.stock) || prize.stock < 1) {
+				throw new Error(
+					"El stock de un premio instantáneo debe ser un entero mayor o igual a 1",
+				);
+			}
+			if (instantSeen.has(prize.id)) {
+				throw new Error(
+					`El premio instantáneo "${prize.id}" no puede repetirse en la máquina`,
+				);
+			}
+			instantSeen.add(prize.id);
+		}
+	}
+	if (total > 100) {
+		throw new Error(
+			"La suma de los porcentajes de la máquina no puede superar 100",
+		);
+	}
+}
 
 /**
  * Deriva el estado del número ganador: null si no hay número configurado;
@@ -210,6 +314,7 @@ export interface Raffle {
 	ticketIssuance?: TicketIssuanceMode;
 	status: RaffleStatus;
 	winnerTicketId?: string;
+	machine?: RaffleMachineConfig;
 	createdAt?: Date;
 	updatedAt?: Date;
 }

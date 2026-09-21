@@ -176,9 +176,7 @@ export class RaffleController {
 	 * Enriquece la respuesta pública con el total de vendidos y el estado
 	 * derivado del número ganador de cada premio (blocked/enabled/expedited).
 	 */
-	private async withWinningInfo(
-		raffle: Raffle | null,
-	): Promise<
+	private async withWinningInfo(raffle: Raffle | null): Promise<
 		| (Omit<Raffle, "prizes"> & {
 				soldTickets: number;
 				prizes: (RafflePrize & {

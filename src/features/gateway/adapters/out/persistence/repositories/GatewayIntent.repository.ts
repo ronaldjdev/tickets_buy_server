@@ -45,6 +45,31 @@ export class GatewayIntentRepository implements IGatewayIntentRepository {
 		return docs as unknown as GatewayIntent[];
 	}
 
+	async findPaidByDocumentNumber(
+		documentNumber: string,
+		raffleId?: string,
+	): Promise<GatewayIntent[]> {
+		const docs = await GatewayIntentModel.find({
+			buyerDocumentNumber: documentNumber,
+			status: "pagada",
+			...(raffleId ? { raffleId } : {}),
+		})
+			.sort({ createdAt: 1 })
+			.lean();
+		return docs as unknown as GatewayIntent[];
+	}
+
+	async findPaidByPurchaseIds(purchaseIds: string[]): Promise<GatewayIntent[]> {
+		if (purchaseIds.length === 0) return [];
+		const docs = await GatewayIntentModel.find({
+			purchaseId: { $in: purchaseIds },
+			status: "pagada",
+		})
+			.sort({ createdAt: 1 })
+			.lean();
+		return docs as unknown as GatewayIntent[];
+	}
+
 	async updateByReference(
 		reference: string,
 		data: Partial<GatewayIntent>,

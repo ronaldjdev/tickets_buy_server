@@ -17,6 +17,11 @@ export interface IGatewayIntentRepository {
 	findByReference(reference: string): Promise<GatewayIntent | null>;
 	findByLinkId(linkId: string): Promise<GatewayIntent | null>;
 	findPaidByContactId(contactId: string): Promise<GatewayIntent[]>;
+	findPaidByDocumentNumber(
+		documentNumber: string,
+		raffleId?: string,
+	): Promise<GatewayIntent[]>;
+	findPaidByPurchaseIds(purchaseIds: string[]): Promise<GatewayIntent[]>;
 	updateByReference(
 		reference: string,
 		data: Partial<GatewayIntent>,

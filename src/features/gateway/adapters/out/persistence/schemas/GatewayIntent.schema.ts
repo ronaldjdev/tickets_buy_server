@@ -25,6 +25,9 @@ const GatewayIntentSchema = new Schema<GatewayIntent>(
 		contactId: { type: String },
 		contactName: { type: String },
 		contactPhone: { type: String },
+		raffleId: { type: String, index: true },
+		buyerDocumentNumber: { type: String, index: true },
+		plays: { type: Number, default: 0, min: 0 },
 		amountInCents: { type: Number, required: true },
 		currency: { type: String, required: true, default: "COP" },
 		status: {

@@ -5,11 +5,13 @@ import { slugify } from "../../../../shared/utils/slugify.js";
 import type { IComboRepository } from "../../../combo/domain/repositories/ICombo.repository.js";
 import type {
 	Raffle,
+	RaffleMachineConfig,
 	RafflePrize,
 	TicketIssuanceMode,
 } from "../../domain/entities/Raffle.entity.js";
 import {
 	isTicketIssuanceMode,
+	validateMachineConfig,
 	validatePrizes,
 	validateWinningNumberConfig,
 } from "../../domain/entities/Raffle.entity.js";
@@ -28,6 +30,7 @@ export interface UpdateRaffleCommand {
 	minTickets?: number;
 	ticketIssuance?: TicketIssuanceMode;
 	winnerTicketId?: string;
+	machine?: RaffleMachineConfig;
 }
 
 export class UpdateRaffle {
@@ -55,6 +58,7 @@ export class UpdateRaffle {
 			throw new Error("ticketIssuance debe ser 'random' o 'consecutive'");
 		}
 		validatePrizes(command.prizes);
+		validateMachineConfig(command.machine, command.prizes ?? raffle.prizes);
 
 		const title = command.title ?? raffle.title;
 		let slug = raffle.slug;
@@ -94,9 +98,7 @@ export class UpdateRaffle {
 		validateWinningNumberConfig(command.prizes, maxTickets);
 		if (command.prizes) {
 			const existingNumbers = new Set(
-				(await this.ticketService.listTickets(raffle.id)).map(
-					(t) => t.number,
-				),
+				(await this.ticketService.listTickets(raffle.id)).map((t) => t.number),
 			);
 			for (const prize of command.prizes) {
 				if (
@@ -147,6 +149,7 @@ export class UpdateRaffle {
 			ticketIssuance:
 				command.ticketIssuance ?? raffle.ticketIssuance ?? "random",
 			winnerTicketId: command.winnerTicketId ?? raffle.winnerTicketId,
+			machine: command.machine ?? raffle.machine,
 		});
 
 		this.logger.info("Sorteo actualizado", {

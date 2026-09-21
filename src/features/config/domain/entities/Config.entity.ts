@@ -163,6 +163,10 @@ export interface Config {
 	wompi?: WompiConfig;
 	integrations?: IntegrationsConfig;
 	homepage?: HomepageCmsConfig;
+	machine?: {
+		/** Interruptor global de la máquina de tiros (default true). */
+		enabled?: boolean;
+	};
 	createdAt?: Date;
 	updatedAt?: Date;
 }

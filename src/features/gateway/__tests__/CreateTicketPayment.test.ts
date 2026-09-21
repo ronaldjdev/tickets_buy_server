@@ -39,6 +39,14 @@ class MockIntentRepo implements IGatewayIntentRepository {
 		return [];
 	}
 
+	async findPaidByDocumentNumber(): Promise<GatewayIntent[]> {
+		return [];
+	}
+
+	async findPaidByPurchaseIds(): Promise<GatewayIntent[]> {
+		return [];
+	}
+
 	async updateByReference(): Promise<GatewayIntent | null> {
 		return null;
 	}
