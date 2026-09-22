@@ -5,3 +5,4 @@ dist/
 .opencode
 .playwright-mcp
 logs/*
+logs/combined.log
