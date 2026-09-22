@@ -19,6 +19,8 @@ const noopLogger = createNoopLogger();
 const settings: IMachineSettings = {
 	isEnabled: async () => true,
 	setEnabled: async () => {},
+	getPlaysRule: async () => null,
+	setPlaysRule: async () => {},
 };
 
 class MockIntentRepo {

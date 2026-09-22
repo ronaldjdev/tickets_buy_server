@@ -166,6 +166,8 @@ export interface Config {
 	machine?: {
 		/** Interruptor global de la máquina de tiros (default true). */
 		enabled?: boolean;
+		/** Regla global "por cada X boletos, Y tiros". */
+		playsRule?: { every: number; plays: number };
 	};
 	createdAt?: Date;
 	updatedAt?: Date;

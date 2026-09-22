@@ -37,6 +37,8 @@ export interface RaffleMachineConfigPayload {
 	prizes: MachinePrizeConfigPayload[];
 	/** Interruptor de la máquina para esta sorteo (default true). */
 	enabled?: boolean;
+	/** Regla de tiros "por cada X boletos, Y tiros" para esta sorteo. */
+	playsRule?: { every: number; plays: number };
 }
 
 export interface RafflePayload {

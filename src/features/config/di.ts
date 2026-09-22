@@ -34,4 +34,12 @@ export const machineSettings: IMachineSettings = {
 	async setEnabled(enabled: boolean) {
 		await configRepo.update({ machine: { enabled } });
 	},
+	async getPlaysRule() {
+		const config = await configRepo.findSingleton();
+		const rule = config?.machine?.playsRule;
+		return rule && rule.every > 0 ? rule : null;
+	},
+	async setPlaysRule(rule) {
+		await configRepo.update({ machine: { playsRule: rule ?? undefined } });
+	},
 };

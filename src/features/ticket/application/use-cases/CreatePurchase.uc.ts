@@ -1,11 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { IGatewayLinkCreator } from "../../../../shared/contracts/IGatewayLinkCreator.contract.js";
+import type { IMachineSettings } from "../../../../shared/contracts/IMachineSettings.contract.js";
 import type {
 	IRaffleService,
 	RafflePayload,
 } from "../../../../shared/contracts/raffle/IRaffleService.contract.js";
 import { UseCaseError } from "../../../../shared/errors/UseCaseError.js";
 import type { ILogger } from "../../../../shared/port/ILogger.port.js";
+import { computeMachinePlays } from "../../../../shared/utils/machinePlays.js";
 import { pickConsecutiveFreeNumbers } from "../../../../shared/utils/pickConsecutiveFreeNumbers.js";
 import { pickRandomFreeNumbers } from "../../../../shared/utils/pickRandomFreeNumbers.js";
 import type { Combo } from "../../../combo/domain/entities/Combo.entity.js";
@@ -65,6 +67,7 @@ export class CreatePurchase {
 		private readonly contactRepository: IContactRepository,
 		private readonly comboRepository: IComboRepository,
 		private readonly logger: ILogger,
+		private readonly settings: IMachineSettings,
 	) {}
 
 	async execute(command: CreatePurchaseCommand): Promise<CreatePurchaseResult> {
@@ -177,12 +180,18 @@ export class CreatePurchase {
 
 		const contact = await this.registerBuyer(command);
 
+		const plays = computeMachinePlays({
+			quantity,
+			raffleRule: raffle.machine?.playsRule,
+			globalRule: await this.settings.getPlaysRule(),
+			comboPlays: combo?.plays,
+		});
 		const link = await this.linkCreator.execute({
 			purchaseId,
 			ticketIds: claimed.map((t) => t.id),
 			raffleId: raffle.id,
 			buyerDocumentNumber: command.buyerDocumentNumber?.trim(),
-			plays: combo?.plays ?? 0,
+			plays,
 			contactId: this.contactId(contact),
 			contactName: command.buyerName,
 			contactPhone: command.buyerPhone,
@@ -197,6 +206,7 @@ export class CreatePurchase {
 			comboName: combo?.name,
 			quantity,
 			amount,
+			plays,
 			ticketNumbers: claimed.map((t) => t.number).sort((a, b) => a - b),
 			buyerName: command.buyerName,
 			buyerEmail: command.buyerEmail,

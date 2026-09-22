@@ -61,6 +61,13 @@ const MachineConfigSchema = new Schema(
 	{
 		prizes: { type: [MachinePrizeSchema], default: [] },
 		enabled: { type: Boolean, default: true },
+		playsRule: {
+			type: {
+				every: { type: Number, min: 1, required: true },
+				plays: { type: Number, min: 0, required: true },
+			},
+			_id: false,
+		},
 	},
 	{ _id: false },
 );

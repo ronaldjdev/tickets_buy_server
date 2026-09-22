@@ -181,6 +181,7 @@ export class MachineController {
 		try {
 			response(res, 200, "Configuración de la máquina", {
 				enabled: await this.settings.isEnabled(),
+				playsRule: await this.settings.getPlaysRule(),
 			});
 		} catch (error) {
 			next(error);
@@ -190,11 +191,49 @@ export class MachineController {
 	updateSettings = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const enabled = bool(req.body?.enabled);
-			if (enabled === undefined) {
-				throw new Error("El campo enabled es obligatorio.");
+			const playsRuleRaw = req.body?.playsRule as
+				| { every?: unknown; plays?: unknown }
+				| null
+				| undefined;
+			const hasPlaysRule = playsRuleRaw !== undefined;
+
+			if (enabled === undefined && !hasPlaysRule) {
+				throw new Error(
+					"Debes indicar enabled o playsRule para actualizar la configuración.",
+				);
 			}
-			await this.settings.setEnabled(enabled);
-			response(res, 200, "Configuración actualizada", { enabled });
+
+			let playsRule: { every: number; plays: number } | null | undefined;
+			if (hasPlaysRule) {
+				if (playsRuleRaw === null) {
+					playsRule = null;
+				} else {
+					const every = Number(playsRuleRaw?.every);
+					const plays = Number(playsRuleRaw?.plays);
+					if (!Number.isInteger(every) || every < 1) {
+						throw new Error(
+							"La regla de tiros requiere una cantidad de boletos entera mayor a 0.",
+						);
+					}
+					if (!Number.isInteger(plays) || plays < 0) {
+						throw new Error(
+							"Los tiros de la regla deben ser un entero mayor o igual a 0.",
+						);
+					}
+					playsRule = { every, plays };
+				}
+			}
+
+			if (enabled !== undefined) await this.settings.setEnabled(enabled);
+			if (hasPlaysRule) await this.settings.setPlaysRule(playsRule ?? null);
+
+			response(res, 200, "Configuración actualizada", {
+				enabled: enabled ?? (await this.settings.isEnabled()),
+				playsRule:
+					playsRule === undefined
+						? await this.settings.getPlaysRule()
+						: playsRule,
+			});
 		} catch (error) {
 			next(error);
 		}
