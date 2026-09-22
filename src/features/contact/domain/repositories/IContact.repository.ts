@@ -9,10 +9,16 @@ export interface IContactRepository {
 	update(id: string, data: Partial<Contact>): Promise<Contact | null>;
 	delete(id: string): Promise<any>;
 
+	/** Todos los contactos (sin paginación), ordenados por fecha de creación desc. */
+	listAll(): Promise<ExportContact[]>;
+
 	countAll(): Promise<number>;
 
 	countNewThisMonth(): Promise<number>;
 }
+
+/** Contacto aplanado para exporte, con id y fecha de alta. */
+export type ExportContact = Contact & { id: string; createdAt?: Date };
 
 export interface IListContactsResponse {
 	contacts: Contact[];
