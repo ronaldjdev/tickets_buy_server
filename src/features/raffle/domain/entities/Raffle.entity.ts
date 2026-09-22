@@ -85,6 +85,8 @@ export type RaffleMachineConfig = {
 	prizes: MachinePrizeConfig[];
 	/** Interruptor de la máquina para esta sorteo (default true). */
 	enabled?: boolean;
+	/** Regla de tiros "por cada X boletos, Y tiros" para esta sorteo. */
+	playsRule?: { every: number; plays: number };
 };
 
 /**
@@ -156,6 +158,19 @@ export function validateMachineConfig(
 		throw new Error(
 			"La suma de los porcentajes de la máquina no puede superar 100",
 		);
+	}
+	if (machine.playsRule !== undefined) {
+		const rule = machine.playsRule;
+		if (!Number.isInteger(rule?.every) || (rule?.every ?? 0) < 1) {
+			throw new Error(
+				"La regla de tiros requiere una cantidad de boletos entera mayor a 0",
+			);
+		}
+		if (!Number.isInteger(rule?.plays) || (rule?.plays ?? 0) < 0) {
+			throw new Error(
+				"Los tiros de la regla deben ser un entero mayor o igual a 0",
+			);
+		}
 	}
 }
 

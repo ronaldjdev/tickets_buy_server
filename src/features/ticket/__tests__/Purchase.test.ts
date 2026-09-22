@@ -9,6 +9,7 @@ import type {
 	GatewayLinkResult,
 	IGatewayLinkCreator,
 } from "../../../shared/contracts/IGatewayLinkCreator.contract.js";
+import type { IMachineSettings } from "../../../shared/contracts/IMachineSettings.contract.js";
 import type { ITicketConfirmationNotifier } from "../../../shared/contracts/ITicketConfirmationNotifier.contract.js";
 import type {
 	IRaffleService,
@@ -82,6 +83,10 @@ class MockComboRepo implements IComboRepository {
 class MockContactRepo implements IContactRepository {
 	created: Contact[] = [];
 
+	async listAll() {
+		return [];
+	}
+
 	async create(data: Contact): Promise<Contact> {
 		const contact = { ...data, _id: { toString: () => "contact-1" } };
 		this.created.push(contact as unknown as Contact);
@@ -142,6 +147,24 @@ class MockLinkCreator implements IGatewayLinkCreator {
 			amountInCents: input.amountInCents,
 			purchaseId: input.purchaseId,
 		};
+	}
+}
+
+class MockMachineSettings implements IMachineSettings {
+	playsRule: { every: number; plays: number } | null = null;
+
+	async isEnabled() {
+		return true;
+	}
+
+	async setEnabled() {}
+
+	async getPlaysRule() {
+		return this.playsRule;
+	}
+
+	async setPlaysRule(rule: { every: number; plays: number } | null) {
+		this.playsRule = rule;
 	}
 }
 
@@ -350,12 +373,13 @@ function makeCommand(
 	} as CreatePurchaseCommand;
 }
 
-function build() {
+function build(options: { settings?: MockMachineSettings } = {}) {
 	const raffleService = new MockRaffleService(makeRaffle());
 	const ticketRepo = new MockTicketRepo(makeTickets(5));
 	const linkCreator = new MockLinkCreator();
 	const contactRepo = new MockContactRepo();
 	const comboRepo = new MockComboRepo([makeCombo()]);
+	const settings = options.settings ?? new MockMachineSettings();
 	const useCase = new CreatePurchase(
 		raffleService,
 		ticketRepo,
@@ -363,6 +387,7 @@ function build() {
 		contactRepo,
 		comboRepo,
 		noopLogger,
+		settings,
 	);
 	return {
 		useCase,
@@ -371,6 +396,7 @@ function build() {
 		linkCreator,
 		contactRepo,
 		comboRepo,
+		settings,
 	};
 }
 
@@ -647,6 +673,65 @@ describe("CreatePurchase (mínimo y cantidad)", () => {
 			ticketRepo.store.filter((t) => t.status === "reserved").length,
 			3,
 		);
+	});
+
+	it("debería aplicar la regla por defecto de tiros sin configuración (1 por cada 5)", async () => {
+		const { useCase, linkCreator, raffleService, ticketRepo } = build();
+		raffleService.raffle = { ...makeRaffle(), maxTickets: 20 };
+		raffleService.raffle.machine = undefined;
+		ticketRepo.store = [];
+
+		const result = await useCase.execute(
+			makeCommand({ comboId: undefined, raffleId: "raffle-1", quantity: 12 }),
+		);
+
+		assert.equal(result.quantity, 12);
+		assert.equal(linkCreator.inputs[0].plays, 2);
+	});
+
+	it("debería aplicar la regla global de tiros (por cada 5 boletos, 1 tiro)", async () => {
+		const { useCase, linkCreator, raffleService, ticketRepo, settings } =
+			build();
+		settings.playsRule = { every: 5, plays: 1 };
+		raffleService.raffle = { ...makeRaffle(), maxTickets: 30 };
+		ticketRepo.store = [];
+
+		const result = await useCase.execute(
+			makeCommand({ comboId: undefined, raffleId: "raffle-1", quantity: 17 }),
+		);
+
+		assert.equal(result.quantity, 17);
+		assert.equal(linkCreator.inputs[0].plays, 3);
+	});
+
+	it("debería priorizar la regla de la sorteo sobre la global", async () => {
+		const { useCase, linkCreator, raffleService, ticketRepo, settings } =
+			build();
+		settings.playsRule = { every: 5, plays: 1 };
+		raffleService.raffle = {
+			...makeRaffle(),
+			maxTickets: 30,
+			machine: { prizes: [], playsRule: { every: 2, plays: 1 } },
+		};
+		ticketRepo.store = [];
+
+		const result = await useCase.execute(
+			makeCommand({ comboId: undefined, raffleId: "raffle-1", quantity: 5 }),
+		);
+
+		assert.equal(result.quantity, 5);
+		assert.equal(linkCreator.inputs[0].plays, 2);
+	});
+
+	it("debería sumar los tiros de la regla con los del combo", async () => {
+		const { useCase, linkCreator, comboRepo, settings } = build();
+		settings.playsRule = { every: 5, plays: 1 };
+		comboRepo.combos = [{ ...makeCombo(), ticketCount: 5, plays: 3 }];
+
+		const result = await useCase.execute(makeCommand({ comboId: "combo-1" }));
+
+		assert.equal(result.quantity, 5);
+		assert.equal(linkCreator.inputs[0].plays, 4);
 	});
 });
 

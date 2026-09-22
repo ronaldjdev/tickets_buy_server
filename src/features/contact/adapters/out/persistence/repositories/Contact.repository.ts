@@ -3,6 +3,7 @@ import type { OptionsPag } from "../../../../../../shared/types/types.js";
 import { ContactMapper } from "../../../../application/mappers/Contact.mapper.js";
 import type { Contact } from "../../../../domain/entities/Contact.entity.js";
 import type {
+	ExportContact,
 	IContactRepository,
 	IListContactsResponse,
 } from "../../../../domain/repositories/IContact.repository.js";
@@ -71,6 +72,21 @@ export class ContactRepository implements IContactRepository {
 				hasPrevPage: options.page > 1,
 			},
 		};
+	}
+
+	async listAll(): Promise<ExportContact[]> {
+		const sortOptions = QueryFactory.createSortOptions();
+		const docs = await ContactModel.find({}).sort(sortOptions).lean();
+		return docs.map((doc) => {
+			const contact = ContactMapper.toDomain(
+				doc as unknown as Contact,
+			) as ExportContact & Record<string, unknown>;
+			delete contact._id;
+			delete contact.updatedAt;
+			contact.id = String((doc as { _id: unknown })._id);
+			contact.createdAt = (doc as { createdAt?: Date }).createdAt;
+			return contact;
+		});
 	}
 
 	async delete(id: string): Promise<any> {

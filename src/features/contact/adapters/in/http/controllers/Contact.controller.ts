@@ -3,14 +3,35 @@ import logger from "../../../../../../platform/logger/index.js";
 import { ValidationError } from "../../../../../../shared/errors/ValidationError.js";
 import type { ListQueryDTO } from "../../../../../../shared/http/Common.dto.js";
 import response from "../../../../../../shared/http/Response.utils.js";
+import type { DocumentType } from "../../../../../../shared/types/types.js";
+import { toCsv } from "../../../../../../shared/utils/toCsv.js";
 import type {
 	CreateContact,
 	DeleteContact,
+	ExportContacts,
 	GetContact,
 	ListContacts,
 	UpdateContact,
 } from "../../../../application/use-cases/index.js";
 import type { CreateContactDTO, UpdateContactDTO } from "../dto/contact.dto.js";
+
+const STATUS_LABELS: Record<string, string> = {
+	activo: "Activo",
+	pendiente: "Pendiente",
+	inactivo: "Inactivo",
+};
+
+const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+	cc: "C.C.",
+	ce: "C.E.",
+	pasaporte: "Pasaporte",
+};
+
+function formatDate(value?: Date): string {
+	if (!value) return "";
+	const date = value instanceof Date ? value : new Date(value);
+	return date.toISOString().slice(0, 10);
+}
 
 export class ContactController {
 	constructor(
@@ -19,6 +40,7 @@ export class ContactController {
 		private readonly listContacts: ListContacts,
 		private readonly updateContact: UpdateContact,
 		private readonly deleteContact: DeleteContact,
+		private readonly exportContacts: ExportContacts,
 	) {}
 
 	create = async (req: Request, res: Response, next: NextFunction) => {
@@ -99,6 +121,54 @@ export class ContactController {
 			response(res, 200, "Contacto eliminado");
 		} catch (error: any) {
 			logger.error("Error al eliminar el contacto:", error);
+			next(error);
+		}
+	};
+
+	exportCsv = async (_req: Request, res: Response, next: NextFunction) => {
+		try {
+			const contacts = await this.exportContacts.execute();
+			const headers = [
+				"ID",
+				"Nombre",
+				"Apellido",
+				"Correo",
+				"Teléfono",
+				"Tipo de documento",
+				"Documento",
+				"País",
+				"Dirección",
+				"Estado",
+				"Fecha de alta",
+			];
+			const rows = contacts.map((contact) => [
+				contact.id,
+				contact.name,
+				contact.lastName ?? "",
+				contact.email ?? "",
+				contact.phone,
+				contact.documentType
+					? (DOCUMENT_TYPE_LABELS[contact.documentType] ?? contact.documentType)
+					: "",
+				contact.documentNumber ?? "",
+				contact.country ?? "",
+				contact.address ?? "",
+				STATUS_LABELS[contact.status] ?? contact.status,
+				formatDate(contact.createdAt),
+			]);
+
+			const date = new Date().toISOString().slice(0, 10);
+			res.setHeader("Content-Type", "text/csv; charset=utf-8");
+			res.setHeader(
+				"Content-Disposition",
+				`attachment; filename="contactos_${date}.csv"`,
+			);
+			res.send(toCsv(headers, rows));
+			logger.info(`Contactos exportados: ${contacts.length}`, {
+				operation: "exportar_contactos",
+			});
+		} catch (error: any) {
+			logger.error("Error al exportar los contactos:", error);
 			next(error);
 		}
 	};

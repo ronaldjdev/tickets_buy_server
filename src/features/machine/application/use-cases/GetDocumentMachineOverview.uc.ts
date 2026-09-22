@@ -24,6 +24,8 @@ export interface DocumentMachineOverview {
 const ALWAYS_ENABLED: IMachineSettings = {
 	isEnabled: async () => true,
 	setEnabled: async () => {},
+	getPlaysRule: async () => null,
+	setPlaysRule: async () => {},
 };
 
 export class GetDocumentMachineOverview {

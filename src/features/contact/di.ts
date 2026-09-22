@@ -8,6 +8,7 @@ import { ContactRepository } from "./adapters/out/persistence/repositories/Conta
 import {
 	CreateContact,
 	DeleteContact,
+	ExportContacts,
 	GetContact,
 	ListContacts,
 	UpdateContact,
@@ -34,6 +35,7 @@ export function createContactModule(deps: {
 	const listContacts = new ListContacts(contactRepo);
 	const updateContact = new UpdateContact(contactRepo, logger);
 	const deleteContact = new DeleteContact(contactRepo, logger);
+	const exportContacts = new ExportContacts(contactRepo);
 
 	const controller = new ContactController(
 		createContact,
@@ -41,6 +43,7 @@ export function createContactModule(deps: {
 		listContacts,
 		updateContact,
 		deleteContact,
+		exportContacts,
 	);
 
 	return { controller };

@@ -4,6 +4,7 @@ import type { IRaffleService } from "../../shared/contracts/raffle/IRaffleServic
 import type { ITicketService } from "../../shared/contracts/ticket/ITicketService.contract.js";
 import type { ILogger } from "../../shared/port/ILogger.port.js";
 import { ComboRepository } from "../combo/adapters/out/persistence/repositories/Combo.repository.js";
+import { machineSettings } from "../config/di.js";
 import { ContactRepository } from "../contact/adapters/out/persistence/repositories/Contact.repository.js";
 import type { GetPublicIntent } from "../gateway/application/use-cases/GetPublicIntent.uc.js";
 import type { NotificationService } from "../notification/application/services/NotificationService.js";
@@ -68,6 +69,7 @@ export function createTicketPurchaseModule(deps: {
 		contactRepository,
 		comboRepository,
 		appLogger,
+		machineSettings,
 	);
 	const confirmTicketPayment = new ConfirmTicketPayment(
 		deps.raffleService,

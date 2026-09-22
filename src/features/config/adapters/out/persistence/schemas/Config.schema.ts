@@ -202,6 +202,13 @@ const ConfigSchema = new Schema<Config>(
 		homepage: { type: HomepageCmsSchema },
 		machine: {
 			enabled: { type: Boolean, default: true },
+			playsRule: {
+				type: {
+					every: { type: Number, min: 1, required: true },
+					plays: { type: Number, min: 0, required: true },
+				},
+				_id: false,
+			},
 		},
 	},
 	{ timestamps: true },

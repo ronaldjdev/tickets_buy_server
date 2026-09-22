@@ -60,6 +60,8 @@ export class RaffleMapper {
 			machine: d.machine
 				? {
 						prizes: (d.machine.prizes ?? []).map((p) => this.normalizePrize(p)),
+						enabled: d.machine.enabled,
+						playsRule: d.machine.playsRule,
 					}
 				: undefined,
 			createdAt: d.createdAt,
