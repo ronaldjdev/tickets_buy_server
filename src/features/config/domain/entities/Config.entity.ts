@@ -153,6 +153,7 @@ export interface HomepageCmsConfig {
 	faq?: FaqCmsContent;
 	cta?: CtaCmsContent;
 	salesProgress?: SalesProgressCmsContent;
+	whatsappNumber?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
