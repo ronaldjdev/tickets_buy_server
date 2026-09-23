@@ -164,6 +164,7 @@ const HomepageCmsSchema = new Schema(
 		faq: { type: FaqCmsSchema },
 		cta: { type: CtaCmsSchema },
 		salesProgress: { type: SalesProgressCmsSchema },
+		whatsappNumber: { type: String },
 	},
 	{ _id: false },
 );
