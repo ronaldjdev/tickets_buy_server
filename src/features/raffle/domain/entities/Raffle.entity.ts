@@ -298,11 +298,8 @@ export function validatePrizes(prizes: RafflePrize[] | undefined): void {
 		if (!prize || typeof prize.type !== "string") {
 			throw new Error("Cada premio debe tener un tipo");
 		}
-		if (prize.type !== "mayor" && prize.imageUrl !== undefined) {
-			throw new Error("Solo el premio mayor puede incluir una imagen");
-		}
 		if (prize.imageUrl !== undefined && typeof prize.imageUrl !== "string") {
-			throw new Error("La imagen del premio mayor debe ser una URL");
+			throw new Error("La imagen del premio debe ser una URL");
 		}
 		if (prize.type === "mayor" && prize.schedule) {
 			throw new Error(
