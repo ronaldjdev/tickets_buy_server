@@ -59,15 +59,18 @@ export interface IntegrationsConfig {
 
 export type HomepageSectionType =
 	| "hero"
+	| "countdown-premio-mayor"
 	| "featured-raffle"
 	| "raffle-grid"
+	| "combos"
 	| "how-it-works"
 	| "trust"
 	| "stats"
 	| "winners"
 	| "testimonials"
 	| "faq"
-	| "cta";
+	| "cta"
+	| "ticket-lookup";
 
 export interface HomepageSectionVisibility {
 	type: HomepageSectionType;
