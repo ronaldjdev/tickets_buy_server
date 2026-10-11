@@ -98,4 +98,29 @@ describe("validatePrizes", () => {
 		);
 		assert.doesNotThrow(() => validatePrizes(undefined));
 	});
+
+	it("acepta imageUrl en cualquier premio (mayor y secos)", () => {
+		assert.doesNotThrow(() =>
+			validatePrizes([
+				{
+					type: "mayor",
+					name: "Mayor",
+					imageUrl: "https://cdn.ejemplo.com/mayor.png",
+				},
+				{
+					type: "seco1",
+					name: "Seco",
+					imageUrl: "https://cdn.ejemplo.com/seco.png",
+				},
+			]),
+		);
+	});
+
+	it("rechaza imageUrl que no sea string", () => {
+		assert.throws(() =>
+			validatePrizes([
+				{ type: "seco1", name: "Seco", imageUrl: 123 as never },
+			]),
+		);
+	});
 });
